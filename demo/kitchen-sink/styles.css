@@ -47,3 +47,7 @@ body {
     right: 0;
     border-left: 1px solid;
 }
+/*https://groups.google.com/forum/#!searchin/ace-discuss/danil/ace-discuss/Oi8rmyC3vz0/3VJJI6sKCZkJ*/
+.ace_cursor{
+    transition: top 0.05s, left 0.05s;
+}

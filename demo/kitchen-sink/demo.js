@@ -91,6 +91,9 @@ var container = document.getElementById("editor-container");
 var Split = require("ace/split").Split;
 var split = new Split(container, theme, 1);
 env.editor = split.getEditor(0);
+
+require("ace/smooth_scroll")(env.editor);
+
 split.on("focus", function(editor) {
     env.editor = editor;
     updateUIEditorOptions();
