@@ -312,7 +312,6 @@
         Date.now = function() { return (new Date()).getTime() };
     }
 
-
     var scrollTop, startTime;
     var timeout, speed, next
     var editor, shouldProfile;
@@ -335,7 +334,7 @@
         shouldProfile && console.profileEnd()
         var dt = startTime - Date.now()
         console.log(dt)
-        ace.cmdLine.setValue(dt+"", 1)
+        editor.cmdLine.setValue(dt+"", 1)
     }
 
     /*editor.renderer.scrollToY(0);
