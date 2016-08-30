@@ -1,14 +1,12 @@
 var fs = require("fs");
+var lib = require("./lib");
 var path = require("path");
 var util = require("util");
 var cssParse = require("css-parse");
 var cssStringify = require("css-stringify");
 
-var parseString = require("plist").parseString;
 function parseTheme(themeXml, callback) {
-    parseString(themeXml, function(_, theme) {
-        callback(theme[0])
-    });
+    lib.parsePlist(themeXml, callback);
 }
 
 var unsupportedScopes = { };
