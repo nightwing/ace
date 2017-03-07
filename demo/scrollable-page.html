@@ -5,12 +5,16 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <title>Editor</title>
   <style type="text/css" media="screen">
+  body {
+    transform: translateZ(0)
+  }
     .ace_editor {
         position: relative !important;
         border: 1px solid lightgray;
         margin: auto;
         height: 200px;
         width: 80%;
+        /color:red!important;
     }
 
     .ace_editor.fullScreen {
@@ -49,6 +53,13 @@
         border-radius: 10px 10px 10px 10px;
         box-shadow: 0 0 12px 0 lightblue;
     }
+    .ace_text-input {
+    z-index: 10!important;
+    opacity: 1!important;
+    background: rgb(84, 0, 255)!important;
+    color: rgb(255, 255, 255)!important;
+    width: 10em!important;
+}
   </style>
 </head>
 <body>
@@ -143,7 +154,9 @@ function scroll(speed) {
         window.scrollBy(0, speed)
     }
 }
-
+document.body.onmousedown=function(e) { 
+  if (e.target !=this) return
+a=document.querySelectorAll(".ace_editor");xxx=a[a.length -1];xxx.env.editor.focus() }
 var themes = require("ace/ext/themelist").themes.map(function(t){return t.theme});
 
 window.add = add;
