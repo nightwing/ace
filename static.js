@@ -7,6 +7,10 @@ var http = require("http")
   , port = process.env.PORT || 8888
   , ip = process.env.IP || "0.0.0.0";
 
+var istanbul = require("istanbul")
+var instrumenter = new istanbul.Instrumenter();
+
+
 function lookupMime(filename) {
     var ext = /[^\/\\.]*$/.exec(filename)[0];
     return {
@@ -61,7 +65,26 @@ http.createServer(function(req, res) {
 
             var contentType = lookupMime(filename) || "text/plain";
             writeHead(res, 200, contentType);
-            res.write(file, "binary");
+            
+            if (/\.js$/.test(filename)) {
+                
+                file = instrumenter.instrumentSync(file.toString("utf8"), filename)
+                res.write(file, "utf8");
+                /*
+
+var doclist = require("demo/kitchen-sink/doclist");
+doclist.saveDoc({
+    path: "coverage.json",
+    session: {getValue:function() {return JSON.stringify(window.__coverage__) } }
+}, function(err) {
+    console.log(err || "done")
+});
+                
+                */
+                
+            } else {
+                res.write(file, "binary");
+            }
             res.end();
         });
     });
