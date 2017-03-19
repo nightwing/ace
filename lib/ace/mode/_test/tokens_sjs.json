@@ -1,5 +1,5 @@
 [[
-   "start",
+   "no_regex",
   ["storage.type","var"],
   ["text"," "],
   ["paren.lparen","{"],
@@ -19,7 +19,7 @@
   ["paren.rparen",")"],
   ["punctuation.operator",";"]
 ],[
-   "start",
+   "no_regex",
   ["storage.type","var"],
   ["text"," "],
   ["paren.lparen","{"],
@@ -36,9 +36,9 @@
   ["paren.rparen",")"],
   ["punctuation.operator",";"]
 ],[
-   "start"
+   "no_regex"
 ],[
-   "start",
+   "no_regex",
   ["storage.type","function"],
   ["text"," "],
   ["entity.name.function","foo"],

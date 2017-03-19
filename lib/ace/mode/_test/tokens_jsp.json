@@ -9,13 +9,13 @@
   ["meta.tag.tag-name.xml","body"],
   ["meta.tag.punctuation.tag-close.xml",">"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text.xml","    "],
   ["meta.tag.punctuation.tag-open.xml","<"],
   ["meta.tag.script.tag-name.xml","script"],
   ["meta.tag.punctuation.tag-close.xml",">"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","        "],
   ["storage.type","var"],
   ["text"," "],
@@ -26,7 +26,7 @@
   ["string","\"abc\""],
   ["punctuation.operator",";"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","        "],
   ["storage.type","function"],
   ["text"," "],

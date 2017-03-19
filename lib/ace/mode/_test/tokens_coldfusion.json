@@ -41,7 +41,7 @@
   ["keyword.tag-name.xml","cfoutput"],
   ["meta.tag.punctuation.tag-close.xml",">"]
 ],[
-   "cfjs-start",
+   "cfjs-no_regex",
   ["meta.tag.punctuation.tag-open.xml","<"],
   ["meta.tag.cfscript.tag-name.xml","cfscript"],
   ["meta.tag.punctuation.tag-close.xml",">"]

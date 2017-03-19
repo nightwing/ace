@@ -147,10 +147,10 @@
   ["string","'"],
   ["text",";"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["support.php_tag","?>"]
 ],[
-   "js-comment1",
+   "js-comment",
   ["comment","/*this is js "],
   ["support.php_tag","<?php"],
   ["text"," "],

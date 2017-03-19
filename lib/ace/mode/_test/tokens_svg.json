@@ -61,7 +61,7 @@
   ["meta.tag.punctuation.tag-close.xml",">"],
   ["string.cdata.xml","<![CDATA["]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","    "],
   ["storage.type","var"],
   ["text"," "],
@@ -72,7 +72,7 @@
   ["constant.numeric","0"],
   ["punctuation.operator",";"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","    "],
   ["storage.type","var"],
   ["text"," "],
@@ -83,7 +83,7 @@
   ["constant.numeric","1"],
   ["punctuation.operator",";"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","    "],
   ["storage.type","var"],
   ["text"," "],
@@ -94,37 +94,37 @@
   ["constant.numeric","100"],
   ["punctuation.operator",";"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","    "],
   ["storage.type","var"],
   ["text"," "],
   ["identifier","hickory"],
   ["punctuation.operator",";"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","    "],
   ["storage.type","var"],
   ["text"," "],
   ["identifier","dickory"],
   ["punctuation.operator",";"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","    "],
   ["storage.type","var"],
   ["text"," "],
   ["identifier","dock"],
   ["punctuation.operator",";"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","    "],
   ["storage.type","var"],
   ["text"," "],
   ["identifier","i"],
   ["punctuation.operator",";"]
 ],[
-   "js-start"
+   "js-no_regex"
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","    "],
   ["storage.type","function"],
   ["text"," "],
@@ -135,7 +135,7 @@
   ["text"," "],
   ["paren.lparen","{"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","        "],
   ["identifier","hickory"],
   ["text","  "],
@@ -153,7 +153,7 @@
   ["paren.rparen",")"],
   ["punctuation.operator",";"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","        "],
   ["identifier","dickory"],
   ["text"," "],
@@ -171,7 +171,7 @@
   ["paren.rparen",")"],
   ["punctuation.operator",";"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","        "],
   ["identifier","dock"],
   ["text"," "],
@@ -189,9 +189,9 @@
   ["paren.rparen",")"],
   ["punctuation.operator",";"]
 ],[
-   "js-start"
+   "js-no_regex"
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","        "],
   ["identifier","ShowAndGrowElement"],
   ["paren.lparen","("],
@@ -202,7 +202,7 @@
   ["text","    "],
   ["paren.rparen","}"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","    "],
   ["storage.type","function"],
   ["text"," "],
@@ -212,7 +212,7 @@
   ["text"," "],
   ["paren.lparen","{"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","        "],
   ["identifier","timevalue"],
   ["text"," "],
@@ -237,16 +237,16 @@
   ["identifier","max_time"],
   ["paren.rparen",")"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","            "],
   ["keyword","return"],
   ["punctuation.operator",";"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","        "],
   ["comment","// Scale the text string gradually until it is 20 times larger"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","        "],
   ["identifier","scalefactor"],
   ["text"," "],
@@ -265,9 +265,9 @@
   ["identifier","max_time"],
   ["punctuation.operator",";"]
 ],[
-   "js-start"
+   "js-no_regex"
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","        "],
   ["keyword","if"],
   ["text"," "],
@@ -281,7 +281,7 @@
   ["text"," "],
   ["paren.lparen","{"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","            "],
   ["identifier","hickory"],
   ["punctuation.operator","."],
@@ -294,7 +294,7 @@
   ["paren.rparen",")"],
   ["punctuation.operator",";"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","            "],
   ["identifier","hickory"],
   ["punctuation.operator","."],
@@ -330,7 +330,7 @@
 ],[
    "js-no_regex"
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","        "],
   ["keyword","if"],
   ["text"," "],
@@ -352,7 +352,7 @@
   ["text"," "],
   ["paren.lparen","{"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","            "],
   ["identifier","dickory"],
   ["punctuation.operator","."],
@@ -365,7 +365,7 @@
   ["paren.rparen",")"],
   ["punctuation.operator",";"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","            "],
   ["identifier","dickory"],
   ["punctuation.operator","."],
@@ -396,7 +396,7 @@
   ["text","        "],
   ["paren.rparen","}"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","        "],
   ["keyword","if"],
   ["text"," "],
@@ -410,7 +410,7 @@
   ["text"," "],
   ["paren.lparen","{"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","            "],
   ["identifier","dock"],
   ["punctuation.operator","."],
@@ -423,7 +423,7 @@
   ["paren.rparen",")"],
   ["punctuation.operator",";"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","            "],
   ["identifier","dock"],
   ["punctuation.operator","."],

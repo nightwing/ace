@@ -11,7 +11,7 @@
    ["blockComment","noQstring"],
   ["comment.end","   %}"]
 ],[
-   "noQstring",
+   "start",
   ["comment.end","%}"]
 ],[
    "start"
@@ -54,7 +54,7 @@
    "start",
   ["keyword","end"]
 ],[
-   "noQstring"
+   "start"
 ],[
    "start",
   ["comment","% transpose "]

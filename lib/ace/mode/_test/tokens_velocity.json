@@ -138,25 +138,25 @@
 ],[
    "start"
 ],[
-   "js-start",
+   "js-no_regex",
   ["meta.tag.punctuation.tag-open.xml","<"],
   ["meta.tag.script.tag-name.xml","script"],
   ["meta.tag.punctuation.tag-close.xml",">"]
 ],[
-   "js-comment1",
+   "js-comment",
   ["text","  "],
   ["comment","/*"]
 ],[
-   "js-comment1",
+   "js-comment",
   ["comment","    A sample function to decomstrate"]
 ],[
-   "js-comment1",
+   "js-comment",
   ["comment","    JavaScript highlighting and folding."]
 ],[
-   "js-start",
+   "js-no_regex",
   ["comment","  */"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","  "],
   ["storage.type","function"],
   ["text"," "],
@@ -169,7 +169,7 @@
   ["text"," "],
   ["paren.lparen","{"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","    "],
   ["keyword","for"],
   ["text"," "],
@@ -194,7 +194,7 @@
   ["text"," "],
   ["paren.lparen","{"]
 ],[
-   "js-start",
+   "js-no_regex",
   ["text","      "],
   ["support.function","alert"],
   ["paren.lparen","("],

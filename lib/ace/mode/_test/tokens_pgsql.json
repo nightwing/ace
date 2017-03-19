@@ -666,7 +666,7 @@
    "start",
   ["comment","-- pl/v8 (javascript)"]
 ],[
-   "javascript-start",
+   "javascript-no_regex",
   ["keyword.statementBegin","CREATE"],
   ["text"," "],
   ["keyword","FUNCTION"],
@@ -691,7 +691,7 @@
   ["text"," "],
   ["string","$javascript$"]
 ],[
-   "javascript-start",
+   "javascript-no_regex",
   ["storage.type","var"],
   ["text"," "],
   ["identifier","o"],
@@ -702,7 +702,7 @@
   ["paren.rparen","}"],
   ["punctuation.operator",";"]
 ],[
-   "javascript-start",
+   "javascript-no_regex",
   ["keyword","for"],
   ["paren.lparen","("],
   ["storage.type","var"],
@@ -724,7 +724,7 @@
   ["paren.rparen",")"],
   ["paren.lparen","{"]
 ],[
-   "javascript-start",
+   "javascript-no_regex",
   ["text"," "],
   ["identifier","o"],
   ["paren.lparen","["],
@@ -744,7 +744,7 @@
    "javascript-no_regex",
   ["paren.rparen","}"]
 ],[
-   "javascript-start",
+   "javascript-no_regex",
   ["keyword","return"],
   ["text"," "],
   ["variable.language","JSON"],

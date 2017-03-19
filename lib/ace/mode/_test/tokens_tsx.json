@@ -22,7 +22,7 @@
   ["meta.tag.punctuation.tag-close.xml",">"],
   ["string"," "]
 ],[
-   "start",
+   "no_regex",
   ["meta.tag.punctuation.end-tag-open.xml","</"],
   ["meta.tag.tag-name.xml","div"],
   ["meta.tag.punctuation.tag-close.xml",">"],

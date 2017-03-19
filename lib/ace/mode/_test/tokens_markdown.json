@@ -96,7 +96,7 @@
    "listblock",
   ["list","in lists"]
 ],[
-   "start"
+   "allowBlock"
 ],[
    "start",
   ["text.xml","in plain text "],

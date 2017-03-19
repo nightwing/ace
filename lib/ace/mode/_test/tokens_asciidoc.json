@@ -2,7 +2,7 @@
    "literalBlock",
   ["support.function","------------------------------------"]
 ],[
-   "dissallowDelimitedBlock",
+   "text",
   ["support.function","-----------------------------------"]
 ],[
    "text",
@@ -86,9 +86,9 @@
   ["support.function","quoted"],
   ["text","''"]
 ],[
-   "dissallowDelimitedBlock"
+   "start"
 ],[
-   "text"
+   "start"
 ],[
    "start",
   ["string.regexp","[fffff]"]
@@ -101,10 +101,10 @@
   ["constant.character","{ss}"],
   ["support.function"," ss"]
 ],[
-   "dissallowDelimitedBlock",
+   "text",
   ["support.function","+++++++++++++++++++++++++++++++++++++"]
 ],[
-   "text"
+   "start"
 ],[
    "listingBlock",
   ["support.function","............."]
@@ -113,13 +113,14 @@
   ["support.function","callout "],
   ["constant.numeric","<1>"]
 ],[
-   "dissallowDelimitedBlock",
+   "text",
   ["support.function",".............."]
 ],[
-   "text"
+   "start"
 ],[
    "text",
-  ["text","> 1"]
+  ["support.function.list.callout","> "],
+  ["text","1"]
 ],[
    "text",
   ["text","1> 2"]
@@ -154,10 +155,10 @@
   ["support.function","callout "],
   ["constant.numeric","<1>"]
 ],[
-   "dissallowDelimitedBlock",
+   "text",
   ["support.function",".............."]
 ],[
-   "text"
+   "start"
 ],[
    "start"
 ],[
@@ -243,17 +244,17 @@
 ],[
    "start"
 ],[
-   "indentedBlock",
+   "start",
   ["support.function"," image::s"]
 ],[
-   "indentedBlock",
-  ["support.function","sssss"]
+   "text",
+  ["text","sssss"]
 ],[
-   "indentedBlock",
-  ["support.function","sss "]
+   "text",
+  ["text","sss "]
 ],[
-   "indentedBlock",
-  ["support.function","sssss"]
+   "text",
+  ["text","sssss"]
 ],[
    "start"
 ],[
@@ -262,7 +263,7 @@
    "start",
   ["markup.heading","== 1"]
 ],[
-   "indentedBlock",
+   "start",
   ["support.function","  heading"]
 ],[
    "start",
@@ -308,10 +309,10 @@
    "literalBlock",
   ["support.function","literal"]
 ],[
-   "dissallowDelimitedBlock",
+   "text",
   ["support.function","---------------------------"]
 ],[
-   "text"
+   "start"
 ],[
    "start"
 ],[
@@ -338,10 +339,10 @@
 ],[
    "tableBlock"
 ],[
-   "dissallowDelimitedBlock",
+   "text",
   ["doc.comment","|===================================="]
 ],[
-   "text"
+   "start"
 ],[
    "start"
 ],[
@@ -354,11 +355,11 @@
    "commentBlock",
   ["doc.comment","comment"]
 ],[
-   "dissallowDelimitedBlock",
+   "text",
   ["doc.comment","///////////"]
 ],[
    "text",
-  ["comment","// one line comment"]
+  ["text","// one line comment"]
 ],[
    "start"
 ],[
@@ -411,10 +412,10 @@
    "literalBlock",
   ["support.function","///////////////////////////"]
 ],[
-   "dissallowDelimitedBlock",
+   "text",
   ["support.function","---------------------------"]
 ],[
-   "text"
+   "start"
 ],[
    "start"
 ],[

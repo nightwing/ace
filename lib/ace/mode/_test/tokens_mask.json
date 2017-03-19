@@ -117,7 +117,7 @@
   ["text","    "],
   ["paren.rparen","}"]
 ],[
-   ["#tmp","css-block-end","paren.lparen52","constant.language40"],
+   ["#tmp","start","paren.lparen52","constant.language40"],
   ["paren.rparen","}"]
 ],[
    ["#tmp","start","paren.lparen52","constant.language40"]
@@ -127,7 +127,7 @@
   ["text"," "],
   ["paren.lparen","{"]
 ],[
-   ["paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
+   ["#tmp","js-block-no_regex","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
   ["text","\t"],
   ["constant.language","event"],
   ["text"," "],
@@ -139,7 +139,7 @@
   ["text"," "],
   ["paren.lparen","{"]
 ],[
-   ["#tmp","js-block-start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
+   ["#tmp","js-block-no_regex","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
   ["text","\t    "],
   ["variable.language","this"],
   ["punctuation.operator","."],
@@ -158,105 +158,108 @@
   ["string.quasi.end","`"],
   ["punctuation.operator",";"]
 ],[
-   ["#tmp","js-block-end","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
+   ["constant.language27","start","paren.lparen52","constant.language40"],
   ["text","\t"],
   ["paren.rparen","}"]
 ],[
-   ["#tmp","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
-  ["paren.rparen","}"]
+   ["constant.language27","start","paren.lparen52","constant.language40"],
+  ["text","}"]
 ],[
-   ["#tmp","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"]
+   ["constant.language27","start","paren.lparen52","constant.language40"]
 ],[
-   ["paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
-  ["constant.language","md"],
+   ["constant.language27","start","paren.lparen52","constant.language40"],
+  ["support.variable.class","md"],
+  ["text"," > \"\"\""]
+],[
+   ["constant.language27","start","paren.lparen52","constant.language40"]
+],[
+   ["constant.language27","start","paren.lparen52","constant.language40"],
+  ["support.variable.class","-"],
   ["text"," "],
-  ["paren.lparen",">"],
+  ["support.variable.class","div"]
+],[
+   ["constant.language27","start","paren.lparen52","constant.language40"],
+  ["support.variable.class","-"],
   ["text"," "],
-  ["paren.lparen","\"\"\""]
+  ["support.variable.class","span"]
 ],[
-   ["#tmp","md-multiline-allowBlock","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"]
+   ["constant.language27","start","paren.lparen52","constant.language40"],
+  ["text"," "]
 ],[
-   ["#tmp","md-multiline-listblock","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
-  ["markup.list","- "],
-  ["list","div"]
+   ["constant.language27","start","paren.lparen52","constant.language40"],
+  ["support.variable.class","Hello"]
 ],[
-   ["#tmp","md-multiline-listblock","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
-  ["markup.list","- "],
-  ["list","span"]
+   ["constant.language27","start","paren.lparen52","constant.language40"]
 ],[
-   ["#tmp","md-multiline-listblock","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
-  ["list"," "]
-],[
-   ["#tmp","md-multiline-listblock","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
-  ["list","Hello"]
-],[
-   ["#tmp","md-multiline-start","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"]
-],[
-   ["#tmp","md-multiline-start","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
+   ["#tmp","js-statement-no_regex","paren.lparen38","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
   ["text","["],
-  ["string","one"],
-  ["text","]("],
-  ["markup.underline","http://google.com"],
-  ["text",")"]
+  ["support.variable.class","one"],
+  ["text","]"],
+  ["paren.lparen","("],
+  ["identifier","http"],
+  ["punctuation.operator",":"],
+  ["comment","//google.com)"]
 ],[
-   ["#tmp","md-multiline-allowBlock","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"]
+   ["#tmp","js-statement-no_regex","paren.lparen38","constant.language27","constant.language27","start","paren.lparen52","constant.language40"]
 ],[
-   ["#tmp","start","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
-  ["paren.rparen","\"\"\";"]
+   ["#tmp","js-statement-no_regex","paren.lparen38","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
+  ["string","\"\"\";"]
 ],[
-   ["#tmp","start","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"]
+   ["#tmp","js-statement-no_regex","paren.lparen38","constant.language27","constant.language27","start","paren.lparen52","constant.language40"]
 ],[
-   ["#tmp","start","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"]
+   ["#tmp","js-statement-no_regex","paren.lparen38","constant.language27","constant.language27","start","paren.lparen52","constant.language40"]
 ],[
-   ["#tmp","start","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
-  ["keyword.support.constant.language","header"],
+   ["#tmp","js-statement-no_regex","paren.lparen38","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
+  ["identifier","header"],
   ["text"," "],
-  ["support.variable.class",".foo"],
+  ["punctuation.operator","."],
+  ["identifier","foo"],
   ["text"," "],
-  ["paren.lparen",">"],
+  ["keyword.operator",">"],
   ["text"," "],
-  ["string.start","'"],
-  ["string","Heading"],
-  ["string.end","'"]
+  ["string","'Heading'"]
 ],[
-   ["#tmp","start","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"]
+   ["#tmp","js-statement-no_regex","paren.lparen38","constant.language27","constant.language27","start","paren.lparen52","constant.language40"]
 ],[
-   ["string.start2","start","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
-  ["keyword.support.constant.language","button"],
+   ["#tmp","js-statement-no_regex","paren.lparen38","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
+  ["identifier","button"],
   ["text"," "],
-  ["support.variable.class",".baz"],
+  ["punctuation.operator","."],
+  ["identifier","baz"],
   ["text"," "],
-  ["support.variable.class.markup.bold","x-signal"],
+  ["support.constant","x"],
+  ["keyword.operator","-"],
+  ["identifier","signal"],
   ["keyword.operator","="],
-  ["string.start","'"],
-  ["string","click: test"],
-  ["string.end","'"],
+  ["string","'click: test'"],
   ["text"," "],
-  ["support.variable.class","disabled"],
+  ["identifier","disabled"],
   ["text"," "],
-  ["paren.lparen",">"],
-  ["text"," "],
-  ["string.start","\""]
+  ["keyword.operator",">"],
+  ["text"," \""]
 ],[
-   ["string.start2","start","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
-  ["string","\tHello,"]
+   ["#tmp","js-statement-no_regex","paren.lparen38","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
+  ["text","\t"],
+  ["identifier","Hello"],
+  ["punctuation.operator",","]
 ],[
-   ["string.start2","start","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
-  ["string","\tworld "]
+   ["#tmp","js-statement-no_regex","paren.lparen38","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
+  ["text","\t"],
+  ["identifier","world"],
+  ["text"," "]
 ],[
-   ["string.start2","start","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
-  ["string","\t"],
-  ["string.escape","\\\""],
-  ["string","Buddy"],
-  ["string.escape","\\\""]
+   ["#tmp","js-statement-no_regex","paren.lparen38","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
+  ["text","\t\\"],
+  ["string","\"Buddy"],
+  ["constant.language.escape","\\\""]
 ],[
-   ["#tmp","start","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
-  ["string.end","\""]
+   ["#tmp","js-statement-no_regex","paren.lparen38","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
+  ["text","\""]
 ],[
-   ["#tmp","start","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"]
+   ["#tmp","js-statement-no_regex","paren.lparen38","constant.language27","constant.language27","start","paren.lparen52","constant.language40"]
 ],[
-   ["#tmp","js-statement-start","start","js-statement-no_regex","constant.language53","start","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
-  ["constant.language","var"],
+   ["#tmp","js-statement-no_regex","start","js-statement-no_regex","paren.lparen38","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
+  ["storage.type","var"],
   ["text"," "],
   ["identifier","a"],
   ["text"," "],
@@ -264,7 +267,7 @@
   ["text"," "],
   ["paren.lparen","{"]
 ],[
-   ["#tmp","js-statement-no_regex","start","js-statement-no_regex","constant.language53","start","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
+   ["#tmp","js-statement-no_regex","start","js-statement-no_regex","paren.lparen38","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
   ["text","    "],
   ["identifier","name"],
   ["punctuation.operator",":"],
@@ -278,25 +281,18 @@
   ["paren.rparen","}"],
   ["string.quasi.end","`"]
 ],[
-   ["#tmp","start","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
+   ["constant.language27","start","paren.lparen52","constant.language40"],
   ["paren.rparen","};"]
 ],[
-   ["#tmp","start","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"]
+   ["constant.language27","start","paren.lparen52","constant.language40"]
 ],[
-   ["#tmp","start","paren.lparen13","constant.language","constant.language","start","paren.lparen39","constant.language27","constant.language27","start","paren.lparen52","constant.language40"],
-  ["keyword.support.constant.language","span"],
+   ["constant.language27","start","paren.lparen52","constant.language40"],
+  ["support.variable.class","span"],
   ["text"," "],
   ["support.variable.class",".foo"],
-  ["text"," "],
-  ["paren.lparen",">"],
-  ["text"," "],
-  ["string.start","\""],
-  ["paren.lparen.markup.italic","~["],
-  ["keyword.control.markup.italic","bind:"],
-  ["text"," "],
-  ["identifier","a"],
-  ["punctuation.operator","."],
-  ["identifier","name"],
-  ["paren.rparen.markup.italic","]"],
-  ["string.end","\""]
+  ["text"," > \"~["],
+  ["support.variable.class","bind"],
+  ["text",": "],
+  ["support.variable.class","a.name"],
+  ["text","]\""]
 ]]

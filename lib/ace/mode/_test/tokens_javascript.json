@@ -1,5 +1,5 @@
 [[
-   "start",
+   "no_regex",
   ["comment","//test: tokenize 'standard' functions"]
 ],[
    "no_regex",
@@ -44,7 +44,7 @@
    "no_regex",
   ["comment","//test: tokenize parens"]
 ],[
-   "start",
+   "no_regex",
   ["text","    "],
   ["storage.type","var"],
   ["text"," "],
@@ -55,7 +55,7 @@
   ["string","\"[{( )}]\""],
   ["punctuation.operator",";"]
 ],[
-   "start",
+   "no_regex",
   ["comment","//test tokenize arithmetic expression which looks like a regexp"]
 ],[
    "no_regex",
@@ -127,14 +127,14 @@
    "no_regex",
   ["comment","/* foo // bar */"]
 ],[
-   "start",
+   "no_regex",
   ["identifier","canBeRegex"],
   ["punctuation.operator",";"]
 ],[
-   "start",
+   "no_regex",
   ["comment","/* foo // bar */"]
 ],[
-   "start",
+   "no_regex",
   ["comment","// test tokenize identifier with umlauts"]
 ],[
    "no_regex",
@@ -145,12 +145,12 @@
    "no_regex",
   ["comment","// test // is not a regexp"]
 ],[
-   "start",
+   "no_regex",
   ["paren.lparen","{"],
   ["text"," "],
   ["comment","// 123"]
 ],[
-   "start",
+   "no_regex",
   ["comment","//test skipping escaped chars"]
 ],[
    "no_regex",
@@ -192,7 +192,7 @@
    "no_regex",
   ["text"," "]
 ],[
-   "start",
+   "no_regex",
   ["storage.type","function"],
   ["text"," "],
   ["entity.name.function","foo"],
@@ -204,7 +204,7 @@
   ["text"," "],
   ["paren.lparen","{"]
 ],[
-   "start",
+   "no_regex",
   ["text","    "],
   ["keyword","for"],
   ["text"," "],
@@ -229,7 +229,7 @@
   ["text"," "],
   ["paren.lparen","{"]
 ],[
-   "start",
+   "no_regex",
   ["text","        "],
   ["support.function","alert"],
   ["paren.lparen","("],
@@ -341,7 +341,7 @@
 ],[
    "no_regex"
 ],[
-   "start",
+   "no_regex",
   ["storage.type","function"],
   ["text"," "],
   ["paren.lparen","("],
@@ -418,7 +418,7 @@
    "no_regex",
   ["paren.rparen","}"]
 ],[
-   "start",
+   "no_regex",
   ["storage.type","function"],
   ["text"," "],
   ["paren.lparen","("],
@@ -426,7 +426,7 @@
   ["text"," "],
   ["paren.lparen","{"]
 ],[
-   "start",
+   "no_regex",
   ["text","\t"],
   ["comment","/* eee */"]
 ],[
@@ -494,14 +494,14 @@
 ],[
    "no_regex"
 ],[
-   "start",
+   "no_regex",
   ["identifier","a"],
   ["text"," "],
   ["keyword.operator","="],
   ["text"," "],
   ["paren.lparen","{"]
 ],[
-   "start",
+   "no_regex",
   ["text","\t"],
   ["string","'a'"],
   ["punctuation.operator",":"],
@@ -608,7 +608,7 @@
   ["keyword.operator","<"],
   ["identifier","div"]
 ],[
-   ["start","jsxAttributes","jsxAttributes","jsx",1],
+   ["#tmp","no_regex","start","jsxAttributes","jsxAttributes","jsx",1],
   ["identifier","z"],
   ["keyword.operator","="],
   ["meta.tag.punctuation.tag-open.xml","<"],
@@ -641,7 +641,7 @@
   ["keyword.operator.attribute-equals.xml","="],
   ["paren.quasi.start","{"]
 ],[
-   ["start","jsxAttributes","jsxAttributes","jsx",1],
+   ["#tmp","no_regex","start","jsxAttributes","jsxAttributes","jsx",1],
   ["text","        "],
   ["constant.numeric","1"],
   ["text"," "],
@@ -679,14 +679,14 @@
   ["meta.tag.tag-name.xml","a"],
   ["meta.tag.punctuation.tag-close.xml",">"]
 ],[
-   "start",
+   "no_regex",
   ["meta.tag.punctuation.end-tag-open.xml","</"],
   ["meta.tag.tag-name.xml","div"],
   ["meta.tag.punctuation.tag-close.xml",">"]
 ],[
-   "start"
+   "no_regex"
 ],[
-   "start",
+   "no_regex",
   ["storage.type","var"],
   ["text"," "],
   ["identifier","o"],
@@ -695,7 +695,7 @@
   ["text"," "],
   ["paren.lparen","{"]
 ],[
-   ["start","no_regex","start","string.quasi.start","string.quasi.start","no_regex"],
+   ["#tmp","no_regex","start","no_regex","start","string.quasi.start","string.quasi.start","no_regex"],
   ["text","    "],
   ["identifier","t"],
   ["punctuation.operator",":"],
@@ -724,7 +724,7 @@
   ["paren.quasi.end","}"],
   ["string.quasi.end","`"]
 ],[
-   "start",
+   "no_regex",
   ["paren.rparen","}"],
   ["punctuation.operator",";"]
 ]]

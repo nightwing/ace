@@ -2,7 +2,7 @@
    "start",
   ["keyword.other.doctype","!!!5"]
 ],[
-   "tag_single"
+   "start"
 ],[
    "start",
   ["text","# "],
@@ -44,7 +44,7 @@
   ["comment.xml","<![endif]"],
   ["comment.end.xml","-->"]
 ],[
-   "tag_single"
+   "start"
 ],[
    "start"
 ],[
@@ -141,11 +141,11 @@
   ["string","'Home'"],
   ["text.xml",", home_url"]
 ],[
-   "tag_single"
+   "start"
 ],[
    "start",
-  ["text"," "],
-  ["text.xml","  #contents"]
+  ["text","   "],
+  ["keyword.attribute-name.id.haml","#contents"]
 ],[
    "start",
   ["meta.tag.haml","%div"],
@@ -179,7 +179,7 @@
   ["text","      "],
   ["text.xml","Neil Patrick Harris "]
 ],[
-   "tag_single"
+   "start"
 ],[
    "start",
   ["meta.tag.haml","%div"],
