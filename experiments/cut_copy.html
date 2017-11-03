@@ -18,33 +18,48 @@
 	    border: 1px solid black;
         margin: 4px;
 	    width: 590px;
-	    height: 400px;
-	}
+ 	}
 
 	</style>
 	
 </head>
 <body>
-    
+
     <div id="container">    
-        <textarea id="text"></textarea>    
-        <div id="canvas"></div>
+        <textarea id="t1">1</textarea>
+        <textarea id="t2">2</textarea>  
+        <textarea id="t3">3</textarea>  
+        <div id="canvas">
+            1.) Try copying text from the first textarea and pasting into the third one.<br>
+            2.) Then try from second to the third.<br>
+            3.) The third textarea should most likely contain 3=copied=3=copied=10<br>
+            4.) Please copy the content of the log area bellow, and add to the bug report
+        </div>
     </div>
 
     <input type="button" value="Clear" id="some_name" onclick="document.getElementById('logger').innerHTML = ''">
     <div id="logger">
         
     </div>
-    
+<!-- 
+<script src="../demo/kitchen-sink/require.js"></script>
 <script type="text/javascript" charset="utf-8">
+require.config({paths: { "ace" : "../lib/ace"}});
+require(["ace/ace"], function(ace) {
+    var editor = ace.edit("canvas");
     
-if (!window.console) window.console = {};
-if (!console.log) {
-    var logger = document.getElementById("logger");
-    console.log = function() {
-        logger.innerHTML += Array.prototype.join.call(arguments, ", ") + "<br>";
-    }
+});
+</script>
+-->
+<script type="text/javascript" charset="utf-8">
+var i = 0;
+var logger = document.getElementById("logger");
+var log = function() {
+    var div = document.createElement("div")
+    div.textContent = (i++) + ":" +  Array.prototype.join.call(arguments, "  ");
+    logger.insertBefore(div, logger.firstChild);
 }
+
 
 function addListener(elem, type, callback) {
     if (elem.addEventListener) {
@@ -60,44 +75,71 @@ function addListener(elem, type, callback) {
     
 var container = document.getElementById("container");
 var canvas = document.getElementById("canvas");
-var text = document.getElementById("text");
+ 
+
+var logKeyboard = false
     
-function log(e) {
-    console.log(e.type, e);
+function logEvent(e) {
+    log(e.type, e.target.id, e);
 }
 
 function logKey(e) {
-    console.log(e.type, e.charCode, e.keyCode, e);
+    if (logKeyboard)
+        log(e.type, e.charCode, e.keyCode, e);
 }
 
-addListener(text, "keydown", logKey, false);
-addListener(text, "keyup", logKey, false);
-addListener(text, "keypress", logKey, false);
-
-addListener(text, "textInput", function(e) {
-    console.log(e.type, e.data, e);
-}, false);
-
-function fillSelection() {
-  text.value = "Juhu Kinners";
-  text.select();
+function logClipboardEvent(e) {
+    if (!e.clipboardData)
+        return log(e.type, e.target.id, "no clipboard data!");
+    
+    var value = e.clipboardData.getData("text/plain");
+    log(e.type, e.target.id, "get:" + value);
+    e.clipboardData.setData("text/plain", "=copied=" + i);
+    newValue = e.clipboardData.getData("text/plain");
+    if (newValue != value) {
+        log(e.type, e.target.id, "set:" + value);
+        newValue = value;
+    }
+    if (e.target.id != "t3") {
+        log("...defaultPrevented")
+        e.preventDefault();
+    }
+    if (e.target.id == "t1") {
+        e.target.value = "\\*/";
+        e.target.select();
+    } else if (e.target.id == "t2") {
+        e.target.value = value;
+    }
 }
+function addListeners(text) {
+    addListener(text, "keydown", logKey, false);
+    addListener(text, "keyup", logKey, false);
+    addListener(text, "keypress", logKey, false);
 
-addListener(text, "copy", fillSelection, false);
-addListener(text, "paste", log, false);
-addListener(text, "cut", fillSelection, false);
+    addListener(text, "textInput", function(e) {
+        log(e.type, e.data, e);
+    }, false);
 
-addListener(text, "beforecopy", log, false);
-addListener(text, "beforepaste", log, false);
-addListener(text, "beforecut", log, false);
+    addListener(text, "copy", logClipboardEvent, false);
+    addListener(text, "paste", logClipboardEvent, false);
+    addListener(text, "cut", logClipboardEvent, false);
 
-addListener(text, "compositionstart", log, false);
-addListener(text, "compositionupdate", log, false);
-addListener(text, "compositionend", log, false);
+    addListener(text, "beforecopy", logClipboardEvent, false);
+    addListener(text, "beforepaste", logClipboardEvent, false);
+    addListener(text, "beforecut", logClipboardEvent, false);
 
-addListener(text, "propertychange", function(e) {
-    console.log(e.type, e.propertyName, e);
-}, false);
+    addListener(text, "compositionstart", logEvent, false);
+    addListener(text, "compositionupdate", logEvent, false);
+    addListener(text, "compositionend", logEvent, false);
+
+    addListener(text, "propertychange", function(e) {
+        log(e.type, e.propertyName, e);
+    }, false);
+    return text;
+}
+addListeners(document.getElementById("t1")).select();
+addListeners(document.getElementById("t2")).select();
+addListeners(document.getElementById("t3"))
     
 </script>
 
