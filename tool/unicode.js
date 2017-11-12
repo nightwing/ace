@@ -120,7 +120,7 @@ function mergeRanges(charString) {
     }).join("");
 }
 
-function test() {
+function testWordChars() {
     function toRegex(chars) { 
         return new RegExp("^[" + chars.replace(/\w{4}/g, "\\u$&") + "]");
     }
@@ -143,7 +143,81 @@ var wordChars = packages.L
     + packages.Pc;
 
 var wordCharsMerged = mergeRanges(wordChars);
-test();
+testWordChars();
+
+
+var fullWidthRanges = [
+    [0x1100, 0x115F],
+    [0x11A3, 0x11A7],
+    [0x11FA, 0x11FF],
+    [0x2329, 0x232A],
+    [0x2E80, 0x2E99],
+    [0x2E9B, 0x2EF3],
+    [0x2F00, 0x2FD5],
+    [0x2FF0, 0x2FFB],
+    [0x3000, 0x303E],
+    [0x3041, 0x3096],
+    [0x3099, 0x30FF],
+    [0x3105, 0x312D],
+    [0x3131, 0x318E],
+    [0x3190, 0x31BA],
+    [0x31C0, 0x31E3],
+    [0x31F0, 0x321E],
+    [0x3220, 0x3247],
+    [0x3250, 0x32FE],
+    [0x3300, 0x4DBF],
+    [0x4E00, 0xA48C],
+    [0xA490, 0xA4C6],
+    [0xA960, 0xA97C],
+    [0xAC00, 0xD7A3],
+    [0xD7B0, 0xD7C6],
+    [0xD7CB, 0xD7FB],
+    [0xF900, 0xFAFF],
+    [0xFE10, 0xFE19],
+    [0xFE30, 0xFE52],
+    [0xFE54, 0xFE66],
+    [0xFE68, 0xFE6B],
+    [0xFF01, 0xFF60],
+    [0xFFE0, 0xFFE6]
+].sort(function(a, b) {
+    return a[0] - b[0]
+})
+
+
+function split(arr, result) {
+    var middle = Math.floor(arr.length / 2);
+    
+    if (middle == 0) {
+        
+    } 
+    else {
+        result.push()
+        split(arr.slice(0, middle), result)
+        split(arr.slice(middle), result)
+    }
+}
+
+
+
+    [0x1100, 0x115F],
+    [0x11A3, 0x11A7],
+    [0x11FA, 0x11FF],
+    [0x2329, 0x232A],
+    [0x2E80, 0x2E99],
+
+
+if (c < 0x1100) return false;
+    
+if (c < 0x11FA) {
+    
+} else if (c > 0x11FF) {
+    
+}
+    
+    [0x1100, 0x115F],
+    [0x11A3, 0x11A7],
+    [0x11FA, 0x11FF],
+    
 
 var fs = require("fs");
 var path = __dirname + "/../lib/ace/unicode.js"
@@ -155,5 +229,102 @@ value = value.replace(/(var wordChars = ").*(";)/, function(_, $1, $2) {
 fs.writeFileSync(path, value, "utf8");
 
 
+
+
+
+
+
+var arr = [
+       [0x1100, 0x115F],
+    [0x11A3, 0x11A7],
+    [0x11FA, 0x11FF],
+    [0x2329, 0x232A],
+    [0x2E80, 0x2E99],
+    [0x2E9B, 0x2EF3],
+    [0x2F00, 0x2FD5],
+    [0x2FF0, 0x2FFB],
+    [0x3000, 0x303E],
+    [0x3041, 0x3096],
+    [0x3099, 0x30FF],
+    [0x3105, 0x312D],
+    [0x3131, 0x318E],
+    [0x3190, 0x31BA],
+    [0x31C0, 0x31E3],
+    [0x31F0, 0x321E],
+    [0x3220, 0x3247],
+    [0x3250, 0x32FE],
+    [0x3300, 0x4DBF],
+    [0x4E00, 0xA48C],
+    [0xA490, 0xA4C6],
+    [0xA960, 0xA97C],
+    [0xAC00, 0xD7A3],
+    [0xD7B0, 0xD7C6],
+    [0xD7CB, 0xD7FB],
+    [0xF900, 0xFAFF],
+    [0xFE10, 0xFE19],
+    [0xFE30, 0xFE52],
+    [0xFE54, 0xFE66],
+    [0xFE68, 0xFE6B],
+    [0xFF01, 0xFF60],
+    [0xFFE0, 0xFFE6]
+
+]
+
+// arr.length = 3
+
+
+
+function str(num) { return "0x" + num.toString(16).toUpperCase() } 
+function split(arr, result) {
+    var middle = Math.floor(arr.length / 2);
+    if (!arr.length) {
+        result.push("return false;")
+    } else if (middle == 0) {
+        // result.push("if (c < " + str(arr[middle][0]) +" || " + "c > " + str(arr[middle][1]) + ") return false;")
+        
+        result.push("return (c >= " + str(arr[middle][0]) +" && " + "c <= " + str(arr[middle][1]) + ")")
+    } 
+    else {
+        result.push("if (c < " + str(arr[middle][0]) + ") {")
+        split(arr.slice(0, middle), result)
+        result.push("} else if ( c > " + str(arr[middle][1]) + ") {")
+        split(arr.slice(middle + 1), result)
+        result.push("}")
+    }
+    return result
+}
+
+result = [
+    "function(c) {",
+    "if (c < " + str(arr[0][0]) + ") return false;"
+]
+split(arr, result)
+result.push("return true", "}")
+
+var indent = 0
+src = result.map(function(line) {
+    if (/}/.test(line)) indent--
+    line = "    ".repeat(indent) + line
+    if (/{$/.test(line)) indent++
+
+    return line
+}).join("\n")
+
+f = eval("(" + src + ")")
+console.log(src)
+var ranges = arr
+g = function(s) {
+    for (var i = 0; i < ranges.length; i++) {
+        var range = ranges[i];
+        if (range[0] <= s && s <= range[1])
+            return true
+    }
+    return false;
+}
+
+for (var i = 0; i < 0xffff; i++) {
+    if (f(i) !== g(i))
+        throw i.toString(16); 
+}
 
 
