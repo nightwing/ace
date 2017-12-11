@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    .session_btn {
+      padding: 0 10px;
+      position: relative;
+      height: 22px;
+      width: 120px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 12px;
+      line-height: 23px;
+    }
+
+    .session_btn .tab_middle {
+      background: gold;
+      border-top: 1px solid gray;
+      z-index: 1;
+      height: 22px;
+      cursor: default;
+      /*position:relative;*/
+    }
+
+    .session_btn .tab_middle:after {
+      background: gold;
+      content: "";
+      width: 22px;
+      height: 22px;
+      display: block;
+      position: absolute;
+      top: 0;
+      transform: matrix(1, 0, 0.35, 1, -1.1, 0);
+      border: 1px solid gray;
+      border-width: 1px 1px 0 0;
+      border-top-right-radius: 8px;
+      right: 0;
+      z-index: -1;
+    }
+
+    .session_btn .tab_middle:before {
+      background: gold;
+      content: "";
+      width: 22px;
+      height: 22px;
+      display: block;
+      position: absolute;
+      top: 0;
+      transform: matrix(1, 0, -0.35, 1, 1.1, 0);
+      border: 1px solid gray;
+      border-width: 1px 0 0 1px;
+      border-top-left-radius: 8px;
+      left: 0;
+      z-index: -1;
+    }
+
+    .inside.scale {
+      display: flex;
+    }
+    .curbtn .tab_middle:before,.curbtn .tab_middle:after, .curbtn .tab_middle {
+      background: goldenrod;
+    }
+    .curbtn {
+      z-index:10;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="btnsesssioncontainer">
+    <div class="inside scale" id="630_buttons" style="">
+
+      <div class="session_btn btnclose" style="display: none;">
+        <div class="tab_shadow"></div>
+        <div class="tab_middle">
+          <div class="sessiontab_title">-</div>
+          <strong> </strong></div>
+      </div>
+      <div class="session_btn btnclose" style="display: none;">
+        <div class="tab_shadow"></div>
+        <div class="tab_middle">
+          <div class="sessiontab_title">-</div>
+          <strong> </strong></div>
+      </div>
+      <div class="c9-simple-btn tabmenubtn" style="">
+      </div>
+      <div class="session_btn btnclose dark focus" style="">
+        <div class="tab_shadow"></div>
+        <div class="tab_middle">
+          <div class="sessiontab_title">[A] /a+.html</div>
+          <strong> </strong></div>
+      </div>
+      <div class="session_btn btnclose dark focus" style="">
+        <div class="tab_shadow"></div>
+        <div class="tab_middle">
+          <div class="sessiontab_title">[B] /a+.html</div>
+          <strong> </strong></div>
+      </div>
+      <div class="session_btn btnclose curbtn dark focus" style="">
+        <div class="tab_shadow"></div>
+        <div class="tab_middle">
+          <div class="sessiontab_title">[C] /a+.html</div>
+          <strong> </strong></div>
+      </div>
+      <div class="c9-simple-btn plus_tab_button c9-simple-btnBool" style="">
+      </div>
+    </div>
+  </div>
+  <script>
+    var $=document.querySelector.bind(document);
+    $(".btnsesssioncontainer").onclick = function(e) {
+      var el = $(".curbtn");
+      el && el.classList.toggle("curbtn");
+      el = e.target;
+      while (el && !el.classList.contains("session_btn")) {
+        el = el.parentElement;
+      }
+      el && el.classList.toggle("curbtn");
+    };
+  </script>
+  <body>
+
+</html>

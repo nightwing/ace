@@ -98,6 +98,8 @@ oop.inherits(TokenTooltip, Tooltip);
             tokenText += "\n  merge";
         if (token.stateTransitions)
             tokenText += "\n  " + token.stateTransitions.join("\n  ");
+    
+        // if (token.currentState)
 
         if (this.tokenText != tokenText) {
             this.setText(tokenText);
