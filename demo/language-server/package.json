@@ -1,0 +1,16 @@
+{
+    "name": "ace-language-server-demo",
+    "version": "1.0.0",
+    "description": "",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "keywords": [],
+    "author": "",
+    "dependencies": {
+        "dockerfile-language-server-nodejs": "0.0.13",
+        "vscode-css-languageserver-bin": "^1.3.0",
+        "ws": "^4.0.0"
+    }
+}

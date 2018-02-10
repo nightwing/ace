@@ -159,7 +159,7 @@ function loadDoc(name, callback) {
     var path = doc.path;
     var parts = path.split("/");
     if (parts[0] == "docs")
-        path = "demo/kitchen-sink/" + path;
+        path = "../kitchen-sink/" + path;
     else if (parts[0] == "ace")
         path = "lib/" + path;
 

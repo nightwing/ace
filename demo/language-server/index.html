@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ACE Autocompletion demo</title>
+    <link rel="stylesheet" href="../kitchen-sink/styles.css" type="text/css" media="screen" charset="utf-8">
+</head>
+
+<body>
+    <div style="position:absolute;height:100%;width:260px">
+        <div style="position: absolute; overflow: hidden; top: 0px; bottom:0">
+            <div id="optionsPanel" style="width: 120%; height:100%; overflow-y: scroll">
+            </div>
+        </div>
+    </div>
+    <div id="editor-container"></div>
+
+    <script src="../kitchen-sink/require.js"></script>
+    <script>
+        // setup paths
+        require.config({
+            baseUrl: location.protocol + "//" + location.host + location.pathname.split("/").slice(0, -1).join("/"),
+            paths: {
+                ace: "../../lib/ace",
+                main_demo: "../kitchen-sink",
+                "demo/kitchen-sink/docs": "../../../kitchen-sink/docs"
+            },
+            waitSeconds: 30
+        });
+        // load ace and extensions
+        require(["demo"], function() {
+
+        });
+
+        var ws = new WebSocket("ws://" + location.host + "/~ws");
+
+        ws.onopen = function(e) {
+            console.log(e)
+        }
+        ws.onerror = function(e) {
+            console.log(e)
+        }
+        ws.onmessage = function(e) {
+            console.log(JSON.parse(e.data))
+        }
+        var id = id || 0
+function send(method, params, withId) {
+    var x = JSON.stringify({
+        jsonrpc: "2.0",
+        id: withId ? id++ : undefined,
+        method,
+        params,
+    }, null, 4)
+    console.log(x)
+    ws.send(x)
+}
+
+function call(method, params) {
+    send(method, params, true)
+}
+
+uri = "file:///" + escape("demo/kitchen-sink/docs/css.css")
+
+function getColors() {
+    call("textDocument/documentColor", {
+        "textDocument": { "uri": uri }
+    })
+}
+
+function config() {
+    send("workspace/didChangeConfiguration", {
+        "settings": {
+            "css": {
+                "validate": true,
+                "colorDecorators": { "enable": true },
+                "lint": {
+                    "compatibleVendorPrefixes": "ignore",
+                    "vendorPrefix": "warning",
+                    "duplicateProperties": "error",
+                    "emptyRules": "warning",
+                    "importStatement": "ignore",
+                    "boxModel": "ignore",
+                    "universalSelector": "ignore",
+                    "zeroUnits": "ignore",
+                    "fontFaceProperties": "warning",
+                    "hexColorLength": "error",
+                    "argumentsInColorFunction": "error",
+                    "unknownProperties": "warning",
+                    "ieHack": "ignore",
+                    "unknownVendorSpecificProperties": "ignore",
+                    "propertyIgnoredDueToDisplay": "warning",
+                    "important": "ignore",
+                    "float": "ignore",
+                    "idSelector": "ignore"
+                },
+                "trace": { "server": "on" }
+            },
+            "scss": {
+                "validate": true,
+                "colorDecorators": { "enable": true },
+                "lint": {
+                    "compatibleVendorPrefixes": "ignore",
+                    "vendorPrefix": "warning",
+                    "duplicateProperties": "ignore",
+                    "emptyRules": "warning",
+                    "importStatement": "ignore",
+                    "boxModel": "ignore",
+                    "universalSelector": "ignore",
+                    "zeroUnits": "ignore",
+                    "fontFaceProperties": "warning",
+                    "hexColorLength": "error",
+                    "argumentsInColorFunction": "error",
+                    "unknownProperties": "warning",
+                    "ieHack": "ignore",
+                    "unknownVendorSpecificProperties": "ignore",
+                    "propertyIgnoredDueToDisplay": "warning",
+                    "important": "ignore",
+                    "float": "ignore",
+                    "idSelector": "ignore"
+                }
+            },
+            "less": {
+                "validate": true,
+                "colorDecorators": { "enable": true },
+                "lint": {
+                    "compatibleVendorPrefixes": "ignore",
+                    "vendorPrefix": "warning",
+                    "duplicateProperties": "ignore",
+                    "emptyRules": "warning",
+                    "importStatement": "ignore",
+                    "boxModel": "ignore",
+                    "universalSelector": "ignore",
+                    "zeroUnits": "ignore",
+                    "fontFaceProperties": "warning",
+                    "hexColorLength": "error",
+                    "argumentsInColorFunction": "error",
+                    "unknownProperties": "warning",
+                    "ieHack": "ignore",
+                    "unknownVendorSpecificProperties": "ignore",
+                    "propertyIgnoredDueToDisplay": "warning",
+                    "important": "ignore",
+                    "float": "ignore",
+                    "idSelector": "ignore"
+                }
+            }
+        }
+    }
+)
+}
+
+function init() {
+    send("textDocument/didOpen", {
+        textDocument: {
+            uri: uri,
+            languageId: "css",
+            version: 1,
+            text: editor.getValue()
+        }
+    })
+}
+
+// editor.off("change", sendChange)
+var sendChange = function sendChange(delta) {
+    send("textDocument/didChange", {
+        textDocument: { uri: uri },
+        contentChanges: [{
+            text: delta.action == "insert"? delta.lines.join("\n") : "",
+            range: {
+                start: convertPos(delta.start),
+                end: convertPos(delta.end),
+            },
+            // text: editor.getValue()
+        }]
+    });
+}
+// editor.on("change", sendChange)
+function convertPos(pos) {
+    return {line: pos.row, character: pos.column}
+}
+
+
+function codeAction() {
+    call("textDocument/codeAction", {
+        "textDocument": { "uri": uri },
+        "range": { "start": convertPos(editor.selection.cursor), "end": convertPos(editor.selection.cursor) },
+        "context": { "diagnostics": [] }
+    })
+}
+
+function complete() {
+    call("textDocument/completion", {
+        "textDocument": { "uri": uri },
+        "position": convertPos(editor.selection.cursor)
+    })
+}
+    </script>
+
+</body>
+
+</html>
