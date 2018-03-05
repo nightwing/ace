@@ -273,12 +273,11 @@ function buildAceModuleInternal(opts, callback) {
         if (opts.filters)
             filters = filters.concat(opts.filters);
     
-        if (opts.noconflict)
-            filters.push(namespace(ns));
+        filters.push(namespace(ns));
         var projectType = opts.projectType;
         if (projectType == "main" || projectType == "ext") {
             filters.push(exportAce(ns, opts.require[0],
-                opts.noconflict ? ns : "", projectType == "ext"));
+                ns, projectType == "ext"));
         }
         
         filters.push(normalizeLineEndings);
@@ -299,7 +298,7 @@ function buildAceModuleInternal(opts, callback) {
         pathConfig: pathConfig,
         additional: opts.additional,
         enableBrowser: true,
-        keepDepArrays: "all",
+        //keepDepArrays: "all",
         noArchitect: true,
         compress: false,
         ignore: opts.ignore || [],
@@ -511,7 +510,7 @@ function exportAce(ns, modules, requireBase, extModules) {
                         window.NS = a;
                     for (var key in a) if (a.hasOwnProperty(key))
                         window.NS[key] = a[key];
-                    window.NS[default] = window.NS;
+                    window.NS["default"] = window.NS;
                     if (typeof module == "object")
                         module.exports = window.NS;
                 });

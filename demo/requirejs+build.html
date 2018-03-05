@@ -37,9 +37,6 @@
             var editor = ace.edit("editor");
             editor.setTheme("ace/theme/twilight");
             editor.session.setMode("ace/mode/javascript");
-            require(["ace/requirejs/text!src/ace"], function(e){
-                editor.setValue(e);
-            })
         }
     );
     require(['testace'])

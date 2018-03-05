@@ -1,11 +1,12 @@
 ({
     optimize: "none",
     preserveLicenseComments: false,
-    name: "node_modules/almond/almond",
-    baseUrl: "../../",
+    name: "node_modules/almond/almond.js",
+    baseUrl: ".",
     paths: {
-        ace : "lib/ace",
-        demo: "demo/kitchen-sink"        
+        "r.js": "demo/r.js",
+        ace : "../../lib/ace",
+        demo: "../../demo/kitchen-sink"
     },
     packages: [
     ],
