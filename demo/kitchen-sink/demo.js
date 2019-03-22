@@ -134,22 +134,8 @@ env.editor.showCommandLine = function(val) {
  * This demonstrates how you can define commands and bind shortcuts to them.
  */
 env.editor.commands.addCommands([{
-    name: "gotoline",
-    bindKey: {win: "Ctrl-L", mac: "Command-L"},
-    exec: function(editor, line) {
-        if (typeof line == "object") {
-            var arg = this.name + " " + editor.getCursorPosition().row;
-            editor.cmdLine.setValue(arg, 1);
-            editor.cmdLine.focus();
-            return;
-        }
-        line = parseInt(line, 10);
-        if (!isNaN(line))
-            editor.gotoLine(line);
-    },
-    readOnly: true
-}, {
     name: "snippet",
+    description: "Snippet",
     bindKey: {win: "Alt-C", mac: "Command-Alt-C"},
     exec: function(editor, needle) {
         if (typeof needle == "object") {
@@ -164,21 +150,25 @@ env.editor.commands.addCommands([{
     readOnly: true
 }, {
     name: "focusCommandLine",
+    description: "Focus command line",
     bindKey: "shift-esc|ctrl-`",
     exec: function(editor, needle) { editor.cmdLine.focus(); },
     readOnly: true
 }, {
     name: "nextFile",
+    description: "Next file",
     bindKey: "Ctrl-tab",
     exec: function(editor) { doclist.cycleOpen(editor, 1); },
     readOnly: true
 }, {
     name: "previousFile",
+    description: "Previous file",
     bindKey: "Ctrl-shift-tab",
     exec: function(editor) { doclist.cycleOpen(editor, -1); },
     readOnly: true
 }, {
     name: "execute",
+    description: "Execute",
     bindKey: "ctrl+enter",
     exec: function(editor) {
         try {
@@ -191,6 +181,7 @@ env.editor.commands.addCommands([{
     readOnly: true
 }, {
     name: "showKeyboardShortcuts",
+    description: "Show keyboard shortcuts",
     bindKey: {win: "Ctrl-Alt-h", mac: "Command-Alt-h"},
     exec: function(editor) {
         config.loadModule("ace/ext/keybinding_menu", function(module) {
@@ -200,6 +191,7 @@ env.editor.commands.addCommands([{
     }
 }, {
     name: "increaseFontSize",
+    description: "Increase font size",
     bindKey: "Ctrl-=|Ctrl-+",
     exec: function(editor) {
         var size = parseInt(editor.getFontSize(), 10) || 12;
@@ -207,6 +199,7 @@ env.editor.commands.addCommands([{
     }
 }, {
     name: "decreaseFontSize",
+    description: "Decrease font size",
     bindKey: "Ctrl+-|Ctrl-_",
     exec: function(editor) {
         var size = parseInt(editor.getFontSize(), 10) || 12;
@@ -214,6 +207,7 @@ env.editor.commands.addCommands([{
     }
 }, {
     name: "resetFontSize",
+    description: "Reset font size",
     bindKey: "Ctrl+0|Ctrl-Numpad0",
     exec: function(editor) {
         editor.setFontSize(12);
@@ -239,6 +233,7 @@ cmdLine.commands.removeCommands(["find", "gotoline", "findall", "replace", "repl
 var commands = env.editor.commands;
 commands.addCommand({
     name: "save",
+    description: "Save",
     bindKey: {win: "Ctrl-S", mac: "Command-S"},
     exec: function(arg) {
         var session = env.editor.session;
@@ -253,6 +248,7 @@ commands.addCommand({
 
 commands.addCommand({
     name: "load",
+    description: "Load",
     bindKey: {win: "Ctrl-O", mac: "Command-O"},
     exec: function(arg) {
         var session = env.editor.session;
