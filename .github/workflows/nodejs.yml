@@ -28,9 +28,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm i && npm i eslint codecov istanbul typescript
     - run: node_modules/.bin/istanbul cover lib/ace/test/all.js
-    - run: ls -la 
-        git branch -a
-        changes=$(git diff --name-only origin/HEAD --no-renames --diff-filter=ACMR);
+    - run: changes=$(git diff --name-only origin/HEAD --no-renames --diff-filter=ACMR);
         if [ "$changes" == "" ]; then
             echo "checking all files";
             node node_modules/eslint/bin/eslint "lib/ace/**/*.js";
