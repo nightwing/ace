@@ -21,7 +21,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Fetch the master branch
-      run: git fetch origin/HEAD --depth 1
+      run: git fetch origin HEAD:refs/remotes/origin/HEAD --depth 1
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
