@@ -36,7 +36,7 @@
   </a>
 <!--DEVEL-->
   <div style="text-align: left; padding: 0.5em 1em;">
-    <a style="color: whitesmoke;" target="_test"  rel="noreferer" href="./lib/ace/test/tests.html">tests</a>
+    <a style="color: whitesmoke;" target="_test"  rel="noreferer" href="./src/test/tests.html">tests</a>
   </div>
   <div style="text-align: left; padding: 0.5em 1em;">
     <a style="color: whitesmoke;" target="_test"  rel="noreferer" href="./tool/mode_creator.html">Mode Creator</a>
@@ -60,7 +60,7 @@
     require.config({
         baseUrl: window.location.protocol + "//" + window.location.host + window.location.pathname.split("/").slice(0, -1).join("/"),
         paths: {
-            ace: "lib/ace",
+            ace: "src",
             demo: "demo/kitchen-sink"
         }
     });

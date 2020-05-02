@@ -23,24 +23,26 @@
     
 <div id="log"></div>
 
+
+<script src="../../demo/kitchen-sink/mini_require.js" data-main="all_browser" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript">
-    var require = {
+    require.config({
+        baseUrl: window.location.protocol + "//" + window.location.host + window.location.pathname.split("/").slice(0, -3).join("/"),
         paths: {
-            ace: "../"
+            ace: "src"
         },
         packages : [{
             name: "asyncjs",
-            location: "./asyncjs",
+            location: "src/test/asyncjs",
             main: "index"
         }, {
             name: "assert",
-            location: "./asyncjs",
+            location: "src/test/asyncjs",
             main: "assert"
         }]
-    };
+    });
+    require(["ace/test/all_browser"])
 </script>
-<script src="../../../demo/kitchen-sink/require.js" data-main="all_browser" type="text/javascript" charset="utf-8"></script>
-
 
 </body>
 </html>

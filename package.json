@@ -7,7 +7,7 @@
         "node": ">= 0.6.0"
     },
     "author": "Fabian Jakobs <fabian@c9.io>",
-    "main": "lib/ace",
+    "main": "src/ace",
     "typings": "ace.d.ts",
     "repository": {
         "type": "git",
@@ -33,8 +33,8 @@
     },
     "scripts": {
         "start": "node static.js",
-        "test": "node lib/ace/test/all.js",
-        "lint": "eslint \"lib/ace/**/*.js\"",
-        "fix": "eslint --fix 'lib/ace/**/*.js'"
+        "test": "node src/test/all.js",
+        "lint": "eslint \"src/**/*.js\"",
+        "fix": "eslint --fix \"src/**/*.js\""
     }
 }
