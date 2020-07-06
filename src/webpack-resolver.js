@@ -1,4 +1,4 @@
-function x(id) {
+function resolveModule(id) {
     switch(id) {
 case 'ace/ext/beautify': return import('./ext/beautify.js')
 case 'ace/ext/elastic_tabstops_lite': return import('./ext/elastic_tabstops_lite.js')
@@ -96,7 +96,6 @@ case 'ace/mode/jade': return import('./mode/jade.js')
 case 'ace/mode/java': return import('./mode/java.js')
 case 'ace/mode/javascript': return import('./mode/javascript.js')
 case 'ace/mode/json': return import('./mode/json.js')
-case 'ace/mode/jsoniq': return import('./mode/jsoniq.js')
 case 'ace/mode/jsp': return import('./mode/jsp.js')
 case 'ace/mode/jssm': return import('./mode/jssm.js')
 case 'ace/mode/jsx': return import('./mode/jsx.js')
@@ -188,7 +187,6 @@ case 'ace/mode/vhdl': return import('./mode/vhdl.js')
 case 'ace/mode/visualforce': return import('./mode/visualforce.js')
 case 'ace/mode/wollok': return import('./mode/wollok.js')
 case 'ace/mode/xml': return import('./mode/xml.js')
-case 'ace/mode/xquery': return import('./mode/xquery.js')
 case 'ace/mode/yaml': return import('./mode/yaml.js')
 
 case 'ace/theme/ambiance': return import('./theme/ambiance.js')
@@ -308,7 +306,6 @@ case 'ace/snippets/jade': return import('./snippets/jade.js')
 case 'ace/snippets/java': return import('./snippets/java.js')
 case 'ace/snippets/javascript': return import('./snippets/javascript.js')
 case 'ace/snippets/json': return import('./snippets/json.js')
-case 'ace/snippets/jsoniq': return import('./snippets/jsoniq.js')
 case 'ace/snippets/jsp': return import('./snippets/jsp.js')
 case 'ace/snippets/jssm': return import('./snippets/jssm.js')
 case 'ace/snippets/jsx': return import('./snippets/jsx.js')
@@ -408,4 +405,9 @@ case 'ace/snippets/yaml': return import('./snippets/yaml.js')
 
 
 config = require("./config")
-config.setLoader(x)
+config.setLoader(function(name, callback) {
+    resolveModule(name).then(
+        function(m) { callback(null, m) },
+        function(err) { callback(err) }
+    )
+})

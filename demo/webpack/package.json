@@ -3,16 +3,33 @@
     "version": "1.0.0",
     "description": "",
     "scripts": {
-        "start": "webpack-dev-server"
+        "start": "webpack-dev-server",
+        "preinstall": "npx npm-force-resolutions"
     },
     "keywords": [],
     "author": "",
     "dependencies": {
-        "file-loader": "^1.1.11",
-        "webpack": "^4.0.1",
-        "webpack-cli": "^2.0.10"
+        "@rollup/plugin-buble": "^0.21.3",
+        "@rollup/plugin-json": "^4.1.0",
+        "eslint": "^7.4.0",
+        "eslint-plugin-react": "^7.20.3",
+        "file-loader": "^6.0.0",
+        "npm-force-resolutions": "0.0.3",
+        "rollup": "^2.19.0",
+        "rollup-plugin-node-resolve": "^5.2.0",
+        "ts-loader": "^7.0.5",
+        "vscode-css-languageservice": "^4.3.0",
+        "vscode-html-languageservice": "^3.1.0",
+        "vscode-json-languageservice": "^3.7.0",
+        "webpack": "^4.43.0",
+        "webpack-cli": "^3.3.12",
+        "worker-loader": "^2.0.0"
+    },
+    "resolutions": {
+        "acorn": "npm:acorn-with-stage3"
     },
     "devDependencies": {
-        "webpack-dev-server": "^3.1.0"
+        "rollup-plugin-commonjs": "^10.1.0",
+        "webpack-dev-server": "^3.11.0"
     }
 }

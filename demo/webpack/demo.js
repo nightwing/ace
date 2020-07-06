@@ -1,11 +1,11 @@
 "use strict";
-
+ 
 // import ace
-import ace from '../../lib/ace/ace'
+var ace = require('../../src/ace')
 // import Range from ace (it is also available as ace.Range)
-import {Range, EditSession} from '../../lib/ace/ace'
+var {Range, EditSession} = require('../../src/ace')
 
-import "../../lib/ace/webpack-resolver";
+require("../../src/webpack-resolver");
 
 // import modes that you want to include into your main bundle
 // import "../../build/src-noconflict/mode-javascript";
@@ -34,3 +34,58 @@ document.body.appendChild(editor.container)
 import {Mode as JSMode} from "../../build/src-noconflict/mode-javascript"
 editor.setMode( new JSMode())
 */
+
+
+window.eslint = require("eslint/lib/linter")
+
+var defaultRules = require("eslint/lib/rules")
+var reactRules = require("eslint-plugin-react")
+var linter = new eslint.Linter()
+console.log(linter)
+
+var rules = {
+}
+rules["handle-callback-err"] = 1;
+    rules["no-debugger"] = 1;
+    rules["no-undef"] = 1;
+    // too buggy:
+    // rules["no-use-before-define"] = [3, "nofunc"];
+    // to annoying:
+    // rules["no-shadow"] = 3;
+    rules["no-inner-declarations"] = [1, "functions"];
+    rules["no-native-reassign"] = 1;
+    rules["no-new-func"] = 1;
+    rules["no-new-wrappers"] = 1;
+    rules["no-cond-assign"] = [1, "except-parens"];
+    rules["no-debugger"] = 3;
+    rules["no-dupe-keys"] = 3;
+    rules["no-eval"] = 1;
+    rules["no-func-assign"] = 1;
+    rules["no-extra-semi"] = 3;
+    rules["no-invalid-regexp"] = 1;
+    rules["no-irregular-whitespace"] = 3;
+    rules["no-negated-in-lhs"] = 1;
+    rules["no-regex-spaces"] = 3;
+    rules["quote-props"] = 0;
+    rules["no-unreachable"] = 1;
+    rules["use-isnan"] = 2;
+    rules["valid-typeof"] = 1;
+    rules["no-redeclare"] = 3;
+    rules["no-with"] = 1;
+    rules["radix"] = 3;
+    rules["no-delete-var"] = 2;
+    rules["no-label-var"] = 3;
+    rules["no-console"] = 0;
+    rules["no-shadow-restricted-names"] = 2;
+    rules["handle-callback-err"] = 1;
+    rules["no-new-require"] = 2;
+
+var data = linter.verify("value", {
+    rules
+});
+// debugger
+console.log(data)
+
+
+
+
