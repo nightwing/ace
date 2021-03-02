@@ -32,6 +32,8 @@ jobs:
     - run: node_modules/.bin/istanbul cover lib/ace/test/all.js
     - run: |
         set -x;
+        git status;
+        git checkout HEAD -- package.json;
         changes=$(git diff --name-only origin/HEAD --no-renames --diff-filter=ACMR);
         if [ "$changes" == "" ]; then
             echo "checking all files";
