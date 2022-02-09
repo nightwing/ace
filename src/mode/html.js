@@ -9,7 +9,6 @@ var HtmlHighlightRules = require("./html_highlight_rules").HtmlHighlightRules;
 var XmlBehaviour = require("./behaviour/xml").XmlBehaviour;
 var HtmlFoldMode = require("./folding/html").FoldMode;
 var HtmlCompletions = require("./html_completions").HtmlCompletions;
-var WorkerClient = require("../worker/worker_client").WorkerClient;
 
 // http://www.w3.org/TR/html5/syntax.html#void-elements
 var voidElements = ["area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta", "menuitem", "param", "source", "track", "wbr"];
@@ -46,26 +45,6 @@ oop.inherits(Mode, TextMode);
 
     this.getCompletions = function(state, session, pos, prefix) {
         return this.$completer.getCompletions(state, session, pos, prefix);
-    };
-
-    this.createWorker = function(session) {
-        if (this.constructor != Mode)
-            return;
-        var worker = new WorkerClient(["ace"], "ace/mode/html_worker", "Worker");
-        worker.attachToDocument(session.getDocument());
-
-        if (this.fragmentContext)
-            worker.call("setOptions", [{context: this.fragmentContext}]);
-
-        worker.on("error", function(e) {
-            session.setAnnotations(e.data);
-        });
-
-        worker.on("terminate", function() {
-            session.clearAnnotations();
-        });
-
-        return worker;
     };
 
     this.$id = "ace/mode/html";

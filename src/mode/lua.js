@@ -5,7 +5,6 @@ var TextMode = require("./text").Mode;
 var LuaHighlightRules = require("./lua_highlight_rules").LuaHighlightRules;
 var LuaFoldMode = require("./folding/lua").FoldMode;
 var Range = require("../range").Range;
-var WorkerClient = require("../worker/worker_client").WorkerClient;
 
 var Mode = function() {
     this.HighlightRules = LuaHighlightRules;
@@ -125,21 +124,6 @@ oop.inherits(Mode, TextMode);
             session.replace(new Range(row, 0, row, column), indent);
             session.outdentRows(new Range(row + 1, 0, row + 1, 0));
         }
-    };
-
-    this.createWorker = function(session) {
-        var worker = new WorkerClient(["ace"], "ace/mode/lua_worker", "Worker");
-        worker.attachToDocument(session.getDocument());
-        
-        worker.on("annotate", function(e) {
-            session.setAnnotations(e.data);
-        });
-        
-        worker.on("terminate", function() {
-            session.clearAnnotations();
-        });
-        
-        return worker;
     };
 
     this.$id = "ace/mode/lua";

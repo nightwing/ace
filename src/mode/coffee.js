@@ -5,7 +5,6 @@ var Outdent = require("./matching_brace_outdent").MatchingBraceOutdent;
 var FoldMode = require("./folding/coffee").FoldMode;
 var Range = require("../range").Range;
 var TextMode = require("./text").Mode;
-var WorkerClient = require("../worker/worker_client").WorkerClient;
 var oop = require("../lib/oop");
 
 function Mode() {
@@ -62,21 +61,6 @@ oop.inherits(Mode, TextMode);
         this.$outdent.autoOutdent(doc, row);
     };
     
-    this.createWorker = function(session) {
-        var worker = new WorkerClient(["ace"], "ace/mode/coffee_worker", "Worker");
-        worker.attachToDocument(session.getDocument());
-        
-        worker.on("annotate", function(e) {
-            session.setAnnotations(e.data);
-        });
-        
-        worker.on("terminate", function() {
-            session.clearAnnotations();
-        });
-        
-        return worker;
-    };
-
     this.$id = "ace/mode/coffee";
 }).call(Mode.prototype);
 

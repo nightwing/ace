@@ -16,7 +16,6 @@ var UndoManager = require("./undomanager").UndoManager;
 var Renderer = require("./virtual_renderer").VirtualRenderer;
 
 // The following require()s are for inclusion in the built ace file
-require("./worker/worker_client");
 require("./keyboard/hash_handler");
 require("./placeholder");
 require("./multi_select");

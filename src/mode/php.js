@@ -6,7 +6,6 @@ var PhpHighlightRules = require("./php_highlight_rules").PhpHighlightRules;
 var PhpLangHighlightRules = require("./php_highlight_rules").PhpLangHighlightRules;
 var MatchingBraceOutdent = require("./matching_brace_outdent").MatchingBraceOutdent;
 var Range = require("../range").Range;
-var WorkerClient = require("../worker/worker_client").WorkerClient;
 var PhpCompletions = require("./php_completions").PhpCompletions;
 var CstyleBehaviour = require("./behaviour/cstyle").CstyleBehaviour;
 var CStyleFoldMode = require("./folding/cstyle").FoldMode;
@@ -98,24 +97,6 @@ var Mode = function(opts) {
 oop.inherits(Mode, HtmlMode);
 
 (function() {
-
-    this.createWorker = function(session) {
-        var worker = new WorkerClient(["ace"], "ace/mode/php_worker", "PhpWorker");
-        worker.attachToDocument(session.getDocument());
-
-        if (this.inlinePhp)
-            worker.call("setOptions", [{inline: true}]);
-
-        worker.on("annotate", function(e) {
-            session.setAnnotations(e.data);
-        });
-
-        worker.on("terminate", function() {
-            session.clearAnnotations();
-        });
-
-        return worker;
-    };
 
     this.$id = "ace/mode/php";
 }).call(Mode.prototype);
