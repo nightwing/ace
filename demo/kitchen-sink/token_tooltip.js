@@ -4,31 +4,28 @@ var dom = require("ace/lib/dom");
 var oop = require("ace/lib/oop");
 var event = require("ace/lib/event");
 var Range = require("ace/range").Range;
-var Tooltip = require("ace/tooltip").Tooltip;
+var HoverTooltip = require("ace/tooltips/hover_tooltip").HoverTooltip
 
 function TokenTooltip (editor) {
     if (editor.tokenTooltip)
         return;
-    Tooltip.call(this, editor.container);
+    HoverTooltip.call(this, editor);
     editor.tokenTooltip = this;
     this.editor = editor;
 
-    this.update = this.update.bind(this);
-    this.onMouseMove = this.onMouseMove.bind(this);
-    this.onMouseOut = this.onMouseOut.bind(this);
-    event.addListener(editor.renderer.scroller, "mousemove", this.onMouseMove);
-    event.addListener(editor.renderer.content, "mouseout", this.onMouseOut);
-}
-
-oop.inherits(TokenTooltip, Tooltip);
-
-(function(){
     this.token = {};
     this.range = new Range();
     
-    this.update = function() {
-        this.$timer = null;
-        
+    this.setCallback(function(session, pos, callback) {        
+        callback(this.getContent());
+    });
+}
+
+oop.inherits(TokenTooltip, HoverTooltip);
+
+(function(){
+    
+    this.getContent = function() {
         var r = this.editor.renderer;
         if (this.lastT - (r.timeStamp || 0) > 1000) {
             r.rect = null;
@@ -69,54 +66,18 @@ oop.inherits(TokenTooltip, Tooltip);
             tokenText += "\n  " + token.stateTransitions.join("\n  ");
 
         if (this.tokenText != tokenText) {
-            this.setText(tokenText);
-            this.width = this.getWidth();
-            this.height = this.getHeight();
             this.tokenText = tokenText;
         }
 
         this.show(null, this.x, this.y);
 
         this.token = token;
-        session.removeMarker(this.marker);
         this.range = new Range(docPos.row, token.start, docPos.row, token.start + token.value.length);
-        this.marker = session.addMarker(this.range, "ace_bracket", "text");
-    };
-    
-    this.onMouseMove = function(e) {
-        this.x = e.clientX;
-        this.y = e.clientY;
-        if (this.isOpen) {
-            this.lastT = e.timeStamp;
-            this.setPosition(this.x, this.y);
+        return {
+            content: tokenText,
+            range: this.range
         }
-        if (!this.$timer)
-            this.$timer = setTimeout(this.update, 100);
-    };
-
-    this.onMouseOut = function(e) {
-        if (e && e.currentTarget.contains(e.relatedTarget))
-            return;
-        this.hide();
-        this.editor.session.removeMarker(this.marker);
-        this.$timer = clearTimeout(this.$timer);
-    };
-
-    this.setPosition = function(x, y) {
-        if (x + 10 + this.width > this.maxWidth)
-            x = window.innerWidth - this.width - 10;
-        if (y > window.innerHeight * 0.75 || y + 20 + this.height > this.maxHeight)
-            y = y - this.height - 30;
-
-        Tooltip.prototype.setPosition.call(this, x + 10, y + 20);
-    };
-
-    this.destroy = function() {
-        this.onMouseOut();
-        event.removeListener(this.editor.renderer.scroller, "mousemove", this.onMouseMove);
-        event.removeListener(this.editor.renderer.content, "mouseout", this.onMouseOut);
-        delete this.editor.tokenTooltip;
-    };
+    };    
 
 }).call(TokenTooltip.prototype);
 
