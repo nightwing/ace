@@ -941,6 +941,9 @@ export const EditSession: {
 export const UndoManager: {
   new(): Ace.UndoManager;
 };
+export const Editor: {
+  new(): Ace.Editor;
+};
 export const Range: {
   new(startRow: number, startColumn: number, endRow: number, endColumn: number): Ace.Range;
   fromPoints(start: Ace.Point, end: Ace.Point): Ace.Range;

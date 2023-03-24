@@ -131,9 +131,6 @@ exports.loadModule = function(moduleName, onLoad) {
             }
         });
     } else {
-        try {
-            module = require(moduleName);
-        } catch (e) {}
         load(module);
     }
 };

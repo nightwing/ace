@@ -69,8 +69,6 @@ oop.inherits(TokenTooltip, HoverTooltip);
             this.tokenText = tokenText;
         }
 
-        this.show(null, this.x, this.y);
-
         this.token = token;
         this.range = new Range(docPos.row, token.start, docPos.row, token.start + token.value.length);
         return {

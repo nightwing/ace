@@ -15,9 +15,12 @@ function HoverTooltip(editor) {
     this.$showTimer = null;
     this.isOpen = false;
 
-    this.getElement().style.pointerEvents = "auto";
-    this.getElement().style.whiteSpace = "pre-wrap";
-    this.getElement().addEventListener("mouseout", this.onMouseOut.bind(this));
+    var element = this.getElement()
+    element.style.pointerEvents = "auto";
+    element.style.whiteSpace = "pre-wrap";
+    element.addEventListener("mouseout", this.onMouseOut.bind(this));
+    element.tabIndex = -1;
+    
     this.editor.on("mousemove", this.onMouseMove.bind(this));
 }
 
@@ -150,6 +153,7 @@ oop.inherits(HoverTooltip, Tooltip);
     };
 
     this.$hide = function () {
+        if (this.getElement().contains(document.activeElment)) return;
         clearTimeout(this.$mouseMoveTimer);
         clearTimeout(this.$showTimer);
         if (this.isOpen) {
@@ -175,6 +179,7 @@ oop.inherits(HoverTooltip, Tooltip);
     };
 
     this.onMouseOut = function(e) {
+        if (this.getElement().contains(document.activeElment)) return;
         clearTimeout(this.$mouseMoveTimer);
         clearTimeout(this.$showTimer);
         if (!e.relatedTarget || e.relatedTarget == this.getElement()) return;

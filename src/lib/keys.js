@@ -151,6 +151,8 @@ var Keys = (function() {
 })();
 oop.mixin(exports, Keys);
 
+exports.default = exports;
+
 exports.keyCodeToString = function(keyCode) {
     // Language-switching keystroke in Chrome/Linux emits keyCode 0.
     var keyString = Keys[keyCode];
