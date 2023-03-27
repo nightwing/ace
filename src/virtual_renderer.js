@@ -2019,7 +2019,7 @@ config.defineOptions(VirtualRenderer.prototype, "renderer", {
     theme: {
         set: function(val) { this.setTheme(val); },
         get: function() { return this.$themeId || this.theme; },
-        initialValue: "./theme/textmate",
+        initialValue: "ace/theme/textmate",
         handlesSet: true
     },
     hasCssTransforms: {

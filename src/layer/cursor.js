@@ -18,6 +18,8 @@ class Cursor {
         this.cursor = this.addCursor();
         dom.addCssClass(this.element, "ace_hidden-cursors");
         this.$updateCursors = this.$updateOpacity.bind(this);
+
+        this.$padding = 0;
     }
     
     $updateOpacity(val) {
@@ -229,7 +231,6 @@ class Cursor {
 
 }
 
-Cursor.prototype.$padding = 0;
 Cursor.prototype.drawCursor = null;
 
 

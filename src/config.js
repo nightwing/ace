@@ -132,6 +132,7 @@ exports.loadModule = function(moduleName, onLoad) {
     } else {
         try {
             module = require(moduleName);
+console.log(moduleName, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
         } catch (e) {}
         load(module);
     }

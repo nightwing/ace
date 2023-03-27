@@ -4,7 +4,7 @@ if (typeof process !== "undefined") {
 }
 
 "use strict";
-
+var config = require("./config");
 var lang = require("./lib/lang");
 var EditSession = require("./edit_session").EditSession;
 var Editor = require("./editor").Editor;
@@ -1106,27 +1106,30 @@ module.exports = {
     },
     
     "test: mode loading" : function(next) {
-        if (!require.undef) {
-            console.log("Skipping test: This test only runs in the browser");
-            next();
-            return;
-        }
+        config.setLoader(function(moduleName, cb) {
+            if (require.cache) { // node
+                cb(null, require(moduleName.replace(/^ace\//, "./")));
+            } else { // browser
+                require([moduleName], function(module) { cb(null, module); });
+            }
+        });
+        var modeChanges = [];
         var session = new EditSession([]);
-        session.setMode("ace/mode/javascript");
-        assert.equal(session.$modeid, "ace/mode/javascript");
         session.on("changeMode", function() {
-            assert.equal(session.$modeid, "ace/mode/javascript");
+            modeChanges.push(session.$modeId.split("/").pop())
         });
-        session.setMode("ace/mode/sh", function(mode) {
-            assert.ok(!mode);
-        });
-        setTimeout(function() {
+        session.setMode("ace/mode/javascript");
+        assert.equal(session.$modeId, "ace/mode/javascript");
+        session.setMode("ace/mode/javascript");
+        session.setMode("ace/mode/sh", function() {
+            assert.equal(session.$modeId, "ace/mode/sh");
             session.setMode("ace/mode/javascript", function(mode) {
                 session.setMode("ace/mode/javascript");
-                assert.equal(session.$modeid, "ace/mode/javascript");
+                assert.equal(session.$modeId, "ace/mode/javascript");
+                assert.equal(modeChanges.join(","), "javascript,sh,javascript");
                 next();
             });
-        }, 0);
+        });
     },
 
     "test: sets destroyed flag when destroy called and tokenizer is never null": function() {
@@ -1141,5 +1144,5 @@ module.exports = {
 };
 
 if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
+    require("asyncjs").test.testcase({"test: mode loading": module.exports["test: mode loading"]}).exec();
 }
