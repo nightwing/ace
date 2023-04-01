@@ -348,8 +348,10 @@ Tokenizer.prototype.reportError = config.reportError;
  * @constructor
  **/
 var CustomTokenizer = function(rules, modeName) {
-    Tokenizer.call(this, rules);
-    this.rootScope = new Scope(modeName);
+    var tokenizer = new Tokenizer(rules);
+    tokenizer.rootScope = new Scope(modeName);
+    tokenizer.getLineTokens = this.getLineTokens;
+    return tokenizer;
 }
 oop.inherits(CustomTokenizer, Tokenizer);
 

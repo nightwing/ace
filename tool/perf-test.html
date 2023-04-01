@@ -10,7 +10,10 @@
     <link href="../doc/site/images/favicon.ico" rel="icon" type="image/x-icon">
 </head>
 <body>
-<div style="position:absolute;height:100%;width:260px">
+<div id="sidePanel" style="position:absolute;height:100%;">
+<div class="toggleButton" id="optionToggle" role="button" aria-label="Hide Options" tabindex="0">
+    <div></div><div></div><div></div>
+</div>
   <div style="position: absolute; overflow: hidden; top:20px; bottom:0">
   <div style="width: 120%; height:100%; overflow-y: scroll">
 
@@ -55,16 +58,69 @@
       };
   </script>
   <script src="demo/kitchen-sink/require.js" data-main="../demo/kitchen-sink/demo" type="text/javascript"></script>
-
   <script>
+    var useLib = /lib=1/.test(location.search);
+    var paths = useLib ? {
+      ace: "../lib/ace",
+      demo: "../demo/kitchen-sink"
+    } : {
+      ace: "../src",
+      demo: "../demo/kitchen-sink",
+      "ace/worker/worker_client": "../lib/ace/worker/worker_client_v2",
+      "ace/worker": "../lib/ace/worker",
+    };
+    
+    if (!useLib) {
+      [
+        "json_worker",
+        "xquery_worker",
+        "yaml_worker",
+        "xquery/xqlint",
+        "xquery/jsoniq_lexer",
+        "xquery/xquery_lexer",
+        "css/csslint",
+        "coffee_worker",
+        "css_worker",
+        "xquery",
+        "html/saxparser",
+        "php/php",
+        "lua/luaparse",
+        "xml/sax",
+        "xml/dom-parser",
+        "xml/dom",
+        "lua_worker",
+        "jsoniq",
+        "json/json_parse",
+        "xml_worker",
+        "coffee/coffee",
+        "javascript_worker",
+        "php_worker",
+        "yaml/yaml-lint",
+        "javascript/jshint",
+        "html_worker",
+      ].forEach(function(m) {
+        paths["ace/mode/" + m] = "../lib/ace/mode/" + m
+      })
+    }
+    
+    require.config({
+        paths: paths
+    });
+    require(["ace/ace"], function (ace) {
+        require(["demo/demo.js"], function (demo) {
+        });
+    });
+  </script>
+
+  <script>(function() {
     if (!Date.now) {
         Date.now = function() { return (new Date()).getTime() };
     }
 
-
     var scrollTop, startTime;
     var timeout, speed, next
     var editor, shouldProfile;
+    var tests = {}
 
     function start(testName) {
         editor = env.editor
@@ -75,23 +131,23 @@
         shouldProfile && console.profile()
 
         speed = 10;
-        next = window[testName + "Next"];
+        next = tests[testName + "Next"];
 
-        window[testName + "Start"] && window[testName + "Start"]()
+        tests[testName + "Start"] && tests[testName + "Start"]()
         setTimeout(next, 1);
     }
     function end(){
         shouldProfile && console.profileEnd()
         var dt = startTime - Date.now()
         console.log(dt)
-        ace.cmdLine.setValue(dt+"", 1)
+        editor.cmdLine.setValue(dt+"", 1)
     }
 
     /*editor.renderer.scrollToY(0);
     editor.navigateFileStart(0);
     */
 
-    var scrollNext = function() {
+    tests.scrollNext = function() {
         var r = editor.renderer
         for (var i = speed; i--; )
             r.scrollBy(0, 1)
@@ -101,7 +157,7 @@
             setTimeout(next, timeout, speed++)
     }
 
-    var selectNext = function() {
+    tests.selectNext = function() {
         var r = editor.renderer
         for (var i = speed; i-- > 0; )
             editor.selection.selectDown()
@@ -112,7 +168,7 @@
             setTimeout(next, timeout, speed+=0.1)
     }
 
-    var selectHNext = function() {
+    tests.selectHNext = function() {
         var r = editor.renderer
         for (var i = speed; i-- > 0; )
             editor.selection.selectRight()
@@ -123,7 +179,7 @@
     }
 
     var typeChars = start.toString().split("")
-    var typeNext = function() {
+    tests.typeNext = function() {
         var r = editor.renderer
         for (var i = speed; i--; )
             editor.insert(typeChars[i % typeChars.length])
@@ -134,15 +190,15 @@
     }
 
     var tokenizer, state, lines, chunk
-    var tokenizeStart = function() {
-        var b = ace.session.bgTokenizer
+    tests.tokenizeStart = function() {
+        var b = editor.session.bgTokenizer
         state = null
         tokenizer = b.tokenizer
         lines = b.doc.getAllLines()
         chunk = 1000
     }
     
-    var tokenizeNext = function() {
+    tests.tokenizeNext = function() {
         var states = []
         for (var i = 0, l = lines.length; i < l; i++) {
             state = tokenizer.getLineTokens(lines[i], state).state
@@ -154,6 +210,8 @@
             end()
     }
 
+    window.start = start;
+}())
   </script>
 
 </body>
