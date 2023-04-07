@@ -16,7 +16,6 @@ var docs = fs.readdirSync(__dirname + "/../demo/kitchen-sink/docs").map(x => {
 
 
 var tokenize = function(testCase) {
-    console.log(testCase.name)
     var lines = testCase.lines
     var tokenizer = testCase.tokenizer;
     var states = [];
@@ -28,7 +27,7 @@ var tokenize = function(testCase) {
     }
     return {tokens, states}
 }
-
+docs = []
 var testCases = docs.map(function(x) {
     var contetnts = fs.readFileSync(x, "utf-8").replace(/\r/g, "");
     var mode = modelist.getModeForPath(x)
@@ -45,12 +44,30 @@ var testCases = docs.map(function(x) {
     };
 }).filter(x => !/mask|luapage/.test(x.name))
 
+var contetnts = fs.readFileSync(__dirname + "/../Readme.md", "utf-8").replace(/\r/g, "");
+testCases = [{
+    lines: contetnts.split(/\n/),
+    name: "old",
+    tokenizer: new (require("../src/mode/markdown_old.js").Mode)().getTokenizer(),
+},{
+    lines: contetnts.split(/\n/),
+    name: "new",
+    tokenizer: new (require("../src/mode/markdown.js").Mode)().getTokenizer(),
+},{
+    lines: contetnts.split(/\n/),
+    name: "old",
+    tokenizer: new (require("../src/mode/markdown_old.js").Mode)().getTokenizer(),
+},{
+    lines: contetnts.split(/\n/),
+    name: "new",
+    tokenizer: new (require("../src/mode/markdown.js").Mode)().getTokenizer(),
+},
+]
 
-
-testCases.forEach(function(testCase) {
+0 && testCases.forEach(function(testCase) {
     var start = performance.now()
     var proofs =[]
-    for (var i = 0; i < 10; i++) {
+    for (var i = 0; i < 100; i++) {
         var proof = tokenize(testCase)
         proofs.push(proof);
     }
@@ -62,5 +79,28 @@ testCases.forEach(function(testCase) {
 
 
 console.log(testCases.map(t => {
-    return [t.name, t.lines.length, t.dt/t.length].join(" ")
+    return [t.name, t.lines.length, t.dt].join(" ")
 }).join("\n"))
+
+
+
+class StringInput {
+    constructor(string) {this.string = string}
+  
+    get length() { return this.string.length }
+  
+    chunk(from) { return this.string.slice(from) }
+  
+    get lineChunks() { return false }
+  
+    read(from, to) { return this.string.slice(from, to) }
+
+    lineAfter(pos) {
+        var end = this.string.indexOf('\n', pos);
+        return this.string.slice(pos, end);
+    }
+  }
+
+  var r = require("lezer-markdown").parser.startParse(new StringInput("#hello"))
+
+  console.log(r)

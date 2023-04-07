@@ -196,20 +196,13 @@ class Tokenizer {
      * @returns {Object}
      **/
     getLineTokens(line, startState) {
-        if (startState && typeof startState != "string") {
-            var stack = startState.slice(0);
-            startState = stack[0];
-            if (startState === "#tmp") {
-                stack.shift();
-                startState = stack.shift();
-            }
-        } else
-            var stack = [];
+        var stack = [];
 
-        var currentState = startState || "start";
+        var currentState = (startState !== undefined) ? (startState instanceof Scope) ? startState
+            : this.rootScope.get(startState) : this.rootScope.get("start");
         var state = this.states[currentState];
         if (!state) {
-            currentState = "start";
+            currentState = this.rootScope.get("start");
             state = this.states[currentState];
         }
         var mapping = this.matchMappings[currentState];
@@ -223,19 +216,20 @@ class Tokenizer {
         var token = {type: null, value: ""};
 
         while (match = re.exec(line)) {
-            var type = mapping.defaultToken;
+            var type = currentState.get(mapping.defaultToken);
             var rule = null;
+            var rememberedState = undefined;
             var value = match[0];
             var index = re.lastIndex;
 
             if (index - value.length > lastIndex) {
                 var skipped = line.substring(lastIndex, index - value.length);
-                if (token.type == type) {
+                if (token.type && token.type === type) {
                     token.value += skipped;
                 } else {
                     if (token.type)
                         tokens.push(token);
-                    token = {type: type, value: skipped};
+                    token = {type: currentState.get(type), value: skipped};
                 }
             }
 
@@ -245,22 +239,48 @@ class Tokenizer {
 
                 rule = state[mapping[i]];
 
-                if (rule.onMatch)
+                if (rule.onMatch) {
                     type = rule.onMatch(value, currentState, stack, line);
-                else
-                    type = rule.token;
+                    if (!(type instanceof Scope)) {
+                        if (!Array.isArray(type)) {
+                            type = currentState.get(type.toString());
+                        } else {
+                            for (var i = 0; i < type.length; i++) {
+                                type[i].type = currentState.get(type[i].type.toString());
+                            }
+                        }
+                    } else {
+                        rememberedState = type.parent;
+                        if (currentState !== rememberedState) {
+                            currentState = rememberedState;
+                            state = this.states[currentState];
+                            mapping = this.matchMappings[currentState];
+                            lastIndex = index;
+                            re = this.regExps[currentState];
+                            re.lastIndex = index;
+                        }
+                    }
+                }
+                else {
+                    if (rule.token)
+                        type = currentState.get(rule.token);
+                }
 
                 if (rule.next) {
-                    if (typeof rule.next == "string") {
-                        currentState = rule.next;
+                    if (!rememberedState) {
+                        if (typeof rule.next !== 'function') {
+                            currentState = currentState.parent.get(rule.next);
+                        } else {
+                            currentState = rule.next(currentState, stack);
+                        }
                     } else {
-                        currentState = rule.next(currentState, stack);
+                        currentState = rememberedState;
                     }
-                    
+
                     state = this.states[currentState];
                     if (!state) {
                         this.reportError("state doesn't exist", currentState);
-                        currentState = "start";
+                        currentState = this.rootScope.get("start");
                         state = this.states[currentState];
                     }
                     mapping = this.matchMappings[currentState];
@@ -274,24 +294,26 @@ class Tokenizer {
             }
 
             if (value) {
-                if (typeof type === "string") {
+                if (!Array.isArray(type)) {
                     if ((!rule || rule.merge !== false) && token.type === type) {
                         token.value += value;
                     } else {
                         if (token.type)
                             tokens.push(token);
-                        token = {type: type, value: value};
+                        token = {type: currentState.get(type), value: value};
                     }
                 } else if (type) {
                     if (token.type)
                         tokens.push(token);
                     token = {type: null, value: ""};
-                    for (var i = 0; i < type.length; i++)
+                    for (var i = 0; i < type.length; i++) {
+                        type[i].type=currentState.get(type[i].type);
                         tokens.push(type[i]);
+                    }
                 }
             }
 
-            if (lastIndex == line.length)
+            if (lastIndex === line.length)
                 break;
 
             lastIndex = index;
@@ -309,27 +331,29 @@ class Tokenizer {
                         tokens.push(token);
                     token = {
                         value: line.substring(lastIndex, lastIndex += 500),
-                        type: "overflow"
+                        type: currentState.get("overflow")
                     };
                 }
-                currentState = "start";
-                stack = [];
+                currentState = this.rootScope.get("start");
                 break;
             }
         }
 
         if (token.type)
             tokens.push(token);
-        
-        if (stack.length > 1) {
-            if (stack[0] !== currentState)
-                stack.unshift("#tmp", currentState);
+
+        if (!tokens.length || tokens[tokens.length - 1].type.parent !== currentState) {
+            token = {
+                value: "",
+                type: currentState.get("empty")
+            };
+            tokens.push(token);
         }
+
         return {
-            tokens : tokens,
-            state : stack.length ? stack : currentState
+            tokens: tokens
         };
-    }
+    };
 }
 
 Tokenizer.prototype.reportError = config.reportError;
