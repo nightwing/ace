@@ -68,7 +68,7 @@ require("ace/config").defineOptions(Editor.prototype, "editor", {
     useAceLinters: {
         set: function(val) {
             if (val && !window.languageProvider) {
-                loadLanguageProvider(editor);
+                loadLanguageProvider(this);
             }
             else if (val) {
                 window.languageProvider.registerEditor(this);
@@ -85,15 +85,13 @@ function loadLanguageProvider(editor) {
     require([
         "https://www.unpkg.com/ace-linters/build/ace-linters.js"
     ], (m) => {
-        window.languageProvider = m.LanguageProvider.fromCdn("https://www.unpkg.com/ace-linters/build");
-        window.languageProvider.registerEditor(editor);
+        var languageProvider = m.LanguageProvider.fromCdn("https://www.unpkg.com/ace-linters/build");
+        window.languageProvider = languageProvider;
+        languageProvider.registerEditor(editor);
         if (languageProvider.$descriptionTooltip)
             editor.off("mousemove", languageProvider.$descriptionTooltip.onMouseMove);
-        
-        
-        docTooltip.setDataProvider(function(e, editor) {
-            var renderer = editor.renderer;
 
+        docTooltip.setDataProvider(function(e, editor) {
             let session = editor.session;
             let docPos = e.getDocumentPosition() ;
 

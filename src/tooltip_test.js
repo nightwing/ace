@@ -42,6 +42,8 @@ module.exports = {
         
         editor.resize(true);
         docTooltip.idleTime = 3;
+        mouse("move", {row: 1, column: 1});
+        debugger
         mouse("move", {row: 0, column: 1});
         setTimeout(function() {
             var nodes = document.querySelectorAll(".doc-tooltip");
