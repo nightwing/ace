@@ -34,7 +34,7 @@ class MarkerGroup {
      * @param {Ace.TooltipMarker[]} markers an array of marker definitions.
      */
     setMarkers(markers) {
-        this.markers = [...markers].sort(this.markersComparator).slice(0, this.MAX_MARKERS);
+        this.markers = markers.sort(this.markersComparator).slice(0, this.MAX_MARKERS);
     }
 
     update(html, markerLayer, session, config) {

@@ -66,7 +66,7 @@ require("ace/config").defineOptions(Editor.prototype, "editor", {
     showTooltipMarkers: {
         set: function(val) {
             if (val) {
-                this.tooltipMarkerManager = this.tooltipMarkerManager || new TooltipMarkerManager(this);
+                /*this.tooltipMarkerManager = this.tooltipMarkerManager || new TooltipMarkerManager(this);
                 const singleLineMarker = {
                     range: new Range(0, 0, 0, 5),
                     tooltipText: "Single line marker",
@@ -77,7 +77,7 @@ require("ace/config").defineOptions(Editor.prototype, "editor", {
                     tooltipText: "Multi line marker",
                     className: "ace_tooltip-marker_test",
                 };
-                editor.session.setTooltipMarkers([singleLineMarker, multiLineMarker], this.tooltipMarkerManager);
+                editor.session.setTooltipMarkers([singleLineMarker, multiLineMarker], this.tooltipMarkerManager);*/
             } else if (this.tooltipMarkerManager) {
                 editor.session.setTooltipMarkers([], this.tooltipMarkerManager);
                 this.tooltipMarkerManager.destroy();
@@ -103,6 +103,7 @@ require("ace/config").defineOptions(Editor.prototype, "editor", {
 });
 
 var {HoverTooltip} = require("ace/tooltip");
+var MarkerGroup = require("ace/tooltip_marker").MarkerGroup;
 var docTooltip = new HoverTooltip();
 function loadLanguageProvider(editor) {
     require([
@@ -112,6 +113,45 @@ function loadLanguageProvider(editor) {
         window.languageProvider.registerEditor(editor);
         if (languageProvider.$descriptionTooltip)
             editor.off("mousemove", languageProvider.$descriptionTooltip.onMouseMove);
+        languageProvider.$messageController.$worker.addEventListener("message", function(e) {
+            if (e.data.type == 6) {
+                e.stopPropagation();
+                var id = e.data.sessionId.split(".")[0];
+                var session = languageProvider.$getSessionLanguageProvider({id: id})?.session
+                if (session) {
+                    showAnnotations(session, e.data.value)
+                }
+            }    
+        }, true)
+        function showAnnotations(session, diagnostics) {
+            session.clearAnnotations();
+            let annotations = diagnostics.map((el) => {
+                console.log(el.severity, el)
+                return {
+                    row: el.range.start.line,
+                    column: el.range.start.character,
+                    text: el.message,
+                    type: el.severity === 1 ? "error" : el.severity === 2 ? "warning" : "info"
+                };
+            });
+            if (annotations && annotations.length > 0) {
+                session.setAnnotations(annotations);
+            }
+            
+            if (!session.state) session.state = {}
+            if (!session.state.diagnosticMarkers) {
+                session.state.diagnosticMarkers = new MarkerGroup();
+                session.addDynamicMarker(session.state.diagnosticMarkers);
+            }
+            session.state.diagnosticMarkers.setMarkers(diagnostics.map((el) => {
+                var r = el.range;
+                return {
+                    range: new Range(r.start.line, r.start.character, r.end.line, r.end.character),
+                    tooltipText: el.message,
+                    className:  "ace_tooltip-marker_test"
+                };
+            }));
+        };
         
         docTooltip.setDataProvider(function(e, editor) {
             var renderer = editor.renderer;
