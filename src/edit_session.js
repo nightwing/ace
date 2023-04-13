@@ -11,7 +11,7 @@ var Range = require("./range").Range;
 var Document = require("./document").Document;
 var BackgroundTokenizer = require("./background_tokenizer").BackgroundTokenizer;
 var SearchHighlight = require("./search_highlight").SearchHighlight;
-var MarkerGroup = require("./tooltip_marker").MarkerGroup;
+var MarkerGroup = require("./marker_group").MarkerGroup;
 
 //{ events
 /**

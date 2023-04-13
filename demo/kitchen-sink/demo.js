@@ -46,7 +46,7 @@ var ElasticTabstopsLite = require("ace/ext/elastic_tabstops_lite").ElasticTabsto
 var IncrementalSearch = require("ace/incremental_search").IncrementalSearch;
 
 var TokenTooltip = require("./token_tooltip").TokenTooltip;
-var TooltipMarkerManager = require("ace/tooltip_marker").TooltipMarkerManager;
+var TooltipMarkerManager = require("ace/marker_group").TooltipMarkerManager;
 require("ace/config").defineOptions(Editor.prototype, "editor", {
     showTokenInfo: {
         set: function(val) {
@@ -103,7 +103,7 @@ require("ace/config").defineOptions(Editor.prototype, "editor", {
 });
 
 var {HoverTooltip} = require("ace/tooltip");
-var MarkerGroup = require("ace/tooltip_marker").MarkerGroup;
+var MarkerGroup = require("ace/marker_group").MarkerGroup;
 var docTooltip = new HoverTooltip();
 function loadLanguageProvider(editor) {
     require([
