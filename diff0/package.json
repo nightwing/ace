@@ -1,0 +1,10 @@
+{
+  "name": "diff0",
+  "version": "1.0.0",
+  "dependencies": {
+    "ace-code": "^1.19.0",
+    "copy-webpack-plugin": "^11.0.0",
+    "webpack": "^5.82.0",
+    "webpack-dev-server": "^4.15.0"
+  }
+}

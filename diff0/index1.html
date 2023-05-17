@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Ace-diff - Simple Demo #1</title>
+
+    <script src="../demo/kitchen-sink/require.js"></script>
+
+    <style type="text/css">
+        .ace_diff-container {
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="ace_diff-container"></div>
+
+<script>
+    var paths = {
+        "ace": "../src",
+        "ace-code": "..",
+        diff: "."
+    }
+
+    require.config({
+        paths: paths
+    });
+
+
+
+    require(["diff/twoway1"], function() {
+
+        var config = require("ace-code/src/config");
+        config.setLoader(function(moduleName, cb) {
+            require([moduleName], function(module) {
+                cb(null, module);
+            });
+        });
+
+        var DiffView = require("diff/twoway1").DiffView;
+        var diffView = new DiffView(document.querySelector(".ace_diff-container"), {});
+        window.diffView = diffView;
+
+        require("ace-code/src/lib/net").get("./diff/0.ts", function(v) {
+            diffView.left.setValue(v, -1);
+            diffView.left.session.setMode("ace-code/src/mode/typescript");
+        });
+        require("ace-code/src/lib/net").get("./diff/1.ts", function(v) {
+            diffView.right.setValue(v, -1);
+            diffView.right.session.setMode("ace-code/src/mode/typescript");
+        });
+    });
+
+</script>
+
+
+
+</body>
+</html>
