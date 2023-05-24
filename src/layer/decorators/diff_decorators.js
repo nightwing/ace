@@ -75,10 +75,6 @@ class DiffDecorator extends Decorator {
                     ycenter = this.canvasHeight - halfHeight;
                 }
 
-                if (zones[i].type === "add") {
-                    console.log(`row: ${i}   offset1: ${offset1}   offset2 ${offset2}    y1 ${y1}   y2 ${y2} heightRatio    ${this.heightRatio}`)
-                }
-
                 resolvedZones.push({
                     from: ycenter - halfHeight,
                     to: ycenter + halfHeight,
