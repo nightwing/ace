@@ -20,7 +20,8 @@ var RenderLoop = require("./renderloop").RenderLoop;
 var FontMetrics = require("./layer/font_metrics").FontMetrics;
 var EventEmitter = require("./lib/event_emitter").EventEmitter;
 var editorCss = require("./css/editor-css");
-var Decorator = require("./layer/decorators").Decorator;
+var ErrorDecorator = require("./layer/decorators/error_decorators").ErrorDecorator;
+var DiffDecorator = require("./layer/decorators/diff_decorators").DiffDecorator;
 
 var useragent = require("./lib/useragent");
 const isTextToken = require("./layer/text_util").isTextToken;
@@ -362,7 +363,7 @@ class VirtualRenderer {
             this.$updateCustomScrollbar(true);
         }
     }
-
+    
     /**
      * @param [force]
      * @param [gutterWidth]
@@ -773,7 +774,7 @@ class VirtualRenderer {
         this.$loop.schedule(this.CHANGE_FULL);
         this.$updatePrintMargin();
     }
-
+    
     /**
      * 
      * @param {number} [top]
@@ -794,7 +795,7 @@ class VirtualRenderer {
             this.session.setScrollTop(-sm.top);
         this.updateFull();
     }
-
+    
     /**
      *
      * @param {number} [top]
@@ -1046,7 +1047,7 @@ class VirtualRenderer {
     }
 
     /**
-     
+    
      */
     $autosize() {
         var height = this.session.getScreenLength() * this.lineHeight;
@@ -1078,7 +1079,7 @@ class VirtualRenderer {
             this._signal("autosize");
         }
     }
-
+    
     /**
      
      * @returns {number}
@@ -1268,7 +1269,7 @@ class VirtualRenderer {
     }
 
     /**
-     * 
+     *
      * Redraw breakpoints.
      * @param {any} [rows]
      */
@@ -1324,7 +1325,7 @@ class VirtualRenderer {
     }
 
     /**
-     * 
+     *
      * Scrolls the cursor into the first visibile area of the editor
      * @param {Point} [cursor]
      * @param {number} [offset]
@@ -1766,7 +1767,7 @@ class VirtualRenderer {
         var insertPosition = position || { row: cursor.row, column: cursor.column };
 
         this.removeGhostText();
-        
+
         var textChunks = this.$calculateWrappedTextChunks(text, insertPosition);
         this.addToken(textChunks[0].text, "ghost_text", insertPosition.row, insertPosition.column);
         
@@ -1838,7 +1839,7 @@ class VirtualRenderer {
                 this.scrollBy(0, (textChunks.length - 1) * this.lineHeight);
             } else {
                 this.scrollToRow(insertPosition.row);
-            }   
+        }
         }
         
     }
@@ -2020,8 +2021,8 @@ class VirtualRenderer {
             if (useragent.isSafari && _self.scroller) {
                 _self.scroller.style.background = "red";
                 _self.scroller.style.background = "";
-            }
         }
+    }
     }
 
     /**
@@ -2053,7 +2054,7 @@ class VirtualRenderer {
     unsetStyle(style) {
         dom.removeCssClass(this.container, style);
     }
-
+    
     /**
      * @param {string} style
      */
@@ -2111,7 +2112,11 @@ class VirtualRenderer {
             this.scrollBarH.addEventListener("scroll", function (e) {
                 if (!_self.$scrollAnimation) _self.session.setScrollLeft(e.data - _self.scrollMargin.left);
             });
-            this.$scrollDecorator = new Decorator(this.scrollBarV, this);
+            if (this.$decoratorType === "diff") {
+                this.$scrollDecorator = new DiffDecorator(this.scrollBarV, this);
+            } else {
+                this.$scrollDecorator = new ErrorDecorator(this.scrollBarV, this);
+            }
             this.$scrollDecorator.$updateDecorators();
         }
         else {
@@ -2352,6 +2357,18 @@ config.defineOptions(VirtualRenderer.prototype, "renderer", {
             this.$updateCustomScrollbar(val);
         },
         initialValue: false
+    },
+    decoratorType: {
+        set: function (val) {
+            switch (val) {
+                case "diff":
+                    this.$decoratorType = val;
+                    break;
+                default:
+                    this.$decoratorType = "error";
+            }
+        },
+        initialValue: "error"
     },
     theme: {
         set: function(val) { this.setTheme(val); },
