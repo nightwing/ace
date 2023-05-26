@@ -2516,28 +2516,10 @@ function computeDiff(originalLines, modifiedLines, options) {
         let modifiedStartLineNumber;
         let modifiedEndLineNumber;
         let innerChanges = changes.innerChanges;
-        if (changes.originalRange.isEmpty) {
-            // Insertion
-            originalStartLineNumber = changes.originalRange.startLineNumber - 1;
-            originalEndLineNumber = 0;
-            innerChanges = undefined;
-        } else {
-            originalStartLineNumber = changes.originalRange.startLineNumber;
-            originalEndLineNumber = changes.originalRange.endLineNumberExclusive - 1;
-        }
-        if (changes.modifiedRange.isEmpty) {
-            // Deletion
-            modifiedStartLineNumber = changes.modifiedRange.startLineNumber - 1;
-            modifiedEndLineNumber = 0;
-            innerChanges = undefined;
-        } else {
-            modifiedStartLineNumber = changes.modifiedRange.startLineNumber;
-            modifiedEndLineNumber = changes.modifiedRange.endLineNumberExclusive - 1;
-        }
-        originalStartLineNumber--;
-        originalEndLineNumber--;
-        modifiedStartLineNumber--;
-        modifiedEndLineNumber--;
+        originalStartLineNumber = changes.originalRange.startLineNumber - 1;
+        originalEndLineNumber = changes.originalRange.endLineNumberExclusive - 2;
+        modifiedStartLineNumber = changes.modifiedRange.startLineNumber - 1;
+        modifiedEndLineNumber = changes.modifiedRange.endLineNumberExclusive - 2;
         return {
             origStart: originalStartLineNumber,
             origEnd: originalEndLineNumber,
