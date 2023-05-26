@@ -50,10 +50,8 @@ class DiffView {
 
         this.orig = this.left = createEditor();
         this.edit = this.right = createEditor();
-        this.gutterEl = document.createElement("div");
 
         element.appendChild(this.left.container);
-        element.appendChild(this.gutterEl);
         element.appendChild(this.right.container);
 
         this.left.setOption("scrollPastEnd", 0.5);
@@ -73,8 +71,6 @@ class DiffView {
             chunks: []
         });
         this.onChangeTheme();
-
-        this.$initArrow();
 
         this.$attachEventHandlers();
 
@@ -111,8 +107,6 @@ class DiffView {
     onChangeTheme() {
         this.right.setTheme(this.left.getTheme());
         var theme = this.right.renderer.theme;
-        this.gutterEl.className = "ace_diff-gutter " + theme.cssClass;
-        dom.setCssClass(this.gutterEl, "ace_dark", theme.isDark);
     };
 
     resize() {
@@ -139,10 +133,11 @@ class DiffView {
     };
 
     $diffLines(val1, val2) {
-        return computeDiff(val1, val2, {
+        var chunks = computeDiff(val1, val2, {
             ignoreTrimWhitespace: this.options.ignoreTrimWhitespace,
             maxComputationTimeMs: this.options.maxComputationTimeMs
         });
+        return chunks;
     };
 
     /*** scroll locking ***/
@@ -355,91 +350,6 @@ class DiffView {
 
         this.left.on("input", this.onInput);
         this.right.on("input", this.onInput);
-    };
-
-    $initArrow() {
-        var arrow = document.createElement("div");
-        this.gutterEl.appendChild(arrow);
-
-        var region = 0;
-        var diffView = this;
-        arrow.addEventListener("click", function (e) {
-            if (region && region.chunk) {
-                var range = diffView.useChunk(region.chunk, region.side == 1);
-                var editor = region.side == 1 ? diffView.orig : diffView.edit;
-                editor.selection.moveToPosition(range.start);
-                editor.focus();
-            }
-            hide();
-        });
-        this.gutterEl.addEventListener("mousemove", function (e) {
-            var rect = e.currentTarget.getBoundingClientRect();
-            var x = e.clientX - rect.left;
-            var y = e.clientY; // - rect.top;
-
-            if (!region) {
-                arrow.style.display = "";
-                region = {};
-            }
-
-            if (x < rect.width / 2) {
-                if (region.side != -1) arrow.className = "diff-arrow diff-arrow-left";
-                region.side = -1;
-            }
-            else {
-                if (region.side != 1) arrow.className = "diff-arrow diff-arrow-right";
-                region.side = 1;
-            }
-            var editor = region.side == 1 ? diffView.edit : diffView.orig;
-            var other = editor == diffView.edit ? diffView.orig : diffView.edit;
-            var renderer = editor.renderer;
-
-            if (other.getReadOnly()) return hide();
-
-            var p = renderer.screenToTextCoordinates(x, y);
-            var row = p.row;
-            if (row == renderer.session.getLength() - 1) row++;
-            var chunks = diffView.chunks;
-            var i = findChunkIndex(chunks, row, region.side == -1);
-            if (i == -1) i = 0;
-            var ch = chunks[i] || chunks[chunks.length - 1];
-            var next = chunks[i + 1];
-
-            var side = region.side == -1 ? "orig" : "edit";
-            if (next && ch) {
-                if (ch[side + "End"] + next[side + "Start"] < 2 * row) ch = next;
-            }
-            region.chunk = ch;
-            if (!ch) return hide();
-            if (renderer.layerConfig.firstRow > ch[side + "End"]) return hide();
-            if (renderer.layerConfig.lastRow < ch[side + "Start"] - 1) return hide();
-
-            var screenPos = renderer.$cursorLayer.getPixelPosition({
-                row: ch[side + "Start"],
-                column: 0
-            }, true).top;
-            if (screenPos < renderer.layerConfig.offset) screenPos = renderer.layerConfig.offset;
-            arrow.style.top = screenPos - renderer.layerConfig.offset + "px";
-            if (region.side == -1) {
-                arrow.style.left = "2px";
-                arrow.style.right = "";
-            }
-            else {
-                arrow.style.left = "";
-                arrow.style.right = "2px";
-            }
-        }.bind(this));
-        this.gutterEl.addEventListener("mouseout", function (e) {
-            hide();
-        });
-        event.addMouseWheelListener(this.gutterEl, hide);
-
-        function hide() {
-            if (region) {
-                region = null;
-                arrow.style.display = "none";
-            }
-        }
     };
 
     /*** other ***/
