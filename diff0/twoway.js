@@ -34,6 +34,7 @@ class DiffView {
         this.onScroll = this.onScroll.bind(this);
         this.onChangeFold = this.onChangeFold.bind(this);
         this.onChangeTheme = this.onChangeTheme.bind(this);
+        this.onSelect = this.onSelect.bind(this);
 
         dom.importCssString(css, "diffview.css");
         this.options = {
@@ -186,6 +187,20 @@ class DiffView {
         diffView.orig.session._emit("changeFold", {data: {start: {row: 0}}});
     };
 
+    onSelect(e, selection) {
+        console.log("selection");
+        this.syncSelect(selection);
+    };
+
+    syncSelect(selection) {
+        var left = this.left;
+        var right = this.right;
+        var isOrig = selection.session == left;
+        let newRange = this.transformRange(selection.getRange(), true);
+        left.selection.setSelectionRange(newRange);
+        //console.log(this.transformPosition(selection.cursor, true))
+    }
+
     onScroll(e, session) {
         this.syncScroll(this.left.session === session ? this.left.renderer : this.right.renderer);
     };
@@ -320,6 +335,7 @@ class DiffView {
         this.right.session.on("changeFold", this.onChangeFold);
         this.left.session.addDynamicMarker(this.markerLeft);
         this.right.session.addDynamicMarker(this.markerRight);
+        this.right.selection.on("changeSelection", this.onSelect);
     };
 
     $detachSessionEventHandlers() {
@@ -472,6 +488,77 @@ class DiffView {
         }
         destRange.end = destEditor.session.replace(destRange, value);
         return destRange;
+    };
+
+    transformRange(range, orig) {
+        return Range.fromPoints(
+            this.transformPosition(range.start, orig),
+            this.transformPosition(range.end, orig)
+        );
+    };
+
+    transformPosition(pos, orig) {
+        var chunkIndex = findChunkIndex(this.chunks, pos.row, orig);
+        var chunk = this.chunks[chunkIndex];
+
+        var result = {
+            row: pos.row,
+            column: pos.column,
+        };
+        if (orig) {
+            if (chunk.origEnd <= pos.row) {
+                result.row = pos.row - chunk.origEnd + chunk.editEnd;
+            } else {
+                console.log("======================================");
+                var d = pos.row - chunk.origStart;
+                var c = pos.column;
+                var r1 = 0,
+                    c1 = 0,
+                    r2 = 0,
+                    c2 = 0;
+                /*var inlineChanges = chunk.inlineChanges;
+                for (var i = 0; i < inlineChanges.length; i++) {
+                    var diff = inlineChanges[i];
+                    if (diff[1]) {
+                        if (diff[0] == 0) {
+                            r1 += diff[1];
+                            r2 += diff[1];
+                            if (r1 == d) c2 = c1 = diff[2];
+                        } else if (diff[0] == 1) {
+                            r2 += diff[1];
+                            if (r1 == d) c2 = diff[2];
+                        } else if (diff[0] == -1) {
+                            r1 += diff[1];
+                            if (r1 == d) c1 = diff[2];
+                        }
+                    } else if (r1 == d) {
+                        if (diff[0] == 0) {
+                            c1 += diff[2];
+                            c2 += diff[2];
+                        } else if (diff[0] == 1) {
+                            c2 += diff[2];
+                        } else if (diff[0] == -1) {
+                            c1 += diff[2];
+                        }
+                    }
+                    console.log(diff + "", r1, c1, r2, c2, d, c);
+                    if (r1 > d || (r1 == d && c1 >= c)) {
+                        break;
+                    }
+                }*/
+
+                if (r1 > d) {
+                    r2 -= r1 - d;
+                }
+                if (c1 != c) {
+                    c2 -= c1 - c;
+                }
+                result.row = r2 + chunk.editStart;
+                result.column = c2;
+            }
+        }
+
+        return result;
     };
 }
 
