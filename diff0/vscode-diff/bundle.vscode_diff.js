@@ -2517,9 +2517,9 @@ function computeDiff(originalLines, modifiedLines, options) {
         let modifiedEndLineNumber;
         let innerChanges = changes.innerChanges;
         originalStartLineNumber = changes.originalRange.startLineNumber - 1;
-        originalEndLineNumber = changes.originalRange.endLineNumberExclusive - 2;
+        originalEndLineNumber = changes.originalRange.endLineNumberExclusive - 1;
         modifiedStartLineNumber = changes.modifiedRange.startLineNumber - 1;
-        modifiedEndLineNumber = changes.modifiedRange.endLineNumberExclusive - 2;
+        modifiedEndLineNumber = changes.modifiedRange.endLineNumberExclusive - 1;
         return {
             origStart: originalStartLineNumber,
             origEnd: originalEndLineNumber,

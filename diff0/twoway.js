@@ -65,6 +65,8 @@ class DiffView {
 
         this.markerLeft = new DiffHighlight(this, -1);
         this.markerRight = new DiffHighlight(this, 1);
+        this.syncSelectionMarkerLeft = new SyncSelectionMarker();
+        this.syncSelectionMarkerRight = new SyncSelectionMarker();
         this.setSession({
             orig: this.orig.session,
             edit: this.edit.session,
@@ -137,6 +139,7 @@ class DiffView {
             ignoreTrimWhitespace: this.options.ignoreTrimWhitespace,
             maxComputationTimeMs: this.options.maxComputationTimeMs
         });
+        console.log(chunks);
         return chunks;
     };
 
@@ -188,12 +191,32 @@ class DiffView {
     };
 
     syncSelect(selection) {
-        var left = this.left;
-        var right = this.right;
+        var now = Date.now();
+        var left = this.left.session;
+        var right = this.right.session;
         var isOrig = selection.session == left;
-        let newRange = this.transformRange(selection.getRange(), true);
-        left.selection.setSelectionRange(newRange);
-        //console.log(this.transformPosition(selection.cursor, true))
+        
+        if (this.selectionSetBy != selection.session && now - this.selectionSetAt < 500) return;
+        let selectionRange = selection.getRange();
+        let newRange = this.transformRange(selectionRange, isOrig);
+        if (isOrig) {
+            this.updateSelectionMarker(this.syncSelectionMarkerLeft, left, selectionRange);
+            this.updateSelectionMarker(this.syncSelectionMarkerRight, right, newRange);
+            this.selectionSetBy = left;
+        }
+        else {
+            this.updateSelectionMarker(this.syncSelectionMarkerLeft, left, newRange);
+            this.updateSelectionMarker(this.syncSelectionMarkerRight, right, selectionRange);
+            this.selectionSetBy = right;
+        }
+
+        this.selectionSetAt = now;
+    }
+
+    updateSelectionMarker(marker, session, range) {
+        marker.setRange(range);
+        session.removeMarker(marker.id);
+        session.addDynamicMarker(marker);
     }
 
     onScroll(e, session) {
@@ -330,6 +353,7 @@ class DiffView {
         this.right.session.on("changeFold", this.onChangeFold);
         this.left.session.addDynamicMarker(this.markerLeft);
         this.right.session.addDynamicMarker(this.markerRight);
+        this.left.selection.on("changeSelection", this.onSelect);
         this.right.selection.on("changeSelection", this.onSelect);
     };
 
@@ -374,97 +398,35 @@ class DiffView {
         ace.renderer.animateScrolling(scrollTop);
     };
 
-    useChunk(chunk, toOrig) {
-        var origRange = new Range(chunk.origStart, 0, chunk.origEnd, 0);
-        var editRange = new Range(chunk.editStart, 0, chunk.editEnd, 0);
-
-        var srcEditor = toOrig ? this.edit : this.orig;
-        var destEditor = toOrig ? this.orig : this.edit;
-        var destRange = toOrig ? origRange : editRange;
-        var srcRange = toOrig ? editRange : origRange;
-
-        var value = srcEditor.session.getTextRange(srcRange);
-        // missing eol at the end of document
-        if (srcRange.isEmpty() && !destRange.isEmpty()) {
-            if (destRange.end.row == destEditor.session.getLength()) {
-                destRange.start.row--;
-                destRange.start.column = Number.MAX_VALUE;
-            }
-        }
-        else if (destRange.isEmpty() && !srcRange.isEmpty()) {
-            if (srcRange.end.row == srcEditor.session.getLength()) {
-                value = "\n" + value;
-            }
-        }
-        destRange.end = destEditor.session.replace(destRange, value);
-        return destRange;
-    };
-
     transformRange(range, orig) {
-        return Range.fromPoints(
-            this.transformPosition(range.start, orig),
-            this.transformPosition(range.end, orig)
-        );
+        return Range.fromPoints(this.transformPosition(range.start, orig), this.transformPosition(range.end, orig));
     };
-
-    transformPosition(pos, orig) {
-        var chunkIndex = findChunkIndex(this.chunks, pos.row, orig);
+    
+    transformPosition(pos, isOrig) {
+        var chunkIndex = findChunkIndex(this.chunks, pos.row, isOrig);
         var chunk = this.chunks[chunkIndex];
 
         var result = {
             row: pos.row,
-            column: pos.column,
+            column: pos.column
         };
-        if (orig) {
+        if (isOrig) { //TODO: calculate line widgets
             if (chunk.origEnd <= pos.row) {
                 result.row = pos.row - chunk.origEnd + chunk.editEnd;
-            } else {
-                console.log("======================================");
-                var d = pos.row - chunk.origStart;
-                var c = pos.column;
-                var r1 = 0,
-                    c1 = 0,
-                    r2 = 0,
-                    c2 = 0;
-                /*var inlineChanges = chunk.inlineChanges;
-                for (var i = 0; i < inlineChanges.length; i++) {
-                    var diff = inlineChanges[i];
-                    if (diff[1]) {
-                        if (diff[0] == 0) {
-                            r1 += diff[1];
-                            r2 += diff[1];
-                            if (r1 == d) c2 = c1 = diff[2];
-                        } else if (diff[0] == 1) {
-                            r2 += diff[1];
-                            if (r1 == d) c2 = diff[2];
-                        } else if (diff[0] == -1) {
-                            r1 += diff[1];
-                            if (r1 == d) c1 = diff[2];
-                        }
-                    } else if (r1 == d) {
-                        if (diff[0] == 0) {
-                            c1 += diff[2];
-                            c2 += diff[2];
-                        } else if (diff[0] == 1) {
-                            c2 += diff[2];
-                        } else if (diff[0] == -1) {
-                            c1 += diff[2];
-                        }
-                    }
-                    console.log(diff + "", r1, c1, r2, c2, d, c);
-                    if (r1 > d || (r1 == d && c1 >= c)) {
-                        break;
-                    }
-                }*/
-
-                if (r1 > d) {
-                    r2 -= r1 - d;
-                }
-                if (c1 != c) {
-                    c2 -= c1 - c;
-                }
-                result.row = r2 + chunk.editStart;
-                result.column = c2;
+            }
+            else {
+                var deltaLine = pos.row - chunk.origStart;
+                result.row = deltaLine + chunk.editStart;
+                result.column = 0;
+            }
+        }
+        else {
+            if (chunk.editEnd <= pos.row) {
+                result.row = pos.row - chunk.editEnd + chunk.origEnd;
+            }
+            else {
+                var deltaLine = pos.row - chunk.editStart;
+                result.row = deltaLine + chunk.origStart;
             }
         }
 
@@ -514,6 +476,21 @@ function isCharChangeOrDelete(charChange) {
     return charChange.originalEndLineNumber - charChange.originalStartLineNumber > -1;
 }
 
+class SyncSelectionMarker {
+    constructor() {
+        this.type = "fullLine";
+        this.clazz = "ace_diff selection";
+    };
+
+    update(html, markerLayer, session, config) {
+    };
+
+    setRange(range) {
+        this.range = range;
+    }
+
+}
+
 class DiffHighlight {
     constructor(diffView, type) {
         this.diffView = diffView;
@@ -540,7 +517,7 @@ class DiffHighlight {
         for (const lineChange of lineChanges) {
 
             if (isChangeOrDelete(lineChange)) {
-                let range = new Range(lineChange.origStart, 0, lineChange.origEnd, 1 << 30);
+                let range = new Range(lineChange.origStart, 0, lineChange.origEnd - 1, 1 << 30);
                 diffView.left.renderer.$scrollDecorator.addZone(range.start.row, range.end.row, "remove");
                 range = range.toScreenRange(session);
                 markerLayer.drawFullLineMarker(html, range, "ace_diff " + "delete inline", config);
@@ -596,14 +573,14 @@ class DiffHighlight {
 
     updateModifiedEditor(html, markerLayer, session, config) {
         var diffView = this.diffView;
-        const ignoreTrimWhitespace = diffView.options.ignoreTrimWhitespace;
+        var ignoreTrimWhitespace = diffView.options.ignoreTrimWhitespace;
         var lineChanges = diffView.chunks;
         diffView.right.renderer.$scrollDecorator.zones = [];
 
-        for (const lineChange of lineChanges) {
+        for (var lineChange of lineChanges) {
             if (isChangeOrInsert(lineChange)) {
-                let range = new Range(lineChange.editStart, 0, lineChange.editEnd, 1 << 30);
-                diffView.right.renderer.$scrollDecorator.addZone(lineChange.editStart, lineChange.editEnd, "add");
+                let range = new Range(lineChange.editStart, 0, lineChange.editEnd - 1, 1 << 30);
+                diffView.right.renderer.$scrollDecorator.addZone(lineChange.editStart, lineChange.editEnd - 1, "add");
 
                 range = range.toScreenRange(session);
                 markerLayer.drawFullLineMarker(html, range, "ace_diff " + "insert inline", config);
