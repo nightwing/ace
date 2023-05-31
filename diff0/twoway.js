@@ -412,30 +412,33 @@ class DiffView {
             column: pos.column
         };
         if (isOrig) { //TODO: calculate line widgets
-            let origIndent = this.left.session.getLine(pos.row).match(/^\s*/)[0].length;
-            let editIndent = this.right.session.getLine(result.row).match(/^\s*/)[0].length;
-            let deltaChar = origIndent - editIndent;
             if (chunk.origEnd <= pos.row) {
                 result.row = pos.row - chunk.origEnd + chunk.editEnd;
-                result.column = pos.column - deltaChar;
+                result.column = pos.column - this.$getDeltaIndent(pos.row, result.row);
             }
             else {
                 var deltaLine = pos.row - chunk.origStart;
                 result.row = deltaLine + chunk.editStart;
+                let deltaChar = this.$getDeltaIndent(pos.row, result.row);
 
                 if (chunk.charChanges) {
                     for (let i = 0; i < chunk.charChanges.length; i++) {
                         let change = chunk.charChanges[i];
-                        if (change.originalStartLineNumber == pos.row) {
-                            if (pos.column > change.originalStartColumn && pos.column < change.originalEndColumn) {
-                                result.column = change.modifiedStartColumn;
-                                return result;
-                            }
-                            else if (pos.column >= change.originalEndColumn) {
-                                deltaChar += change.originalEndColumn - change.originalStartColumn
-                                    - (change.modifiedEndColumn - change.modifiedStartColumn);
-                            }
+                        /*if (change.modifiedStartLineNumber != change.modifiedEndLineNumber)
+                            continue;*/
+                        if (isCharChangeOrDelete(change)) {
+                            if (change.originalStartLineNumber == pos.row) {
+                                if (pos.column > change.originalStartColumn && pos.column < change.originalEndColumn) {
+                                    result.column = change.modifiedStartColumn;
+                                    return result;
+                                }
+                                else if (pos.column >= change.originalEndColumn) {
+                                    deltaChar += change.originalEndColumn - change.originalStartColumn
+                                        - (change.modifiedEndColumn - change.modifiedStartColumn);
+                                }
+                            } 
                         }
+                        
                     }
                 }
                 result.column = result.column - deltaChar;
@@ -453,6 +456,12 @@ class DiffView {
 
         return result;
     };
+    
+    $getDeltaIndent(origLine, editLine) {
+        let origIndent = this.left.session.getLine(origLine).match(/^\s*/)[0].length;
+        let editIndent = this.right.session.getLine(editLine).match(/^\s*/)[0].length;
+        return origIndent - editIndent;
+    }
 }
 
 /*** options ***/
@@ -555,13 +564,13 @@ class DiffHighlight {
                                         startColumn = charChange.originalStartColumn;
                                     }
                                     else {
-                                        startColumn = session.getLine(lineNumber).match(/^\s*/)[0];
+                                        startColumn = session.getLine(lineNumber).match(/^\s*/)[0].length;
                                     }
                                     if (lineNumber === charChange.originalEndLineNumber) {
                                         endColumn = charChange.originalEndColumn;
                                     }
                                     else {
-                                        endColumn = session.getLine(lineNumber).match(/^\s*/)[0];
+                                        endColumn = session.getLine(lineNumber).length;
                                     }
                                     let range = new Range(lineNumber, startColumn, lineNumber, endColumn);
                                     var screenRange = range.toScreenRange(session);
@@ -618,13 +627,13 @@ class DiffHighlight {
                                         startColumn = charChange.modifiedStartColumn;
                                     }
                                     else {
-                                        startColumn = session.getLine(lineNumber).match(/^\s*/)[0];
+                                        startColumn = session.getLine(lineNumber).match(/^\s*/)[0].length;
                                     }
                                     if (lineNumber === charChange.modifiedEndLineNumber) {
                                         endColumn = charChange.modifiedEndColumn;
                                     }
                                     else {
-                                        endColumn = session.getLine(lineNumber).match(/^\s*/)[0];
+                                        endColumn = session.getLine(lineNumber).length;
                                     }
                                     let range = new Range(lineNumber, startColumn, lineNumber, endColumn);
                                     var screenRange = range.toScreenRange(session);
