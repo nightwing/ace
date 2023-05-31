@@ -423,18 +423,17 @@ class DiffView {
                 var deltaLine = pos.row - chunk.origStart;
                 result.row = deltaLine + chunk.editStart;
 
-
                 if (chunk.charChanges) {
                     for (let i = 0; i < chunk.charChanges.length; i++) {
-                        let charChange = chunk.charChanges[i];
-                        if (charChange.originalStartLineNumber == pos.row) {
-                            if (pos.column > charChange.originalStartColumn && pos.column
-                                < charChange.originalEndColumn) {
-                                result.column = charChange.modifiedStartColumn;
+                        let change = chunk.charChanges[i];
+                        if (change.originalStartLineNumber == pos.row) {
+                            if (pos.column > change.originalStartColumn && pos.column < change.originalEndColumn) {
+                                result.column = change.modifiedStartColumn;
                                 return result;
                             }
-                            else if (pos.column > charChange.originalEndColumn) {
-                                deltaChar += charChange.originalEndColumn - charChange.originalStartColumn;
+                            else if (pos.column >= change.originalEndColumn) {
+                                deltaChar += change.originalEndColumn - change.originalStartColumn
+                                    - (change.modifiedEndColumn - change.modifiedStartColumn);
                             }
                         }
                     }
