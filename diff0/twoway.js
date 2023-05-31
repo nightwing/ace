@@ -202,6 +202,7 @@ class DiffView {
         if (isOrig) {
             this.updateSelectionMarker(this.syncSelectionMarkerLeft, left, selectionRange);
             this.updateSelectionMarker(this.syncSelectionMarkerRight, right, newRange);
+            right.selection.setSelectionRange(newRange);
             this.selectionSetBy = left;
         }
         else {
@@ -401,7 +402,7 @@ class DiffView {
     transformRange(range, orig) {
         return Range.fromPoints(this.transformPosition(range.start, orig), this.transformPosition(range.end, orig));
     };
-    
+
     transformPosition(pos, isOrig) {
         var chunkIndex = findChunkIndex(this.chunks, pos.row, isOrig);
         var chunk = this.chunks[chunkIndex];
@@ -411,13 +412,34 @@ class DiffView {
             column: pos.column
         };
         if (isOrig) { //TODO: calculate line widgets
+            let origIndent = this.left.session.getLine(pos.row).match(/^\s*/)[0].length;
+            let editIndent = this.right.session.getLine(result.row).match(/^\s*/)[0].length;
+            let deltaChar = origIndent - editIndent;
             if (chunk.origEnd <= pos.row) {
                 result.row = pos.row - chunk.origEnd + chunk.editEnd;
+                result.column = pos.column - deltaChar;
             }
             else {
                 var deltaLine = pos.row - chunk.origStart;
                 result.row = deltaLine + chunk.editStart;
-                result.column = 0;
+
+
+                if (chunk.charChanges) {
+                    for (let i = 0; i < chunk.charChanges.length; i++) {
+                        let charChange = chunk.charChanges[i];
+                        if (charChange.originalStartLineNumber == pos.row) {
+                            if (pos.column > charChange.originalStartColumn && pos.column
+                                < charChange.originalEndColumn) {
+                                result.column = charChange.modifiedStartColumn;
+                                return result;
+                            }
+                            else if (pos.column > charChange.originalEndColumn) {
+                                deltaChar += charChange.originalEndColumn - charChange.originalStartColumn;
+                            }
+                        }
+                    }
+                }
+                result.column = result.column - deltaChar;
             }
         }
         else {
