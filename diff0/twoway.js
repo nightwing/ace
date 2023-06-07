@@ -27,6 +27,10 @@ function createEditor() {
     return editor;
 }
 
+/**
+ * @typedef {{old: Range, new: Range, charChanges?: Array<{old: Range, new: Range}>}} AceDiff
+ */
+
 class DiffView {
     constructor(element, options) {
         this.onInput = this.onInput.bind(this);
@@ -80,6 +84,11 @@ class DiffView {
         config._signal("diffView", this);
     }
 
+    /**
+     * @type AceDiff[]
+     */
+    chunks;
+
     /*** theme/session ***/
     setSession(session) {
         if (this.session) {
@@ -92,29 +101,29 @@ class DiffView {
             this.edit.setSession(session.edit);
             this.$attachSessionEventHandlers();
         }
-    };
+    }
 
     getSession() {
         return this.session;
-    };
+    }
     
     setTheme(theme) {
         this.left.setTheme(theme);
-    };
+    }
 
     getTheme() {
         return this.left.getTheme();
-    };
+    }
 
     onChangeTheme() {
         this.right.setTheme(this.left.getTheme());
         var theme = this.right.renderer.theme;
-    };
+    }
 
     resize() {
         this.edit.resize();
         this.orig.resize();
-    };
+    }
 
     onInput() {
         var val1 = this.left.session.doc.getAllLines();
@@ -132,16 +141,35 @@ class DiffView {
 
         this.left.renderer.updateBackMarkers();
         this.right.renderer.updateBackMarkers();
-    };
+    }
 
     $diffLines(val1, val2) {
         var chunks = computeDiff(val1, val2, {
             ignoreTrimWhitespace: this.options.ignoreTrimWhitespace,
             maxComputationTimeMs: this.options.maxComputationTimeMs
         });
-        console.log(chunks);
-        return chunks;
-    };
+        if (chunks.changes) {
+            return chunks.changes.map((changes) => {
+                let originalStartLineNumber = changes.originalRange.startLineNumber - 1;
+                let originalEndLineNumber = changes.originalRange.endLineNumberExclusive - 1;
+                let modifiedStartLineNumber = changes.modifiedRange.startLineNumber - 1;
+                let modifiedEndLineNumber = changes.modifiedRange.endLineNumberExclusive - 1;
+                return {
+                    old: new Range(originalStartLineNumber, 0, originalEndLineNumber, 0),
+                    new: new Range(modifiedStartLineNumber, 0, modifiedEndLineNumber, 0),
+                    charChanges: changes.innerChanges && changes.innerChanges.map(m => ({
+                        old: new Range(
+                            m.originalRange.startLineNumber - 1, m.originalRange.startColumn - 1,
+                            m.originalRange.endLineNumber - 1, m.originalRange.endColumn - 1
+                        ),
+                        new: new Range(m.modifiedRange.startLineNumber - 1, m.modifiedRange.startColumn - 1,
+                            m.modifiedRange.endLineNumber - 1, m.modifiedRange.endColumn - 1
+                        )
+                    }))
+                };
+            });
+        }
+    }
 
     /*** scroll locking ***/
     align() {
@@ -165,30 +193,29 @@ class DiffView {
         init(diffView.edit);
         init(diffView.orig);
         diffView.chunks.forEach(function (ch) {
-            var diff1 = ch.origEnd - ch.origStart;
-            var diff2 = ch.editEnd - ch.editStart;
-
+            var diff1 = ch.old.end.row - ch.old.start.row;
+            var diff2 = ch.new.end.row - ch.new.start.row;
             if (diff1 < diff2) {
                 add(diffView.orig, {
                     rowCount: diff2 - diff1,
-                    row: ch.origEnd === 0 ? 0 : ch.origEnd - 1
+                    row: ch.old.end.row === 0 ? 0 : ch.old.end.row - 1
                 });
             }
             else if (diff1 > diff2) {
                 add(diffView.edit, {
                     rowCount: diff1 - diff2,
-                    row: ch.editEnd === 0 ? 0 : ch.editEnd - 1
+                    row: ch.new.end.row === 0 ? 0 : ch.new.end.row - 1
                 });
             }
         });
         diffView.edit.session._emit("changeFold", {data: {start: {row: 0}}});
         diffView.orig.session._emit("changeFold", {data: {start: {row: 0}}});
-    };
+    }
 
     onSelect(e, selection) {
         console.log("selection");
         this.syncSelect(selection);
-    };
+    }
 
     syncSelect(selection) {
         var now = Date.now();
@@ -222,7 +249,7 @@ class DiffView {
 
     onScroll(e, session) {
         this.syncScroll(this.left.session === session ? this.left.renderer : this.right.renderer);
-    };
+    }
 
     syncScroll(renderer) {
         if (this.$syncScroll == false) return;
@@ -255,41 +282,39 @@ class DiffView {
             var mid = r.session.screenToDocumentRow(midY / lc.lineHeight, 0);
 
             var i = findChunkIndex(chunks, mid, isOrig);
+            /**
+             * 
+             * @type {AceDiff}
+             */
             var ch = chunks[i];
 
             if (!ch) {
                 ch = {
-                    editStart: 0,
-                    editEnd: 0,
-                    origStart: 0,
-                    origEnd: 0
+                    old: new Range(0,0,0,0),
+                    new: new Range(0,0,0,0)
                 };
             }
-            if (mid >= (isOrig ? ch.origEnd : ch.editEnd)) {
+            if (mid >= (isOrig ? ch.old.end.row : ch.new.end.row)) {
                 var next = chunks[i + 1] || {
-                    editStart: r2.session.getLength(),
-                    editEnd: r2.session.getLength(),
-                    origStart: r1.session.getLength(),
-                    origEnd: r1.session.getLength()
+                    old: new Range(r1.session.getLength(), 0, r1.session.getLength(), 0),
+                    new: new Range(r2.session.getLength(), 0, r2.session.getLength(), 0)
                 };
                 ch = {
-                    origStart: ch.origEnd,
-                    origEnd: next.origStart,
-                    editStart: ch.editEnd,
-                    editEnd: next.editStart
+                    old: new Range(ch.old.end.row, 0, next.old.start.row, 0),
+                    new: new Range(ch.new.end.row, 0, next.new.start.row, 0)
                 };
             }
             if (r == r1) {
-                var start = ch.origStart;
-                var end = ch.origEnd;
-                var otherStart = ch.editStart;
-                var otherEnd = ch.editEnd;
+                var start = ch.old.start.row;
+                var end = ch.old.end.row;
+                var otherStart = ch.new.start.row;
+                var otherEnd = ch.new.end.row;
             }
             else {
-                otherStart = ch.origStart;
-                otherEnd = ch.origEnd;
-                start = ch.editStart;
-                end = ch.editEnd;
+                otherStart = ch.old.start.row;
+                otherEnd = ch.old.end.row;
+                start = ch.new.start.row;
+                end = ch.new.end.row;
             }
 
             var offOtherTop = rOther.session.documentToScreenRow(otherStart, 0) * lc.lineHeight;
@@ -317,7 +342,7 @@ class DiffView {
         rOther.session.setScrollTop(targetPos);
         this.$syncScroll = true;
         this.scrollSetAt = now;
-    };
+    }
 
     onMouseWheel(ev) {
         if (ev.getAccelKey()) return;
@@ -334,7 +359,7 @@ class DiffView {
                 ev.wheelX * ev.speed, ev.wheelY * ev.speed);
             return ev.stop();
         }
-    };
+    }
 
     onChangeFold(ev, session) {
         if (ev.action == "remove") {
@@ -345,7 +370,7 @@ class DiffView {
                 other.removeFold(fold.other);
             }
         }
-    };
+    }
 
     $attachSessionEventHandlers() {
         this.left.session.on("changeScrollTop", this.onScroll);
@@ -356,7 +381,7 @@ class DiffView {
         this.right.session.addDynamicMarker(this.markerRight);
         this.left.selection.on("changeSelection", this.onSelect);
         this.right.selection.on("changeSelection", this.onSelect);
-    };
+    }
 
     $detachSessionEventHandlers() {
         this.left.session.off("changeScrollTop", this.onScroll);
@@ -365,7 +390,7 @@ class DiffView {
         this.right.session.off("changeFold", this.onChangeFold);
         this.left.session.removeMarker(this.markerLeft.id);
         this.right.session.removeMarker(this.markerRight.id);
-    };
+    }
 
     $attachEventHandlers() {
         this.left.renderer.on("themeLoaded", this.onChangeTheme);
@@ -375,13 +400,13 @@ class DiffView {
 
         this.left.on("input", this.onInput);
         this.right.on("input", this.onInput);
-    };
+    }
 
     /*** other ***/
     destroy() {
         this.left.destroy();
         this.right.destroy();
-    };
+    }
 
     gotoNext(dir) {
         var orig = false;
@@ -392,16 +417,16 @@ class DiffView {
 
         var scrollTop = ace.session.getScrollTop();
         if (chunk) {
-            var line = Math.max(chunk.editStart, chunk.editEnd - 1);
+            var line = Math.max(chunk.new.start.row, chunk.new.end.row - 1);
             ace.selection.setRange(new Range(line, 0, line, 0));
         }
         ace.renderer.scrollSelectionIntoView(ace.selection.lead, ace.selection.anchor, 0.5);
         ace.renderer.animateScrolling(scrollTop);
-    };
+    }
 
     transformRange(range, orig) {
         return Range.fromPoints(this.transformPosition(range.start, orig), this.transformPosition(range.end, orig));
-    };
+    }
 
     transformPosition(pos, isOrig) {
         var chunkIndex = findChunkIndex(this.chunks, pos.row, isOrig);
@@ -412,13 +437,13 @@ class DiffView {
             column: pos.column
         };
         if (isOrig) { //TODO: calculate line widgets
-            if (chunk.origEnd <= pos.row) {
-                result.row = pos.row - chunk.origEnd + chunk.editEnd;
+            if (chunk.old.end.row <= pos.row) {
+                result.row = pos.row - chunk.old.end.row + chunk.new.end.row;
                 result.column = pos.column - this.$getDeltaIndent(pos.row, result.row);
             }
             else {
-                var deltaLine = pos.row - chunk.origStart;
-                result.row = deltaLine + chunk.editStart;
+                var deltaLine = pos.row - chunk.old.start.row;
+                result.row = deltaLine + chunk.new.start.row;
                 let deltaChar = this.$getDeltaIndent(pos.row, result.row);
 
                 if (chunk.charChanges) {
@@ -427,14 +452,14 @@ class DiffView {
                         /*if (change.modifiedStartLineNumber != change.modifiedEndLineNumber)
                             continue;*/
                         if (isCharChangeOrDelete(change)) {
-                            if (change.originalStartLineNumber == pos.row) {
-                                if (pos.column > change.originalStartColumn && pos.column < change.originalEndColumn) {
-                                    result.column = change.modifiedStartColumn;
+                            if (change.old.start.row == pos.row) {
+                                if (pos.column > change.old.start.column && pos.column < change.old.end.column) {
+                                    result.column = change.new.start.column;
                                     return result;
                                 }
-                                else if (pos.column >= change.originalEndColumn) {
-                                    deltaChar += change.originalEndColumn - change.originalStartColumn
-                                        - (change.modifiedEndColumn - change.modifiedStartColumn);
+                                else if (pos.column >= change.old.end.column) {
+                                    deltaChar += change.old.end.column - change.old.start.column
+                                        - (change.new.end.column - change.new.start.column);
                                 }
                             } 
                         }
@@ -445,17 +470,17 @@ class DiffView {
             }
         }
         else {
-            if (chunk.editEnd <= pos.row) {
-                result.row = pos.row - chunk.editEnd + chunk.origEnd;
+            if (chunk.new.end.row <= pos.row) {
+                result.row = pos.row - chunk.new.end.row + chunk.old.end.row;
             }
             else {
-                var deltaLine = pos.row - chunk.editStart;
-                result.row = deltaLine + chunk.origStart;
+                var deltaLine = pos.row - chunk.new.start.row;
+                result.row = deltaLine + chunk.old.start.row;
             }
         }
 
         return result;
-    };
+    }
     
     $getDeltaIndent(origLine, editLine) {
         let origIndent = this.left.session.getLine(origLine).match(/^\s*/)[0].length;
@@ -474,46 +499,63 @@ config.defineOptions(DiffView.prototype, "editor", {
     }
 });
 
+/**
+ * 
+ * @param {AceDiff[]} chunks
+ * @param {number} row
+ * @param {boolean} orig
+ * @return {number}
+ */
 function findChunkIndex(chunks, row, orig) {
     if (orig) {
         for (var i = 0; i < chunks.length; i++) {
             var ch = chunks[i];
-            if (ch.origEnd < row) continue;
-            if (ch.origStart > row) break;
+            if (ch.old.end.row < row) continue;
+            if (ch.old.start.row > row) break;
         }
     }
     else {
         for (var i = 0; i < chunks.length; i++) {
             var ch = chunks[i];
-            if (ch.editEnd < row) continue;
-            if (ch.editStart > row) break;
+            if (ch.new.end.row < row) continue;
+            if (ch.new.start.row > row) break;
         }
     }
     return i - 1;
 }
 
+/**
+ * 
+ * @param {AceDiff["charChanges"][0]} charChange
+ * @return {boolean}
+ */
 function isCharChangeOrInsert(charChange) {
-    if (charChange.modifiedStartLineNumber === charChange.modifiedEndLineNumber) {
-        return charChange.modifiedEndColumn - charChange.modifiedStartColumn > -1;
+    if (charChange.new.start.row === charChange.new.end.row) {
+        return charChange.new.end.column - charChange.new.start.column > -1;
     }
-    return charChange.modifiedEndLineNumber - charChange.modifiedStartLineNumber > -1;
+    return charChange.new.end.row - charChange.new.start.row > -1;
 }
 
+/**
+ *
+ * @param {AceDiff["charChanges"][0]} charChange
+ * @return {boolean}
+ */
 function isCharChangeOrDelete(charChange) {
-    if (charChange.originalStartLineNumber === charChange.originalEndLineNumber) {
-        return charChange.originalEndColumn - charChange.originalStartColumn > -1;
+    if (charChange.old.start.row === charChange.old.end.row) {
+        return charChange.old.end.column - charChange.old.start.column > -1;
     }
-    return charChange.originalEndLineNumber - charChange.originalStartLineNumber > -1;
+    return charChange.old.end.row - charChange.old.start.row > -1;
 }
 
 class SyncSelectionMarker {
     constructor() {
         this.type = "fullLine";
         this.clazz = "ace_diff selection";
-    };
+    }
 
     update(html, markerLayer, session, config) {
-    };
+    }
 
     setRange(range) {
         this.range = range;
@@ -522,10 +564,15 @@ class SyncSelectionMarker {
 }
 
 class DiffHighlight {
+    /**
+     * 
+     * @param {DiffView} diffView
+     * @param type
+     */
     constructor(diffView, type) {
         this.diffView = diffView;
         this.type = type;
-    };
+    }
 
     static MAX_RANGES = 500;
 
@@ -536,7 +583,7 @@ class DiffHighlight {
         else {
             this.updateModifiedEditor(html, markerLayer, session, config);
         }
-    };
+    }
 
     updateOriginalEditor(html, markerLayer, session, config) {
         var diffView = this.diffView;
@@ -547,7 +594,7 @@ class DiffHighlight {
         for (const lineChange of lineChanges) {
 
             if (isChangeOrDelete(lineChange)) {
-                let range = new Range(lineChange.origStart, 0, lineChange.origEnd - 1, 1 << 30);
+                let range = new Range(lineChange.old.start.row, 0, lineChange.old.end.row - 1, 1 << 30);
                 diffView.left.renderer.$scrollDecorator.addZone(range.start.row, range.end.row, "remove");
                 range = range.toScreenRange(session);
                 markerLayer.drawFullLineMarker(html, range, "ace_diff " + "delete inline", config);
@@ -556,18 +603,18 @@ class DiffHighlight {
                     for (const charChange of lineChange.charChanges) {
                         if (isCharChangeOrDelete(charChange)) {
                             if (ignoreTrimWhitespace) {
-                                for (let lineNumber = charChange.originalStartLineNumber; lineNumber
-                                <= charChange.originalEndLineNumber; lineNumber++) {
+                                for (let lineNumber = charChange.old.start.row; lineNumber
+                                <= charChange.old.end.row; lineNumber++) {
                                     let startColumn;
                                     let endColumn;
-                                    if (lineNumber === charChange.originalStartLineNumber) {
-                                        startColumn = charChange.originalStartColumn;
+                                    if (lineNumber === charChange.old.start.row) {
+                                        startColumn = charChange.old.start.column;
                                     }
                                     else {
                                         startColumn = session.getLine(lineNumber).match(/^\s*/)[0].length;
                                     }
-                                    if (lineNumber === charChange.originalEndLineNumber) {
-                                        endColumn = charChange.originalEndColumn;
+                                    if (lineNumber === charChange.old.end.row) {
+                                        endColumn = charChange.old.end.column;
                                     }
                                     else {
                                         endColumn = session.getLine(lineNumber).length;
@@ -580,9 +627,9 @@ class DiffHighlight {
                                 }
                             }
                             else {
-                                let range = new Range(charChange.originalStartLineNumber,
-                                    charChange.originalStartColumn, charChange.originalEndLineNumber,
-                                    charChange.originalEndColumn
+                                let range = new Range(charChange.old.start.row,
+                                    charChange.old.start.column, charChange.old.end.row,
+                                    charChange.old.end.column
                                 );
                                 var screenRange = range.toScreenRange(session);
                                 if (screenRange.isMultiLine()) {
@@ -609,8 +656,8 @@ class DiffHighlight {
 
         for (var lineChange of lineChanges) {
             if (isChangeOrInsert(lineChange)) {
-                let range = new Range(lineChange.editStart, 0, lineChange.editEnd - 1, 1 << 30);
-                diffView.right.renderer.$scrollDecorator.addZone(lineChange.editStart, lineChange.editEnd - 1, "add");
+                let range = new Range(lineChange.new.start.row, 0, lineChange.new.end.row - 1, 1 << 30);
+                diffView.right.renderer.$scrollDecorator.addZone(lineChange.new.start.row, lineChange.new.end.row - 1, "add");
 
                 range = range.toScreenRange(session);
                 markerLayer.drawFullLineMarker(html, range, "ace_diff " + "insert inline", config);
@@ -619,18 +666,18 @@ class DiffHighlight {
                     for (const charChange of lineChange.charChanges) {
                         if (isCharChangeOrInsert(charChange)) {
                             if (ignoreTrimWhitespace) {
-                                for (let lineNumber = charChange.modifiedStartLineNumber; lineNumber
-                                <= charChange.modifiedEndLineNumber; lineNumber++) {
+                                for (let lineNumber = charChange.new.start.row; lineNumber
+                                <= charChange.new.end.row; lineNumber++) {
                                     let startColumn;
                                     let endColumn;
-                                    if (lineNumber === charChange.modifiedStartLineNumber) {
-                                        startColumn = charChange.modifiedStartColumn;
+                                    if (lineNumber === charChange.new.start.row) {
+                                        startColumn = charChange.new.start.column;
                                     }
                                     else {
                                         startColumn = session.getLine(lineNumber).match(/^\s*/)[0].length;
                                     }
-                                    if (lineNumber === charChange.modifiedEndLineNumber) {
-                                        endColumn = charChange.modifiedEndColumn;
+                                    if (lineNumber === charChange.new.end.row) {
+                                        endColumn = charChange.new.end.column;
                                     }
                                     else {
                                         endColumn = session.getLine(lineNumber).length;
@@ -643,9 +690,9 @@ class DiffHighlight {
                                 }
                             }
                             else {
-                                let range = new Range(charChange.modifiedStartLineNumber,
-                                    charChange.modifiedStartColumn, charChange.modifiedEndLineNumber,
-                                    charChange.modifiedEndColumn
+                                let range = new Range(charChange.new.start.row,
+                                    charChange.new.start.column, charChange.new.end.row,
+                                    charChange.new.end.column
                                 );
                                 var screenRange = range.toScreenRange(session);
                                 if (screenRange.isMultiLine()) {
@@ -666,12 +713,22 @@ class DiffHighlight {
     }
 }
 
+/**
+ * 
+ * @param {AceDiff} lineChange
+ * @return {boolean}
+ */
 function isChangeOrInsert(lineChange) {
-    return lineChange.editEnd > -1;
+    return lineChange.new.end.row > -1;
 }
 
+/**
+ *
+ * @param {AceDiff} lineChange
+ * @return {boolean}
+ */
 function isChangeOrDelete(lineChange) {
-    return lineChange.origEnd > -1;
+    return lineChange.old.end.row > -1;
 }
 
 exports.DiffView = DiffView;

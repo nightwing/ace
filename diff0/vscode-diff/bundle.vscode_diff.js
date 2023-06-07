@@ -2508,35 +2508,7 @@ function isSpace(charCode) {
 ;// CONCATENATED MODULE: ./src/index.ts
 
 function computeDiff(originalLines, modifiedLines, options) {
-    var _diffComputer_computeDiff;
-    let diffComputer = new StandardLinesDiffComputer();
-    return (_diffComputer_computeDiff = diffComputer.computeDiff(originalLines, modifiedLines, options)) === null || _diffComputer_computeDiff === void 0 ? void 0 : _diffComputer_computeDiff.changes.map((changes)=>{
-        let originalStartLineNumber;
-        let originalEndLineNumber;
-        let modifiedStartLineNumber;
-        let modifiedEndLineNumber;
-        let innerChanges = changes.innerChanges;
-        originalStartLineNumber = changes.originalRange.startLineNumber - 1;
-        originalEndLineNumber = changes.originalRange.endLineNumberExclusive - 1;
-        modifiedStartLineNumber = changes.modifiedRange.startLineNumber - 1;
-        modifiedEndLineNumber = changes.modifiedRange.endLineNumberExclusive - 1;
-        return {
-            origStart: originalStartLineNumber,
-            origEnd: originalEndLineNumber,
-            editStart: modifiedStartLineNumber,
-            editEnd: modifiedEndLineNumber,
-            charChanges: innerChanges === null || innerChanges === void 0 ? void 0 : innerChanges.map((m)=>({
-                    originalStartLineNumber: m.originalRange.startLineNumber - 1,
-                    originalStartColumn: m.originalRange.startColumn - 1,
-                    originalEndLineNumber: m.originalRange.endLineNumber - 1,
-                    originalEndColumn: m.originalRange.endColumn - 1,
-                    modifiedStartLineNumber: m.modifiedRange.startLineNumber - 1,
-                    modifiedStartColumn: m.modifiedRange.startColumn - 1,
-                    modifiedEndLineNumber: m.modifiedRange.endLineNumber - 1,
-                    modifiedEndColumn: m.modifiedRange.endColumn - 1
-                }))
-        };
-    });
+    return new StandardLinesDiffComputer().computeDiff(originalLines, modifiedLines, options);
 }
 
 /******/ 	return __webpack_exports__;
