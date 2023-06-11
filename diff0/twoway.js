@@ -1,7 +1,6 @@
 "use strict";
 
 var oop = require("ace-code/src/lib/oop");
-var event = require("ace-code/src/lib/event");
 var Range = require("ace-code/src/range").Range;
 var dom = require("ace-code/src/lib/dom");
 var config = require("ace-code/src/config");
@@ -447,7 +446,7 @@ class DiffView {
                     for (let i = 0; i < chunk.charChanges.length; i++) {
                         let change = chunk.charChanges[i];
                         let isOneLine = change.new.start.row === change.new.end.row;
-                        if (isCharChangeOrDelete(change)) {
+                        if (change.isCharChangeOrDelete()) {
                             if (pos.row >= change.old.start.row && pos.row <= change.old.end.row) {
                                 if (pos.column > change.old.start.column && pos.column < change.old.end.column) {
                                     result.column = change.new.start.column;
@@ -463,7 +462,7 @@ class DiffView {
                                 }
                             }
                         }
-                        
+
                     }
                 }
                 result.row = deltaLine + chunk.new.start.row;
@@ -528,30 +527,6 @@ function findChunkIndex(chunks, row, orig) {
     return i - 1;
 }
 
-/**
- *
- * @param {AceDiff["charChanges"][0]} charChange
- * @return {boolean}
- */
-function isCharChangeOrInsert(charChange) {
-    if (charChange.new.start.row === charChange.new.end.row) {
-        return charChange.new.end.column - charChange.new.start.column > -1;
-    }
-    return charChange.new.end.row - charChange.new.start.row > -1;
-}
-
-/**
- *
- * @param {AceDiff["charChanges"][0]} charChange
- * @return {boolean}
- */
-function isCharChangeOrDelete(charChange) {
-    if (charChange.old.start.row === charChange.old.end.row) {
-        return charChange.old.end.column - charChange.old.start.column > -1;
-    }
-    return charChange.old.end.row - charChange.old.start.row > -1;
-}
-
 class SyncSelectionMarker {
     constructor() {
         this.type = "fullLine";
@@ -562,7 +537,7 @@ class SyncSelectionMarker {
     }
 
     setRange(range) {
-        range.end.column+=1; //TODO:
+        //range.end.column+=1; //TODO:
 
         this.range = range;
     }
@@ -583,157 +558,89 @@ class DiffHighlight {
     static MAX_RANGES = 500;
 
     update(html, markerLayer, session, config) {
-        if (this.type === -1) {
-            this.updateOriginalEditor(html, markerLayer, session, config);
+        let side, dir, operation, opOperation, lineCheck, charCheck;
+        if (this.type === -1) {// original editor
+            side = "left";
+            dir = "old";
+            operation = "delete";
+            opOperation = "insert";
+            lineCheck = "isChangeOrDelete";
+            charCheck = "isCharChangeOrDelete";
         }
-        else {
-            this.updateModifiedEditor(html, markerLayer, session, config);
+        else { //modified editor
+            side = "right";
+            dir = "new";
+            operation = "insert";
+            opOperation = "delete";
+            lineCheck = "isChangeOrInsert";
+            charCheck = "isCharChangeOrInsert";
         }
-    }
 
-    updateOriginalEditor(html, markerLayer, session, config) {
-        var diffView = this.diffView;
-        const ignoreTrimWhitespace = diffView.options.ignoreTrimWhitespace;
-        var lineChanges = diffView.chunks;
-        diffView.left.renderer.$scrollDecorator.zones = [];
-
-        for (const lineChange of lineChanges) {
-
-            if (isChangeOrDelete(lineChange)) {
-                let range = new Range(lineChange.old.start.row, 0, lineChange.old.end.row - 1, 1 << 30);
-                diffView.left.renderer.$scrollDecorator.addZone(range.start.row, range.end.row, "remove");
-                range = range.toScreenRange(session);
-                markerLayer.drawFullLineMarker(html, range, "ace_diff " + "delete inline", config);
-
-                if (lineChange.charChanges) {
-                    for (const charChange of lineChange.charChanges) {
-                        if (isCharChangeOrDelete(charChange)) {
-                            if (ignoreTrimWhitespace) {
-                                for (let lineNumber = charChange.old.start.row; lineNumber
-                                <= charChange.old.end.row; lineNumber++) {
-                                    let startColumn;
-                                    let endColumn;
-                                    if (lineNumber === charChange.old.start.row) {
-                                        startColumn = charChange.old.start.column;
-                                    }
-                                    else {
-                                        startColumn = session.getLine(lineNumber).match(/^\s*/)[0].length;
-                                    }
-                                    if (lineNumber === charChange.old.end.row) {
-                                        endColumn = charChange.old.end.column;
-                                    }
-                                    else {
-                                        endColumn = session.getLine(lineNumber).length;
-                                    }
-                                    let range = new Range(lineNumber, startColumn, lineNumber, endColumn);
-                                    var screenRange = range.toScreenRange(session);
-                                    markerLayer.drawSingleLineMarker(html, screenRange, "ace_diff inline delete",
-                                        config
-                                    );
-                                }
-                            }
-                            else {
-                                let range = new Range(charChange.old.start.row, charChange.old.start.column,
-                                    charChange.old.end.row, charChange.old.end.column
-                                );
-                                var screenRange = range.toScreenRange(session);
-                                if (screenRange.isMultiLine()) {
-                                    markerLayer.drawTextMarker(html, range, "ace_diff inline delete", config);
-                                }
-                                else {
-                                    markerLayer.drawSingleLineMarker(html, screenRange, "ace_diff inline delete",
-                                        config
-                                    );
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    updateModifiedEditor(html, markerLayer, session, config) {
         var diffView = this.diffView;
         var ignoreTrimWhitespace = diffView.options.ignoreTrimWhitespace;
         var lineChanges = diffView.chunks;
-        diffView.right.renderer.$scrollDecorator.zones = [];
-
-        for (var lineChange of lineChanges) {
-            if (isChangeOrInsert(lineChange)) {
-                let range = new Range(lineChange.new.start.row, 0, lineChange.new.end.row - 1, 1 << 30);
-                diffView.right.renderer.$scrollDecorator.addZone(
-                    lineChange.new.start.row, lineChange.new.end.row - 1, "add");
-
+        diffView[side].renderer.$scrollDecorator.zones = [];
+        for (const lineChange of lineChanges) {
+            if (lineChange[lineCheck]()) {
+                let range = new Range(lineChange[dir].start.row, 0, lineChange[dir].end.row - 1, 1 << 30);
+                diffView[side].renderer.$scrollDecorator.addZone(range.start.row, range.end.row, operation);
                 range = range.toScreenRange(session);
-                markerLayer.drawFullLineMarker(html, range, "ace_diff " + "insert inline", config);
+                markerLayer.drawFullLineMarker(html, range, "ace_diff " + operation + " inline", config);
 
                 if (lineChange.charChanges) {
                     for (const charChange of lineChange.charChanges) {
-                        if (isCharChangeOrInsert(charChange)) {
+                        if (charChange[charCheck]()) {
                             if (ignoreTrimWhitespace) {
-                                for (let lineNumber = charChange.new.start.row; lineNumber
-                                <= charChange.new.end.row; lineNumber++) {
+                                for (let lineNumber = charChange[dir].start.row; lineNumber
+                                <= charChange[dir].end.row; lineNumber++) {
                                     let startColumn;
                                     let endColumn;
-                                    if (lineNumber === charChange.new.start.row) {
-                                        startColumn = charChange.new.start.column;
+                                    if (lineNumber === charChange[dir].start.row) {
+                                        startColumn = charChange[dir].start.column;
                                     }
                                     else {
                                         startColumn = session.getLine(lineNumber).match(/^\s*/)[0].length;
                                     }
-                                    if (lineNumber === charChange.new.end.row) {
-                                        endColumn = charChange.new.end.column;
+                                    if (lineNumber === charChange[dir].end.row) {
+                                        endColumn = charChange[dir].end.column;
                                     }
                                     else {
                                         endColumn = session.getLine(lineNumber).length;
                                     }
                                     let range = new Range(lineNumber, startColumn, lineNumber, endColumn);
                                     var screenRange = range.toScreenRange(session);
-                                    markerLayer.drawSingleLineMarker(html, screenRange, "ace_diff inline insert",
-                                        config
-                                    );
+
+                                    let cssClass = "inline " + operation;
+                                    if (range.isEmpty() && startColumn !== 0) {
+                                        cssClass = "inline " + opOperation + " empty";
+                                    }
+
+                                    markerLayer.drawSingleLineMarker(html, screenRange, "ace_diff " + cssClass, config);
                                 }
                             }
                             else {
-                                let range = new Range(charChange.new.start.row, charChange.new.start.column,
-                                    charChange.new.end.row, charChange.new.end.column
+                                let range = new Range(charChange[dir].start.row, charChange[dir].start.column,
+                                    charChange[dir].end.row, charChange[dir].end.column
                                 );
                                 var screenRange = range.toScreenRange(session);
+                                let cssClass = "inline " + operation;
+                                if (range.isEmpty() && charChange[dir].start.column !== 0) {
+                                    cssClass = "inline empty" + opOperation;
+                                }
+
                                 if (screenRange.isMultiLine()) {
-                                    markerLayer.drawTextMarker(html, range, "ace_diff inline insert", config);
+                                    markerLayer.drawTextMarker(html, range, "ace_diff " + cssClass, config);
                                 }
                                 else {
-                                    markerLayer.drawSingleLineMarker(html, screenRange, "ace_diff inline insert",
-                                        config
-                                    );
+                                    markerLayer.drawSingleLineMarker(html, screenRange, "ace_diff " + cssClass, config);
                                 }
                             }
                         }
                     }
                 }
-
             }
         }
     }
-}
-
-/**
- *
- * @param {AceDiff} lineChange
- * @return {boolean}
- */
-function isChangeOrInsert(lineChange) {
-    return lineChange.new.end.row > -1;
-}
-
-/**
- *
- * @param {AceDiff} lineChange
- * @return {boolean}
- */
-function isChangeOrDelete(lineChange) {
-    return lineChange.old.end.row > -1;
 }
 
 class AceDiff {
@@ -746,6 +653,28 @@ class AceDiff {
             ), new Range(m.modifiedRange.startLineNumber - 1, m.modifiedRange.startColumn - 1,
                 m.modifiedRange.endLineNumber - 1, m.modifiedRange.endColumn - 1
             )));
+    }
+
+    isChangeOrInsert() {
+        return this.new.end.row > -1;
+    }
+
+    isChangeOrDelete() {
+        return this.old.end.row > -1;
+    }
+
+    isCharChangeOrInsert() {
+        if (this.new.start.row === this.new.end.row) {
+            return this.new.end.column - this.new.start.column > -1;
+        }
+        return this.new.end.row - this.new.start.row > -1;
+    }
+
+    isCharChangeOrDelete() {
+        if (this.old.start.row === this.old.end.row) {
+            return this.old.end.column - this.old.start.column > -1;
+        }
+        return this.old.end.row - this.old.start.row > -1;
     }
 
     padCenter(str, length) {

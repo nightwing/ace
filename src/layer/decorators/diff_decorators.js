@@ -10,13 +10,13 @@ class DiffDecorator extends Decorator {
         this.canvasWidth = parent.width;
         
         this.colors.dark = {
-            "remove": "rgba(255, 18, 18, 1)",
-            "add": "rgba(18, 136, 18, 1)"
+            "delete": "rgba(255, 18, 18, 1)",
+            "insert": "rgba(18, 136, 18, 1)"
         };
 
         this.colors.light = {
-            "remove": "rgb(255,51,51)",
-            "add": "rgb(32,133,72)"
+            "delete": "rgb(255,51,51)",
+            "insert": "rgb(32,133,72)"
         };
         
     }
@@ -50,8 +50,8 @@ class DiffDecorator extends Decorator {
         if (zones) {
             var resolvedZones = [];
             var priorities = {
-                "remove": 0,
-                "add": 1
+                "delete": 0,
+                "insert": 1
             };
 
             for (let i = 0; i < zones.length; i++) {

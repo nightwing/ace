@@ -96,6 +96,16 @@
     background-color: rgba(255, 128, 79, 0.26);
 }
 
+.ace_diff.delete.inline.empty {
+    background-color: rgba(255, 128, 79, 0.8);
+    width: 2px !important;
+}
+
+.ace_diff.insert.inline.empty {
+    background-color: rgba(49, 230, 96, 0.8);
+    width: 2px !important;
+}
+
 .ace_diff.selection {
     border-color: black;
     background: transparent;
