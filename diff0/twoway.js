@@ -218,12 +218,7 @@ class DiffView {
     }
 
     syncSelect(selection) {
-        var left = this.left.session;
-        var right = this.right.session;
-
-        var selectionSession = selection.session;
-        var isOrig = selectionSession === left;
-        var selectionMarker = isOrig ? this.syncSelectionMarkerLeft : this.syncSelectionMarkerRight;
+        var isOrig = selection.session === this.left.session;
         var selectionRange = selection.getRange();
 
         var currSelectionRange = isOrig ? this.lefSelectionRange : this.righSelectionRange;
@@ -236,13 +231,14 @@ class DiffView {
             this.righSelectionRange = selectionRange;
         }
 
+        var selectionMarker = isOrig ? this.syncSelectionMarkerLeft : this.syncSelectionMarkerRight;
         this.updateSelectionMarker(selectionMarker, selection.session, selectionRange);
 
         if (!this.selectionSetBy) {
             setTimeout(() => {
                 this.selectionSetBy = true;
                 let newRange = this.transformRange(selectionRange, isOrig);
-                (isOrig ? right : left).selection.setSelectionRange(newRange);
+                (isOrig ? this.left : this.right).session.selection.setSelectionRange(newRange);
                 this.selectionSetBy = false;
             }, 0);
         }
