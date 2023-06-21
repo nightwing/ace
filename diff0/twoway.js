@@ -238,17 +238,14 @@ class DiffView {
 
         this.updateSelectionMarker(selectionMarker, selection.session, selectionRange);
 
-        if (this.selectionSetBy) {
-            this.selectionSetBy = false;
-            return;
+        if (!this.selectionSetBy) {
+            setTimeout(() => {
+                this.selectionSetBy = true;
+                let newRange = this.transformRange(selectionRange, isOrig);
+                (isOrig ? right : left).selection.setSelectionRange(newRange);
+                this.selectionSetBy = false;
+            }, 0);
         }
-
-        setTimeout(() => {
-            this.selectionSetBy = true;
-            let newRange = this.transformRange(selectionRange, isOrig);
-            (isOrig ? right : left).selection.setSelectionRange(newRange);
-        }, 0);
-
     }
 
     updateSelectionMarker(marker, session, range) {
@@ -477,7 +474,7 @@ class DiffView {
                         if (fromRange.start.row > pos.row)
                             break;
 
-                        if (fromRange.isMultiLine()) {
+                        if (fromRange.isMultiLine() && fromRange.contains(pos.row, pos.column)) {
                             result.row = toRange.start.row + pos.row - fromRange.start.row;
                             var maxRow = toRange.end.row;
                             if (toRange.end.column === 0)
