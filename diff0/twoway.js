@@ -130,8 +130,8 @@ class DiffView {
         var val2 = this.right.session.doc.getAllLines();
 
         this.selectionSetBy = false;
-        this.lefSelectionRange = null;
-        this.righSelectionRange = null;
+        this.leftSelectionRange = null;
+        this.rightSelectionRange = null;
 
         var chunks = this.$diffLines(val1, val2);
 
@@ -218,30 +218,36 @@ class DiffView {
     }
 
     syncSelect(selection) {
+        if (this.$updatingSelection) return;
         var isOrig = selection.session === this.left.session;
         var selectionRange = selection.getRange();
 
-        var currSelectionRange = isOrig ? this.lefSelectionRange : this.righSelectionRange;
+        var currSelectionRange = isOrig ? this.leftSelectionRange : this.rightSelectionRange;
         if (currSelectionRange && selectionRange.isEqual(currSelectionRange))
             return;
 
         if (isOrig) {
-            this.lefSelectionRange = selectionRange;
+            this.leftSelectionRange = selectionRange;
         } else {
-            this.righSelectionRange = selectionRange;
+            this.rightSelectionRange = selectionRange;
         }
 
-        var selectionMarker = isOrig ? this.syncSelectionMarkerLeft : this.syncSelectionMarkerRight;
-        this.updateSelectionMarker(selectionMarker, selection.session, selectionRange);
-
-        if (!this.selectionSetBy) {
-            setTimeout(() => {
-                this.selectionSetBy = true;
-                let newRange = this.transformRange(selectionRange, isOrig);
-                (isOrig ? this.left : this.right).session.selection.setSelectionRange(newRange);
-                this.selectionSetBy = false;
-            }, 0);
+        this.$updatingSelection = true;
+        var newRange = this.transformRange(selectionRange, isOrig);
+        (isOrig ? this.right : this.left).session.selection.setSelectionRange(newRange);
+        this.$updatingSelection = false;
+          
+        
+        if (isOrig) {
+            this.leftSelectionRange = selectionRange;
+            this.rightSelectionRange = newRange;
+        } else {
+            this.leftSelectionRange = newRange;
+            this.rightSelectionRange = selectionRange;
         }
+        
+        this.updateSelectionMarker(this.syncSelectionMarkerLeft, this.left.session, this.leftSelectionRange);
+        this.updateSelectionMarker(this.syncSelectionMarkerRight, this.right.session, this.rightSelectionRange);
     }
 
     updateSelectionMarker(marker, session, range) {
