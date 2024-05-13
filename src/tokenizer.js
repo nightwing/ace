@@ -13,7 +13,7 @@ class Tokenizer {
      * @param {Object} rules The highlighting rules
      **/
     constructor(rules, modeName) {
-        this.rootScope
+        this.rootScope = new Scope(modeName || "");
         /**@type {RegExp}*/
         this.splitRegex;
         this.states = rules;
@@ -220,7 +220,7 @@ class Tokenizer {
      * @returns {Object}
      **/
     getLineTokens(line, startState) {
-        var stack = [];
+        var stack = startState && startState.$toArray ? startState.$toArray() : [];
 
         var currentState = (startState !== undefined) ? (startState instanceof Scope) ? startState
             : this.rootScope.get(startState) : this.rootScope.get("start");
@@ -264,7 +264,14 @@ class Tokenizer {
                 rule = state[mapping[i]];
 
                 if (rule.onMatch) {
+                    console.log(stack, currentState.toPrettyString())
+                    // console.log()
                     type = rule.onMatch(value, currentState, stack, line);
+
+                    if (currentState.$toArray()+'' !== stack+ '') {
+                        debugger
+                    }
+
                     if (!(type instanceof Scope)) {
                         if (!Array.isArray(type)) {
                             type = currentState.get(type.toString());

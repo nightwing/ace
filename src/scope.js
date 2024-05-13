@@ -8,8 +8,8 @@ class Scope extends String {
     constructor(name, parent) {
         super(name.toString());
         this.name = name.toString();
-        if (typeof name != "string")
-            this.value = name;
+        // if (typeof name != "string")
+        this.value = name;
         this.children = {};
         this.parent = parent;
     }
@@ -65,6 +65,28 @@ class Scope extends String {
             scopeNames.push(self.name);
         } while (self = self.parent);
         return scopeNames;
+    }
+
+    toPrettyString() {
+        var iter = function (scope, indent) {
+            var children = Object.keys(scope.children)
+            if (!children.length) return indent + scope.name;
+            var v = indent + "+" + scope.name + "("+ scope.count() + ")"
+            return v + "\n" + children.map(function(ch) {
+                return iter(scope.children[ch], indent + "| ")        
+            }).join("\n")
+        }
+        return iter(this, "");
+    }
+
+    $toArray() {
+        var stack = [];
+        var scope = this;
+        while (scope.parent) {
+            stack.push(scope.value);
+            scope = scope.parent;
+        }
+        return stack;
     }
 } 
 
