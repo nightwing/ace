@@ -84,60 +84,60 @@ var LuaHighlightRules = function() {
             ]
         },
 
-            {
-                token : "comment",
-                regex : "\\-\\-.*$"
+        {
+            token : "comment",
+            regex : "\\-\\-.*$"
+        },
+        {
+            stateName: "bracketedString",
+            onMatch2 : function(value, scope){
+                return scope.get(this.next, value.length - 2).get("string.start");
             },
-            {
-                stateName: "bracketedString",
-                onMatch2 : function(value, scope){
-                    return scope.get(this.next, value.length - 2).get("string.start");
-                },
-                regex : /\[=*\[/,
-                next  : [
-                    {
-                        onMatch2 : function(value, scope) {
-                            if (scope == "bracketedString" && value.length == scope.data) {
-                                return scope.parent.get("string.end");
-                            } else {
-                                return scope.get("string.end");
-                            }
-                        },
+            regex : /\[=*\[/,
+            next  : [
+                {
+                    onMatch2 : function(value, scope) {
+                        if (scope == "bracketedString" && value.length == scope.data) {
+                            return scope.parent.get("string.end");
+                        } else {
+                            return scope.get("string.end");
+                        }
+                    },
 
-                        regex : /\]=*\]/,
-                    }, {
-                        defaultToken : "string"
-                    }
-                ]
-            },
-            {
-                token : "string",           // " string
-                regex : '"(?:[^\\\\]|\\\\.)*?"'
-            }, {
-                token : "string",           // ' string
-                regex : "'(?:[^\\\\]|\\\\.)*?'"
-            }, {
-                token : "constant.numeric", // float
-                regex : floatNumber
-            }, {
-                token : "constant.numeric", // integer
-                regex : integer + "\\b"
-            }, {
-                token : keywordMapper,
-                regex : "[a-zA-Z_$][a-zA-Z0-9_$]*\\b"
-            }, {
-                token : "keyword.operator",
-                regex : "\\+|\\-|\\*|\\/|%|\\#|\\^|~|<|>|<=|=>|==|~=|=|\\:|\\.\\.\\.|\\.\\."
-            }, {
-                token : "paren.lparen",
-                regex : "[\\[\\(\\{]"
-            }, {
-                token : "paren.rparen",
-                regex : "[\\]\\)\\}]"
-            }, {
-                token : "text",
-                regex : "\\s+|\\w+"
-            } ]
+                    regex : /\]=*\]/,
+                }, {
+                    defaultToken : "string"
+                }
+            ]
+        },
+        {
+            token : "string",           // " string
+            regex : '"(?:[^\\\\]|\\\\.)*?"'
+        }, {
+            token : "string",           // ' string
+            regex : "'(?:[^\\\\]|\\\\.)*?'"
+        }, {
+            token : "constant.numeric", // float
+            regex : floatNumber
+        }, {
+            token : "constant.numeric", // integer
+            regex : integer + "\\b"
+        }, {
+            token : keywordMapper,
+            regex : "[a-zA-Z_$][a-zA-Z0-9_$]*\\b"
+        }, {
+            token : "keyword.operator",
+            regex : "\\+|\\-|\\*|\\/|%|\\#|\\^|~|<|>|<=|=>|==|~=|=|\\:|\\.\\.\\.|\\.\\."
+        }, {
+            token : "paren.lparen",
+            regex : "[\\[\\(\\{]"
+        }, {
+            token : "paren.rparen",
+            regex : "[\\]\\)\\}]"
+        }, {
+            token : "text",
+            regex : "\\s+|\\w+"
+        } ]
     };
 
     this.normalizeRules();
