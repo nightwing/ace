@@ -87,6 +87,7 @@ var supportedModes = {
     Csound_Orchestra: ["orc"],
     Csound_Score: ["sco"],
     CSS:         ["css"],
+    CSV:         ["csv"],
     Curly:       ["curly"],
     Cuttlefish:  ["conf"],
     D:           ["d|di"],
