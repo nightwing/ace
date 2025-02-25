@@ -63,24 +63,39 @@ require("ace/config").defineOptions(Editor.prototype, "editor", {
 });
 
 require("ace/config").defineOptions(Editor.prototype, "editor", {
-    useAceLinters: {
+    languageTools: {
         set: function(val) {
-            if (val && !window.languageProvider) {
-                loadLanguageProvider(editor);
+            if (val == "AceLinters") {
+                if (this.container.parentElement)
+                setTimeout(() => {
+                    loadLanguageProvider(editor);
+                    editor.setOption("$useWorker", false);
+                }, 0);
+            } else if (val == "Legacy") {
+                if (window.languageProvider) {
+                    // window.location.reload();
+                }
+            } else if (val == "Mock") {
+
             }
-            else if (val) {
-                window.languageProvider.registerEditor(this);
-            } else {
-                // todo unregister
-            }
-        }
+        },
     }
 });
+if (!localStorage.languageTools) localStorage.languageTools = "AceLinters";
 
 var {HoverTooltip} = require("ace/tooltip");
 var MarkerGroup = require("ace/marker_group").MarkerGroup;
 var docTooltip = new HoverTooltip();
+window.docTooltip = docTooltip;
 function loadLanguageProvider(editor) {
+    if (Array.isArray(window.languageProvider)) {
+        window.languageProvider.push(editor);
+        return
+    } else if (window.languageProvider) {
+        languageProvider.registerEditor(editor);
+        return;
+    }
+    window.languageProvider = [editor]
     function loadScript(cb) {
         if (define.amd) {
             require([
@@ -109,8 +124,11 @@ function loadLanguageProvider(editor) {
                 signatureHelp: false
             }
         });
+        var pending = window.languageProvider;
         window.languageProvider = languageProvider;
-        languageProvider.registerEditor(editor);
+        pending.forEach(function(editor) {
+            languageProvider.registerEditor(editor);
+        });
     });
 }
 
@@ -406,7 +424,13 @@ optionsPanel.add({
                     ? "Below"
                     : "Beside";
             }
-        }
+        },
+        "Code aid": {
+            type: "buttonBar",
+            position: 3000,
+            path: "languageTools",
+            values: ["AceLinters", "Legacy", "Mock"],
+        },
     },
     More: {
         "RTL": {
@@ -445,10 +469,6 @@ optionsPanel.add({
                 return !!originalAutocompleteCommand;
             }
         },
-        "Use Ace Linters": {
-            position: 3000,
-            path: "useAceLinters"
-        },
         "Show Textarea Position": devUtil.textPositionDebugger,
         "Text Input Debugger": devUtil.textInputDebugger,
     }
@@ -457,7 +477,7 @@ optionsPanel.add({
 var optionsPanelContainer = document.getElementById("optionsPanel");
 optionsPanel.render();
 optionsPanelContainer.insertBefore(optionsPanel.container, optionsPanelContainer.firstChild);
-optionsPanel.container.style.width = "80%";
+optionsPanel.container.style.width = "95%";
 optionsPanel.on("setOption", function(e) {
     util.saveOption(e.name, e.value);
 });
