@@ -325,8 +325,9 @@ class AcePopup {
             }
 
             var el = this.container;
-            var screenHeight = window.innerHeight;
-            var screenWidth = window.innerWidth;
+            var scrollBarSize = this.renderer.scrollBar.width || 10;
+            var screenHeight = window.innerHeight - scrollBarSize;
+            var screenWidth = window.innerWidth - scrollBarSize;
             var renderer = this.renderer;
             // var maxLines = Math.min(renderer.$maxLines, this.session.getLength());
             var maxH = renderer.$maxLines * lineHeight * 1.4;
