@@ -153,6 +153,7 @@ class InlineDiffView extends BaseDiffView {
         }
         this.$detachSessionEventHandlers(this.activeEditor, activeMarker);
         this.otherSession.removeMarker(dynamicMarker.id);
+        this.otherSession.bgTokenizer.lines.fill(undefined);
     }
 
     $detachSessionEventHandlers(editor, marker) {
@@ -209,7 +210,7 @@ class InlineDiffView extends BaseDiffView {
             }
         }
 
-        // filterLines(this.otherSession.bgTokenizer.lines, this.chunks);//TODO messes text layers
+        filterLines(this.otherSession.bgTokenizer.lines, this.chunks);//TODO messes text layers
 
         var session = this.otherSession;
 

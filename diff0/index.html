@@ -69,6 +69,9 @@
     var ignoreTrimWhitespace = localStorage["ignoreTrimWhitespace"] == "true";
     var foldUnchanged = localStorage["foldunchanged"] == "true";
 
+    document.getElementById("btn-whitespace").checked = ignoreTrimWhitespace;
+    document.getElementById("btn-foldunchanged").checked = foldUnchanged;
+
     var initialValueA = "";
     var initialValueB = "";
 
@@ -142,6 +145,7 @@
                     showSideA: true
                 });
                 // editorA.container.style.display = "none";
+                // editorB.container.style.display = "";
                 break;
             case "inlineB":
                 var {InlineDiffView} = require("diff/inline_diff_view");
@@ -149,20 +153,23 @@
                     editorA, editorB,
                     showSideA: false
                 });
-                // editorA.container.style.display = "none";
+                // editorA.container.style.display = "";
+                // editorB.container.style.display = "none";
                 break;
             case "split":
                 var {SideBySideDiffView} = require("diff/sidebyside_diff_view");
                 diffView = new SideBySideDiffView({editorA, editorB});
                 // editorA.container.style.display = "";
+                // editorB.container.style.display = "";
                 break;
             case "off":
                 diffView.detach("off");
                 diffView = undefined;
                 // editorA.container.style.display = "";
+                // editorB.container.style.display = "";
                 break;
         }
-        diffView.onInput();
+        diffView?.onInput();
     }
 
     var paths = {
@@ -177,7 +184,7 @@
     });
 
 
-    require(["diff/sidebyside_diff_view", "diff/inline_diff_view", "demo/kitchen-sink/util"], function () {
+    require(["diff/sidebyside_diff_view", "diff/inline_diff_view", "demo/kitchen-sink/util", "demo/kitchen-sink/layout"], function () {
 
         var config = require("ace/config");
         config.setLoader(function (moduleName, cb) {
