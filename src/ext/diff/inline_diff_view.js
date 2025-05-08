@@ -27,6 +27,7 @@ class InlineDiffView extends BaseDiffView {
     init(diffModel) {
         this.onSelect = this.onSelect.bind(this);
         this.onAfterRender = this.onAfterRender.bind(this);
+        this.onChangeWrapLimit = this.onChangeWrapLimit.bind(this);
         
 
         this.$setupModels(diffModel);
@@ -277,10 +278,16 @@ class InlineDiffView extends BaseDiffView {
         diffView.sessionB["_emit"]("changeFold", {data: {start: {row: 0}}});
     }
 
+    onChangeWrapLimit() {
+        this.sessionB.adjustWrapLimit(this.sessionA.$wrapLimit);
+        this.scheduleRealign();
+    }
 
     $attachSessionsEventHandlers() {
         this.$attachSessionEventHandlers(this.editorA, this.markerA);
         this.$attachSessionEventHandlers(this.editorB, this.markerB);
+        this.sessionA.on("changeWrapLimit", this.onChangeWrapLimit);
+        this.sessionA.on("changeWrapMode", this.onChangeWrapLimit);
     }
 
     $attachSessionEventHandlers(editor, marker) {
@@ -294,6 +301,8 @@ class InlineDiffView extends BaseDiffView {
         this.$detachSessionHandlers(this.editorA, this.markerA);
         this.$detachSessionHandlers(this.editorB, this.markerB);
         this.otherSession.bgTokenizer.lines.fill(undefined);
+        this.sessionA.off("changeWrapLimit", this.onChangeWrapLimit);
+        this.sessionA.off("changeWrapMode", this.onChangeWrapLimit);
     }
 
     $detachSessionHandlers(editor, marker) {

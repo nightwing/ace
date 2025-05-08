@@ -342,11 +342,7 @@ class BaseDiffView {
     onChangeFold(ev, session) {
         var fold = ev.data;
         if (this.$syncingFold || !fold || !ev.action) return;
-        if (!this.realignPending) {
-            this.realignPending = true;
-            this.editorA.renderer.on("beforeRender", this.realign);
-            this.editorB.renderer.on("beforeRender", this.realign);
-        }
+        this.scheduleRealign();
 
         const isOrig = session === this.sessionA;
         const other = isOrig ? this.sessionB : this.sessionA;
@@ -386,6 +382,14 @@ class BaseDiffView {
                 }
                 this.$syncingFold = false;
             }
+        }
+    }
+    
+    scheduleRealign() {        
+        if (!this.realignPending) {
+            this.realignPending = true;
+            this.editorA.renderer.on("beforeRender", this.realign);
+            this.editorB.renderer.on("beforeRender", this.realign);
         }
     }
 
@@ -654,7 +658,13 @@ config.defineOptions(BaseDiffView.prototype, "DiffView", {
             this.options.ignoreTrimWhitespace = value;
         },
     },
-});
+    wrap: {
+        set: function() {
+            this.sessionA.setOption("wrap", true);
+            this.sessionB.setOption("wrap", true);
+        }
+    }
+}); 
 
 var emptyGutterRenderer =  {
     getText: function name(params) {

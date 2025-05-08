@@ -187,6 +187,45 @@
         diffView?.onInput();
     }
 
+    var optionValues = {
+        diffMode: localStorage.diffMode,
+        ignoreTrimWhitespace: localStorage.ignoreTrimWhitespace == "true",
+        wrap: localStorage.wrap,
+        syncSelections: localStorage.syncSelections,
+        showOtherLineNumbers: localStorage.showOtherLineNumbers,
+        folding: localStorage.folding,
+    }
+    function drawToolbar() {
+        var toolbar = document.createElement("div");
+        toolbar.className = "toolbar";
+        diffVewContainer.parentNode.insertBefore(toolbar, diffVewContainer);
+
+
+        OptionPanel = require("ace/ext/options").OptionPanel
+        optionBar = new OptionPanel({
+            getOption(path) {
+                console.log(path)
+            },
+            setOption() {
+                
+            }
+        })
+        optionBar.renderOptionControl("mode", {
+            path: "diffMode",
+            type: "buttonBar",
+            values: ["hi", "bar"]
+        })
+        optionBar.renderOptionControl("mode", {
+            path: "diffMode",
+            type: "checkbox",
+        })
+
+        ["label", {for: "mode"}]
+
+        
+        return require("ace/lib/dom").buildDom()
+    }
+
 
     var paths = {
         "ace": "../../src",
@@ -198,10 +237,14 @@
         paths: paths
     });
 
-
-
-    require(["ace/ext/diff/diff_view", "ace/ext/diff/inline_diff_view", "demo/kitchen-sink/util",
-        "demo/kitchen-sink/layout", "ace/ext/diff/providers/default"], function () {
+    require([
+        "ace/ext/diff/diff_view", 
+        "ace/ext/diff/inline_diff_view", 
+        "demo/kitchen-sink/util",
+        "demo/kitchen-sink/layout", 
+        "ace/ext/diff/providers/default",
+        "ace/ext/options",
+    ], function () {
         
         var config = require("ace/config");
         config.setLoader(function (moduleName, cb) {
