@@ -306,8 +306,9 @@ exports.$fixPositionBug = function(el) {
     }
     if (el.style.right) {
         var target = parseFloat(el.style.right);
-        var result = window.innerWidth - rect.right;
+        var result = document.documentElement.clientWidth - rect.right;
         if (Math.abs(target - result) > 1) {
+            el.getBoundingClientRect();
             el.style.right = 2 * target - result + "px";
         }
     }
@@ -320,8 +321,9 @@ exports.$fixPositionBug = function(el) {
     }
     if (el.style.bottom) {
         var target = parseFloat(el.style.bottom);
-        var result = window.innerHeight - rect.bottom;
+        var result = document.documentElement.clientHeight - rect.bottom;
         if (Math.abs(target - result) > 1) {
+            el.getBoundingClientRect();
             el.style.bottom = 2 * target - result + "px";
         }
     }
