@@ -1,5 +1,107 @@
 "use strict";
 
 require("amd-loader");
-var test = require("asyncjs").test;
-test.walkTestCases(__dirname + "/..").exec();
+var Path = require("path");
+var test = require("./asyncjs/index").test;
+// test.walkTestCases(__dirname + "/..").exec();
+
+var testNames = [
+    "ace/ace_test",
+    "ace/anchor_test",
+    "ace/autocomplete/inline_test",
+    "ace/autocomplete/popup_test",
+    "ace/autocomplete_test",
+    "ace/background_tokenizer_test",
+    "ace/commands/command_manager_test",
+    "ace/config_test",
+    "ace/document_test",
+    "ace/edit_session_test",
+    "ace/editor_change_document_test",
+    "ace/editor_commands_test",
+    "ace/editor_highlight_selected_word_test",
+    "ace/editor_navigation_test",
+    "ace/editor_options_test",
+    "ace/editor_text_edit_test",
+    "ace/ext/beautify_test",
+    "ace/ext/code_lens_test",
+    "ace/ext/command_bar_test",
+    "ace/ext/diff/diff_test",
+    "ace/ext/emmet_test",
+    "ace/ext/error_marker_test",
+    "ace/ext/hardwrap_test",
+    "ace/ext/inline_autocomplete_test",
+    "ace/ext/simple_tokenizer_test",
+    "ace/ext/static_highlight_test",
+    "ace/ext/whitespace_test",
+    "ace/incremental_search_test",
+    "ace/keyboard/emacs_test",
+    "ace/keyboard/gutter_handler_test",
+    "ace/keyboard/keybinding_test",
+    "ace/keyboard/sublime_test",
+    "ace/keyboard/textinput_test",
+    "ace/keyboard/vim_ace_test",
+    "ace/keyboard/vim_test",
+    "ace/layer/gutter_test",
+    "ace/layer/text_test",
+    "ace/lib/event_emitter_test",
+    "ace/marker_group_test",
+    "ace/mode/_test/highlight_rules_test",
+    "ace/mode/ada_test",
+    "ace/mode/behaviour/behaviour_test",
+    "ace/mode/coldfusion_test",
+    "ace/mode/css_test",
+    "ace/mode/folding/basic_test",
+    "ace/mode/folding/coffee_test",
+    "ace/mode/folding/cstyle_test",
+    "ace/mode/folding/drools_test",
+    "ace/mode/folding/fold_mode_test",
+    "ace/mode/folding/html_test",
+    "ace/mode/folding/javascript_test",
+    "ace/mode/folding/latex_test",
+    "ace/mode/folding/lua_test",
+    "ace/mode/folding/php_test",
+    "ace/mode/folding/pythonic_test",
+    "ace/mode/folding/ruby_test",
+    "ace/mode/folding/vbscript_test",
+    "ace/mode/folding/xml_test",
+    "ace/mode/folding/yaml_test",
+    "ace/mode/html_test",
+    "ace/mode/javascript_test",
+    "ace/mode/logiql_test",
+    "ace/mode/odin_test",
+    "ace/mode/php_test",
+    "ace/mode/plain_text_test",
+    "ace/mode/python_test",
+    "ace/mode/ruby_test",
+    "ace/mode/text_test",
+    "ace/mode/vbscript_test",
+    "ace/mode/xml_test",
+    "ace/mouse/default_gutter_handler_test",
+    "ace/mouse/mouse_handler_test",
+    "ace/multi_select_test",
+    "ace/occur_test",
+    "ace/placeholder_test",
+    "ace/range_list_test",
+    "ace/range_test",
+    "ace/scrollbar_test",
+    "ace/search_test",
+    "ace/selection_test",
+    "ace/snippets_test",
+    "ace/test/mockdom_test",
+    "ace/token_iterator_test",
+    "ace/tokenizer_test",
+    "ace/tooltip_test",
+    "ace/undomanager_test",
+    "ace/virtual_renderer_test"
+];
+
+
+async function runTests() {
+    // testNames.forEach(function(testName) {
+    var testName = testNames.shift();
+        var filePath = Path.dirname(__dirname) + testName.slice(3) + ".js";
+        console.log("Running " + filePath);
+        test.testcase(require(filePath)).exec();
+    // });
+}
+runTests();
