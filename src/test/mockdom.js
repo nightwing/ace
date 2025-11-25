@@ -425,11 +425,16 @@ function Node(name) {
             if (!height) height = CHAR_HEIGHT;
         }
         else if (this.parentNode) {
+            var isFixed = this.style.position == "fixed";
             // prevent recursion by passing -1
-            var rect = fromChild == -1 
+            var rect = fromChild == -1 || isFixed
                 ? {top: 0, left: 0, width: 0, height: 0, right: 0, bottom: 0} 
                 : this.parentNode.getBoundingClientRect();
-            
+            if (isFixed) {
+                rect.height = WINDOW_HEIGHT;
+                rect.width = WINDOW_WIDTH;
+            }
+
             left = parseCssLength(this.style.left || "0", rect.width);
             top = parseCssLength(this.style.top || "0", rect.height);
             var right = parseCssLength(this.style.right || "0", rect.width);
@@ -461,6 +466,13 @@ function Node(name) {
             
             top += rect.top;
             bottom += rect.bottom;
+            left += rect.left;
+
+            if (isFixed) {
+                if (this.style.right && !this.style.left) {
+                    left = rect.width - right - width;
+                }
+            }
         }
         return {top: top, left: left, width: width, height: height, right: left + width, bottom: top + height};
     };
