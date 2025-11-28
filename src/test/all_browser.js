@@ -1,6 +1,7 @@
 "use strict";
 
 require("ace/lib/fixoldbrowsers");
+
 var mockdom = require("../test/mockdom");
 var AsyncTest = require("asyncjs").test;
 var async = require("asyncjs");
@@ -136,6 +137,7 @@ var nav = buildDom(["div", {style: "position:absolute;right:0;top:0"}, html], do
 
 
 if (forceShow) {
+    // @ts-ignore
     require(["ace/virtual_renderer", "ace/test/mockrenderer"], function(real, mock) {
         var VirtualRenderer = real.VirtualRenderer;
         mock.MockRenderer = function() {
@@ -167,68 +169,127 @@ if (location.search) {
 var filter = decodeURIComponent(location.hash.substr(1));
 window.onhashchange = function() { location.reload(); };
 
-require(selectedTests, function() {
-    var tests = selectedTests.map(function(x) {
+// @ts-ignore
+require(selectedTests, async function() {
+    var testSuites = selectedTests.map(function(x) {
         var module = require(x);
         module.href = x;
         return module;
     });
 
-    async.list(tests)
-        .expand(function(test) {
-            if (filter) {
-                Object.keys(test).forEach(function(method) {
-                    if (method.match(/^>?test/) && !method.match(filter))
-                        test[method] = undefined;
-                });
-            }
-            return AsyncTest.testcase(test);
-        }, AsyncTest.TestGenerator)
-        .run()
-        .each(function(test, next) {
-            if (test.index == 1 && test.context.href) {
-                var href = test.context.href;
-                buildDom(["div", {}, testLink(href)], log);
-            }
-            
-            var messageHeader =  "[" + test.index + "/" + test.count + "]";
-            
-            var node = buildDom(["div", {class: test.passed ? "passed" : "failed"}, 
+    var failed = 0;
+    var passed = 0;
+    var reporter = {
+        before: function(test) {
+            if (!test.name) return;
+            var messageHeader = "[" + test.index + "/" + test.count + "]";
+            var node = buildDom(["div", {class: test.skip ? "skipped" : "waiting"}, 
                 ["a", {href: "#" + escapeRegExp(test.name.replace(/^test\s*/, ""))}, messageHeader],
-                " ",
-                (test.suiteName ? test.suiteName + ": " : ""),
+                " ",                
                 test.name,
-                (test.passed ? " OK" : " FAIL")
+                ["span", (test.skip ? " SKIP" : " ...")],
             ], log);
-            
-            if (!test.passed) {
-                if (test.err.stack)
-                    var err = test.err.stack;
-                else
-                    var err = test.err;
-
-                console.error(node.textContent);
-                console.error(err);
-                buildDom(["pre", {class: "error"}, err + ""], node);
+            test.reportNode = node;
+        },
+        after: function(test) {
+            if (!test.name) return;
+            if (test.passed) {
+                passed++;
             } else {
-                console.log(node.textContent);
+                failed++;
             }
 
-            next();
+            test.reportNode.className = test.passed ? "passed" : "failed";
+            test.reportNode.lastChild.remove()
+            buildDom(["span", (test.passed ? " OK" : " FAIL") + "  " + test.time + "ms"], test.reportNode)
+        },
+        beforeSuite: function(testSuite) {            
+            var href = testSuite.href;
+            buildDom(["div", {}, testLink(href)], log);
+            console.log(href);
+        },
+        afterSuite: function(test) {
+
+        }
+    };
+
+    async function runTest(testSuite, test) {
+        var fn = test.fn;
+        if (fn.length) {
+            var olfFn = fn
+            var next
+            var callbackPromise = new Promise(function(resolve, reject) {
+                next = function(err) {
+                    if (err) return reject(err);
+                    resolve(err)
+                }
+            })
+            fn = async function() {
+                await olfFn.call(test, next);
+                await callbackPromise;
+            }
+        }
+        var timeout = testSuite.timeout || 3000
+        var timeoutId = setTimeout(function() {
+            next(new Error("Source did not respond after " + timeout + "ms!"))
+        }, timeout);
+        var t = Date.now();
+        test.passed = false;
+        reporter.before(test);
+        try {
+            await fn.call(test);
+            test.passed = true;
+        } finally {
+            clearTimeout(timeoutId);
+            test.time = Date.now() - t;
+        }
+        reporter.after(test);
+    }
+
+    for (var i = 0; i < testSuites.length; i++) {
+        var testSuite = testSuites[i];
+
+        var testArray = [];
+        Object.keys(testSuite).forEach(name => {
+            if (!name.match(/^>?test/))
+                return;
+            var test = {name, testSuite, fn: testSuite[name]};
+            if (filter && !test.name.match(filter)) {
+                test.skip = true;
+            }
+            testArray.push(test);
         })
-        .each(function(test) {
-            if (test.passed)
-                passed += 1;
-            else
-                failed += 1;
-        })
-        .end(function() {
-            var node = buildDom(["div", {class: "summary"},
-                ["br"], "Summary:", ["br"], ["br"],
-                "Total number of tests: " + (passed + failed), ["br"],
-                (passed && [null, "Passed tests: " + passed, ["br"]]),
-                (failed && [null, "Failed tests: " + failed])
-            ], log);
-            console.log(node.innerText);
-        });
+
+        reporter.beforeSuite(testSuite)
+        if (testSuite.setUpSuite)
+            await runTest(testSuite, {fn: testSuite.setUpSuite});
+        for (var j = 0; j < testArray.length; j++) {
+            var test = testArray[j];
+            test.index = j;
+            test.count = testArray.length;
+            if (test.skip) {
+                reporter.before(test);
+                continue;
+            }
+            if (testSuite.setup)
+                await runTest(testSuite, {fn: testSuite.setup});
+            await runTest(testSuite, test);            
+            if (testSuite.tearDown)
+                await runTest(testSuite, {fn: testSuite.tearDown});
+        }
+        if (testSuite.tearDownSuite)
+            await runTest(testSuite, {fn: testSuite.tearDownSuite});
+        reporter.afterSuite(testSuite)
+    }
+
+
+  
+    var node = buildDom(["div", {class: "summary"},
+        ["br"], "Summary:", ["br"], ["br"],
+        "Total number of tests: " + (passed + failed), ["br"],
+        (passed && [null, "Passed tests: " + passed, ["br"]]),
+        (failed && [null, "Failed tests: " + failed])
+    ], log);
+    console.log(node.innerText); 
+
 });
