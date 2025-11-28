@@ -425,7 +425,8 @@ function Node(name) {
             if (!height) height = CHAR_HEIGHT;
         }
         else if (this.parentNode) {
-            var isFixed = this.style.position == "fixed";
+            var isFixed = this.style.position == "fixed" 
+                || this.style.positionHint == "fixed";
             // prevent recursion by passing -1
             var rect = fromChild == -1 || isFixed
                 ? {top: 0, left: 0, width: 0, height: 0, right: 0, bottom: 0} 
@@ -935,6 +936,8 @@ exports.loadInBrowser = function(global) {
     delete global.ResizeObserver;
     global.__origRoot__ = global.document.documentElement;
     global.__origBody__ = global.document.body;
+    global.document.createElementOrig = global.document.createElement;
+    global.document.createTextNodeOrig = global.document.createTextNode;
     Object.keys(window).forEach(function(i) {
         if (i != "document" && i != "window") {
             delete global[i];
@@ -945,7 +948,6 @@ exports.loadInBrowser = function(global) {
         var val = window.document[i];
         if (typeof val == "function") {
             if (i == "createElement") {
-                global.document.createElementOrig = global.document.createElement;
                 val = function(n) {
                     if (n == "script")
                         return global.document.createElementOrig(n);
@@ -976,6 +978,7 @@ exports.loadInBrowser = function(global) {
             );
         }
     }
+    global.__mockdom_ = exports;
     loaded = true;
 };
 
@@ -1001,3 +1004,31 @@ exports.unload = function() {
 };
 
 exports.load();
+
+exports.show = function(mockNode) {
+    var global = globalThis;
+    var el = global.document.createElementOrig.bind(global.document);
+    var text = global.document.createTextNodeOrig.bind(global.document);
+    function cloneNode(node) {
+        if (node.nodeType == 3) {
+            return text(node.data);
+        }
+        var newNode = el(node.localName);
+        node.attributes.forEach(function(attr) {
+            newNode.setAttribute(attr.name, attr.value);
+        });
+        node.childNodes.forEach(function(ch) {
+            newNode.appendChild(cloneNode(ch));
+        });
+        var rect = node.getBoundingClientRect(); // to compute sizes
+        newNode.style.top = rect.top + "px";
+        newNode.style.left = rect.left + "px";
+        newNode.style.height = rect.height + "px";
+        newNode.style.width = rect.width + "px";
+        newNode.style.position = "fixed";
+        return newNode;
+    }
+    var result = cloneNode(mockNode || global.document.documentElement);
+    return __origBody__.appendChild(result);
+
+};
