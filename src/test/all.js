@@ -4,6 +4,12 @@ require("amd-loader");
 var Path = require("path");
 var test = require("./asyncjs/index").test;
 // test.walkTestCases(__dirname + "/..").exec();
+window.onerror = function name(...params) {
+    console.log(">>>>>>>>>>>>>>", ...params)
+}
+window.addEventListener('unhandledrejection', (event) => {
+  console.error("Unhandled promise rejection:", event.promise, event.reason);
+});
 
 var testNames = [
     "ace/ace_test",

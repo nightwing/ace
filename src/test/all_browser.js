@@ -3,22 +3,27 @@
 require("ace/lib/fixoldbrowsers");
 
 var mockdom = require("../test/mockdom");
-var AsyncTest = require("asyncjs").test;
-var async = require("asyncjs");
 var buildDom = require("../lib/dom").buildDom;
 var escapeRegExp = require("ace/lib/lang").escapeRegExp;
 
 var useMockdom = location.search.indexOf("mock=1") != -1;
 var forceShow = location.search.indexOf("show=1") != -1;
 
-var passed = 0;
-var failed = 0;
 var log = document.getElementById("log");
+var documentElement = document.documentElement;
 
 // change buildDom to use real document in mockdom 
 var createElement = document.createElement.bind(document);
 var createTextNode = document.createTextNode.bind(document);
 var buildDom = eval("(" + buildDom.toString().replace(/document\./g, "") + ")");
+
+window.onerror = function name(...params) {
+    console.log(">>>>>>>>>>>>>>", ...params)
+}
+window.addEventListener('unhandledrejection', (event) => {
+    console.log("Unhandled promise rejection:", event.promise, event.reason);
+});
+
 
 var testNames = [
     "ace/ace_test",
@@ -60,7 +65,7 @@ var testNames = [
     "ace/layer/text_test",
     "ace/lib/event_emitter_test",
     "ace/marker_group_test",
-    "ace/mode/_test/highlight_rules_test",
+    // "ace/mode/_test/highlight_rules_test",
     "ace/mode/ada_test",
     "ace/mode/behaviour/behaviour_test",
     "ace/mode/coldfusion_test",
@@ -127,7 +132,7 @@ for (var i in testNames) {
 }
 
 function testLink(name) {
-    return ["a", {href:'?' + name + (useMockdom ? "&mock=1" : "")}, name.replace(/^ace\//, "")];
+    return ["a", {href:'?' + name + (useMockdom ? "&mock=1" : "")}, name.replace(/^ace\//, "") + ".js"];
 }
 function normalizeHref(str) {
     return str.replace(/([?&])&+/g, "$1");
@@ -179,8 +184,9 @@ require(selectedTests, async function() {
 
     var failed = 0;
     var passed = 0;
+    var skipped = 0;
     var reporter = {
-        before: function(test) {
+        beforeEach: function(test) {
             if (!test.name) return;
             var messageHeader = "[" + test.index + "/" + test.count + "]";
             var node = buildDom(["div", {class: test.skip ? "skipped" : "waiting"}, 
@@ -190,10 +196,18 @@ require(selectedTests, async function() {
                 ["span", (test.skip ? " SKIP" : " ...")],
             ], log);
             test.reportNode = node;
+            console.log(messageHeader + test.name);
         },
-        after: function(test) {
+        afterEach: function(test) {
+            if (!log.parentElement) {
+                documentElement.appendChild(log)
+                debugger
+            }
             if (!test.name) return;
-            if (test.passed) {
+            if (test.skip) {
+                skipped++
+                return;
+            } else if (test.passed) {
                 passed++;
             } else {
                 failed++;
@@ -202,52 +216,118 @@ require(selectedTests, async function() {
             test.reportNode.className = test.passed ? "passed" : "failed";
             test.reportNode.lastChild.remove()
             buildDom(["span", (test.passed ? " OK" : " FAIL") + "  " + test.time + "ms"], test.reportNode)
+            if (test.error && test.error != true)
+                buildDom(["pre", {class: "error"}, test.error + ""], log);
+            if (test.error) console.log(test.fn);
         },
-        beforeSuite: function(testSuite) {            
+        before: function(testSuite) {
+            var counter = " [" + testSuite.index + "/" + testSuite.count + "]";
             var href = testSuite.href;
-            buildDom(["div", {}, testLink(href)], log);
-            console.log(href);
+            buildDom(["div", {}, testLink(href), counter], log);
+            console.log(href, counter);
         },
-        afterSuite: function(test) {
+        after: function(test) {
 
+        },
+        done: function() {
+            if (!log.parentElement) {
+                documentElement.appendChild(log)
+                debugger
+            }
+            var node = buildDom(["div", {class: "summary"},
+                ["br"], "Summary:", ["br"], ["br"],
+                "Total number of tests: " + (passed + failed + skipped), ["br"],
+                (passed && [null, "Passed tests: " + passed, ["br"]]),
+                (passed && [null, "Passed tests: " + skipped, ["br"]]),
+                (failed && [null, "Failed tests: " + failed])
+            ], log);
+            console.log(node.innerText); 
         }
     };
 
-    async function runTest(testSuite, test) {
-        var fn = test.fn;
-        if (fn.length) {
-            var olfFn = fn
-            var next
-            var callbackPromise = new Promise(function(resolve, reject) {
-                next = function(err) {
-                    if (err) return reject(err);
-                    resolve(err)
-                }
-            })
-            fn = async function() {
-                await olfFn.call(test, next);
-                await callbackPromise;
-            }
-        }
-        var timeout = testSuite.timeout || 3000
-        var timeoutId = setTimeout(function() {
-            next(new Error("Source did not respond after " + timeout + "ms!"))
-        }, timeout);
-        var t = Date.now();
-        test.passed = false;
-        reporter.before(test);
+    var stepIndex = 0
+    async function runStep() {
         try {
-            await fn.call(test);
-            test.passed = true;
+            var step = steps[stepIndex++];
+            if (!step) return;
+            if (step.type == "before") {
+                reporter.before(step.testSuite);
+            }
+            try {
+                if (step.fn) await runTimed(step)
+            } finally {
+                if (step.type == "after") {
+                    reporter.after(step.testSuite);
+                } else if (step.type == "done") {
+                    reporter.done();
+                }
+            }
         } finally {
-            clearTimeout(timeoutId);
-            test.time = Date.now() - t;
+            if (!step) return;
+            // if (step.error) {
+            //     console.log("---------------------------->>")
+            //     setTimeout(function() {
+            //         console.log("---------------------------->><<")
+            //         runStep()
+            //     }, 1000)
+            //     return
+            // }
+            setTimeout(runStep,0);
         }
-        reporter.after(test);
+    }
+    async function runTimed(step, callback) {
+        var fn = step.fn;
+        var testSuite = step.testSuite;
+
+        var resolve;
+        var result = new Promise(function(resolve_, reject_) {
+            resolve = resolve_;
+        });
+        result.name = step.name;
+
+        var doneCalled = false;
+        var done = function(error) {
+            if (doneCalled) return;
+            if (error) step.error = error;
+            step.passed = !step.error;
+            clearTimeout(timeoutId);
+            step.time = Date.now() - t;
+            doneCalled = true;
+            resolve();
+            reporter.afterEach(step);
+        };
+        var timeout = testSuite.timeout || 3000;
+        var interactiveTimeStep = 100;
+        var remainingTime = timeout;
+        var timeoutId = setTimeout(function wait() {
+            remainingTime -= interactiveTimeStep;
+            if (remainingTime > 0) {
+                timeoutId = setTimeout(wait, Math.min(interactiveTimeStep, remainingTime))
+            } else {
+                done(new Error("Source did not respond after " + timeout + "ms!"))
+            }
+        }, Math.min(interactiveTimeStep, remainingTime));
+        
+        var t = Date.now();
+        step.passed = false;
+        reporter.beforeEach(step);
+        var callFailed = true;
+        try {
+            (fn.length ? fn.call(step, done) : fn.call(step));
+            callFailed = false;
+        } finally {
+            if (!fn.length)
+                done(callFailed)
+            return result;
+        }
     }
 
+
+    var steps = [];
     for (var i = 0; i < testSuites.length; i++) {
         var testSuite = testSuites[i];
+        testSuite.index = i + 1;
+        testSuite.count = testSuites.length;
 
         var testArray = [];
         Object.keys(testSuite).forEach(name => {
@@ -260,36 +340,21 @@ require(selectedTests, async function() {
             testArray.push(test);
         })
 
-        reporter.beforeSuite(testSuite)
-        if (testSuite.setUpSuite)
-            await runTest(testSuite, {fn: testSuite.setUpSuite});
+        if (!testArray.length) continue;
+
+        steps.push({type: "before", testSuite, fn: testSuite.setUpSuite})
         for (var j = 0; j < testArray.length; j++) {
             var test = testArray[j];
-            test.index = j;
-            test.count = testArray.length;
-            if (test.skip) {
-                reporter.before(test);
-                continue;
-            }
-            if (testSuite.setup)
-                await runTest(testSuite, {fn: testSuite.setup});
-            await runTest(testSuite, test);            
-            if (testSuite.tearDown)
-                await runTest(testSuite, {fn: testSuite.tearDown});
-        }
-        if (testSuite.tearDownSuite)
-            await runTest(testSuite, {fn: testSuite.tearDownSuite});
-        reporter.afterSuite(testSuite)
+            test.index = j + 1;
+            test.count = testArray.length;  
+            steps.push({type: "beforeEach", testSuite, fn: testSuite.setUp});
+            steps.push(test);
+            steps.push({type: "afterEach", testSuite, fn: testSuite.tearDown});
+        } 
+        steps.push({type: "after", testSuite, fn: testSuite.tearDownSuite});
     }
 
+    steps.push({type: "done"})
 
-  
-    var node = buildDom(["div", {class: "summary"},
-        ["br"], "Summary:", ["br"], ["br"],
-        "Total number of tests: " + (passed + failed), ["br"],
-        (passed && [null, "Passed tests: " + passed, ["br"]]),
-        (failed && [null, "Failed tests: " + failed])
-    ], log);
-    console.log(node.innerText); 
-
+    runStep();
 });

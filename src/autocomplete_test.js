@@ -60,6 +60,15 @@ module.exports = {
             editor = null;
         }
     },
+    // "test: total failure": function(done) {
+    //     var i = 0
+    //     function next() {
+    //         console.log("--------------------------", i++)
+    //         setTimeout(next, 500)
+    //         throw new Error("---------------------------")
+    //     }
+    //     next()
+    // },
     "test: highlighting in the popup": function (done) {
         editor = initEditor("\narraysort alooooooooooooooooooooooooooooong_word");
         //   editor.container.style.width = "500px";

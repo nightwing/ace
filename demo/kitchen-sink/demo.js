@@ -615,7 +615,8 @@ function openTestDialog(animateHeight) {
           + "overflow: hidden; resize: both; box-shadow: 0 0 10px rgba(0,0,0,0.5);"
           + "background: darkblue; border: solid 1px black; display: flex; flex-direction: column"
         }, 
-        ["div", {}, "test dialog", 
+        ["div", {style: "display:flex"}, "test dialog",
+            ["span", {style: "flex:1"}], 
             ["input", {type: "number", value: 1, step: 0.01, onchange: function() {
                 dialog.style.transform = "scale(" +this.value + ")";
             }}]
