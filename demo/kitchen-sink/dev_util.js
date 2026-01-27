@@ -39,7 +39,7 @@ exports.addGlobals = function() {
     window.MockRenderer = require("ace/test/mockrenderer").MockRenderer;
     window.EventEmitter = require("ace/lib/event_emitter").EventEmitter;
     
-    window.getSelection = getSelection;
+    window.getAceSelection = getSelection;
     window.setSelection = setSelection;
     window.testSelection = testSelection;
     window.setValue = setValue;
@@ -396,3 +396,44 @@ exports.log = function(str) {
 };
 
 exports.addGlobals();
+
+
+
+function showRanges() {
+    
+    element = editor.renderer.$textLayer.$lines.cellForRow(6).element
+    element = editor.renderer.$textLayer.$lines.cellForRow(10).element
+
+    element = element.childNodes[0]
+
+    // editor.renderer.$textLayer.$scratchRange.setStart(element, 0)
+    // editor.renderer.$textLayer.$scratchRange.setEnd(element.lastChild, element.children.length)
+    editor.renderer.$textLayer.$scratchRange.selectNodeContents(element)
+
+    var rects = editor.renderer.$textLayer.$scratchRange.getClientRects()
+
+
+
+    var rectNodes = window.rectNodes || []
+    rectNodes.forEach(x => x.remove());
+    rectNodes.length = 0
+    function showRect(rect, i, l) {
+        console.log(i, l, i/l)
+        var div =  document.createElement("div")
+        rectNodes.push(div)
+        div.style.outline = "solid 1px lime"
+        div.style.background = `hsl(${i/l}turn 100% 50% / 0.4)`;
+        div.style.position = "fixed"
+        div.style.left = rect.left + "px"
+        div.style.top = rect.top + "px"
+        div.style.width = rect.width + "px"
+        div.style.height = rect.height + "px"
+        document.body.appendChild(div)
+    }
+
+
+    for (var i = 0; i < rects.length; i++)
+        showRect(rects[i], i, rects.length)
+    
+    
+}

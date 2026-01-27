@@ -144,6 +144,27 @@ class Lines {
         return cell;
     }
     
+    cellForRow(row) {
+        var cells = this.cells;
+        var min = 0;
+        var max = cells.length - 1;
+        
+        if (row < cells[0].row || row > cells[max].row)
+            return;
+
+        while (min <= max) {
+            var mid = Math.floor((min + max) / 2);
+            var cell = cells[mid];
+            if (cell.row > row) {
+                max = mid - 1;
+            } else if (cell.row < row) {
+                min = mid + 1;
+            } else {
+                return cell;
+            }
+        }
+        return cell;        
+    }
 }
 
 exports.Lines = Lines;
