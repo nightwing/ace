@@ -24,6 +24,11 @@ function initDoc(file, path, doc) {
     var mode = modelist.getModeForPath(path);
     session.modeName = mode.name;
     session.setMode(mode.mode);
+    
+    
+    // editor.setOption("fontFamily", "cursive") ; 
+    session.setValue( session.getValue() + "שלום עולם בעברית123" +"\n" + "ジャパン + 八洲", 1)
+
     return session;
 }
 
