@@ -435,31 +435,21 @@ class Text {
         }
 
         try {
-            var firstTextNode = this.$findFirstTextNode(lineElement);
-            if (!firstTextNode) {
-                return column * this.config.characterWidth;
-            }
 
             var position = this.$findColumnPosition(lineElement, column);
             if (!position) {
                 return column * this.config.characterWidth;
             }
 
-            this.$scratchRange.setStart(firstTextNode, 0);
+            this.$scratchRange.setStart(position.node, position.offset);
             this.$scratchRange.setEnd(position.node, position.offset);
 
-            var rect = this.$scratchRange.getBoundingClientRect();
-            return rect.width;
+            var rangeRect = this.$scratchRange.getBoundingClientRect();
+            var rect = this.element.getBoundingClientRect() 
+            return rangeRect.left - rect.left;
         } catch (e) {
             return column * this.config.characterWidth;
         }
-    }
-
-    $findFirstTextNode(element) {
-        var walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, function (node) {
-            return node.nodeValue && node.nodeValue.length > 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
-        });
-        return walker.nextNode();
     }
 
     $findColumnPosition(lineElement, targetColumn) {
