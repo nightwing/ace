@@ -176,7 +176,7 @@ class Marker {
            this.drawBidiSingleLineMarker(stringBuilder, range1, clazz + " ace_br12", config, null, extraStyle);
         } else {
             top = this.$getTop(range.end.row, config);
-            var width = config.textWidth(range.start.row, range.start.column);
+            var width = config.textWidth(range.end.row, range.end.column);
 
             this.elt(
                 clazz + " ace_br12",

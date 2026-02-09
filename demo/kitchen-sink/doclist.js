@@ -26,7 +26,7 @@ function initDoc(file, path, doc) {
     session.setMode(mode.mode);
     
     
-    // editor.setOption("fontFamily", "cursive") ; 
+     editor.setOption("fontFamily", "cursive") ; 
     session.setValue( session.getValue() + "שלום עולם בעברית123" +"\n" + "ジャパン + 八洲", 1)
 
     return session;

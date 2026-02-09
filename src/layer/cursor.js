@@ -188,8 +188,9 @@ class Cursor {
 
         var cursorTop = (pos.row - (onScreen ? this.config.firstRowScreen : 0)) *
             this.config.lineHeight;
+        var cursorWidth = (this.config.textWidth(pos.row, pos.column + 1) - textWidth) || this.config.characterWidth;
 
-        return {left : cursorLeft, top : cursorTop};
+        return {left : cursorLeft, top : cursorTop, width : Math.abs(cursorWidth)};
     }
 
     isCursorInView(pixelPos, config) {
@@ -222,7 +223,7 @@ class Cursor {
                 } else {
                     dom.setStyle(style, "display", "block");
                     dom.translate(element, pixelPos.left, pixelPos.top);
-                    dom.setStyle(style, "width", Math.round(config.characterWidth) + "px");
+                    dom.setStyle(style, "width", Math.round(pixelPos.width) + "px");
                     dom.setStyle(style, "height", config.lineHeight + "px");
                 }
             } else {
