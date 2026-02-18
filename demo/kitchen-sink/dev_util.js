@@ -396,3 +396,82 @@ exports.log = function(str) {
 };
 
 exports.addGlobals();
+
+
+
+function showRanges() {
+   
+    // element = editor.renderer.$textLayer.$lines.cellForRow(6).element
+    // element = editor.renderer.$textLayer.$lines.cellForRow(10).element
+
+    // element = element.childNodes[0]
+
+    var textLayer = editor.renderer.$textLayer
+    var screenPos = editor.session.documentToScreenPosition(editor.getCursorPosition())
+
+
+    var lineElement = textLayer.element.children[screenPos.row - textLayer.config.firstRow];
+
+    var firstTextNode = textLayer.$findFirstTextNode(lineElement);
+
+    var nodePosition = textLayer.$findColumnPosition(lineElement, screenPos.column);
+ 
+
+    textLayer.$scratchRange.setStart(firstTextNode, 0);
+    textLayer.$scratchRange.setEnd(nodePosition.node, nodePosition.offset);
+
+    // editor.renderer.$textLayer.$scratchRange.setStart(element, 0)
+    // editor.renderer.$textLayer.$scratchRange.setEnd(element.lastChild, element.children.length)
+    // editor.renderer.$textLayer.$scratchRange.selectNodeContents(element)
+
+    var rects = textLayer.$scratchRange.getClientRects()
+
+
+
+    var rectNodes = window.rectNodes || []
+    rectNodes.forEach(x => x.remove());
+    rectNodes.length = 0
+    function showRect(rect, i, l) {
+        console.log(i, l, i/l)
+        var div =  document.createElement("div")
+        rectNodes.push(div)
+        div.style.outline = "solid 1px lime"
+        div.style.background = `hsl(${i/l}turn 100% 50% / 0.4)`;
+        div.style.position = "fixed"
+        div.style.left = rect.left + "px"
+        div.style.top = rect.top + "px"
+        div.style.width = rect.width + "px"
+        div.style.height = rect.height + "px"
+        document.body.appendChild(div)
+    }
+
+
+    for (var i = 0; i < rects.length; i++)
+        showRect(rects[i], i, rects.length)
+    
+}
+// rects are unordered, are all on the same line and can be overlapping 
+// we want to get left right pairs as an ordered list of non-overlapping rects covering the same area as the original ones
+function mergeTouchingRects(rects) {
+    var merged = [];
+    for (var i = 0; i < rects.length; i++) {
+        var rect = rects[i];
+        var found = false;
+        for (var j = 0; j < merged.length; j++) {
+            var m = merged[j];
+            if (m.right >= rect.left && m.left <= rect.right) {
+                m.left = Math.min(m.left, rect.left);
+                m.right = Math.max(m.right, rect.right);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            merged.push({
+                left: rect.left,
+                right: rect.right
+            });
+        }
+    }
+    return merged;
+} 
