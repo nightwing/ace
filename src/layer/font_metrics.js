@@ -14,7 +14,10 @@ class FontMetrics {
     /**
      * @param {HTMLElement} parentEl
      */
-    constructor(parentEl) {
+    constructor(parentEl, textLayer) {
+        this.$characterSize = {width: 0, height: 0};
+        this.textLayer = textLayer;
+
         this.el = dom.createElement("div");
         this.$setMeasureNodeStyles(this.el.style, true);
 
@@ -31,13 +34,12 @@ class FontMetrics {
 
         this.$measureNode.textContent = lang.stringRepeat("X", CHAR_COUNT);
 
-        this.$characterSize = {width: 0, height: 0};
-
-
         if (USE_OBSERVER)
             this.$addObserver();
         else
             this.checkForSizeChanges();
+
+        this.textLayer.$setFontMetrics(this);
     }
     
     $setMeasureNodeStyles(style, isRoot) {
@@ -208,7 +210,34 @@ class FontMetrics {
     }
     
 }
-FontMetrics.prototype.$characterSize = {width: 0, height: 0};
+
+
+function mergeTouchingRects(rects) {
+    var merged = [];
+    for (var i = 0; i < rects.length; i++) {
+        var rect = rects[i];
+        var found = false;
+        for (var j = 0; j < merged.length; j++) {
+            var m = merged[j];
+            if (m.right >= rect.left && m.left <= rect.right) {
+                m.left = Math.min(m.left, rect.left);
+                m.right = Math.max(m.right, rect.right);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            merged.push({
+                left: rect.left,
+                right: rect.right,
+                top: rect.top,
+                height: rect.height,
+            });
+        }
+    }
+    return merged;
+} 
+ 
 
 oop.implement(FontMetrics.prototype, EventEmitter);
 

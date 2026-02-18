@@ -2103,12 +2103,7 @@ class EditSession {
             if (c == 9) {
                 screenColumn += this.getScreenTabSize(screenColumn);
             }
-            // full width characters
-            else if (c >= 0x1100 && isFullWidth(c)) {
-                screenColumn += 2;
-            } else {
-                screenColumn += 1;
-            }
+            screenColumn += 1;
             if (screenColumn > maxScreenColumn) {
                 break;
             }
