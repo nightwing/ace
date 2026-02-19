@@ -259,45 +259,6 @@ class BidiHandler {
         return left;
     }
 
-    /**
-     * Returns 'selections' - array of objects defining set of selection rectangles
-     * @param {Number} startCol the start column position
-     * @param {Number} endCol the end column position
-     *
-     * @return {Object[]} Each object contains 'left' and 'width' values defining selection rectangle.
-    **/
-    getSelections(startCol, endCol) {
-        var map = this.bidiMap, levels = map.bidiLevels, level, selections = [], offset = 0,
-            selColMin = Math.min(startCol, endCol) - this.wrapIndent, selColMax = Math.max(startCol, endCol) - this.wrapIndent,
-                isSelected = false, isSelectedPrev = false, selectionStart = 0;
-
-        if (this.wrapIndent)
-            offset += this.isRtlDir ? (-1 * this.wrapOffset) : this.wrapOffset;
-
-        for (var logIdx, visIdx = 0; visIdx < levels.length; visIdx++) {
-            logIdx = map.logicalFromVisual[visIdx];
-            level = levels[visIdx];
-            isSelected = (logIdx >= selColMin) && (logIdx < selColMax);
-            if (isSelected && !isSelectedPrev) {
-                selectionStart = offset;
-            } else if (!isSelected && isSelectedPrev) {
-                selections.push({left: selectionStart, width: offset - selectionStart});
-            }
-            offset += this.charWidths[level];
-            isSelectedPrev = isSelected;
-        }
-
-        if (isSelected && (visIdx === levels.length)) {
-            selections.push({left: selectionStart, width: offset - selectionStart});
-        }
-
-        if(this.isRtlDir) {
-            for (var i = 0; i < selections.length; i++) {
-                selections[i].left += this.rtlLineOffset;
-            }
-        }
-        return selections;
-    }
 
     /**
      * Converts character coordinates on the screen to respective document column number
