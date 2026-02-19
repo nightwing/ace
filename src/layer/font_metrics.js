@@ -284,7 +284,85 @@ class FontMetrics {
         return lastNode && {
             node: lastNode,
             offset: lastNode.nodeValue.length
+        };
+    }
+
+    $pixelToColumn(screenRow, x) {
+        var lineElement = this.$findElementForScreenRow(screenRow);
+        var screenColumn = 0;
+        var childNodes = lineElement.childNodes;
+        for (var i = 0; i < childNodes.length; i++) {
+            var child = childNodes[i];
+            var rects = child.getClientRects();
+            for (var j = 0; j < rects.length; j++) {
+                var rect = rects[j];
+                if (rect.left < x && x < rect.left + rect.width) {
+                    screenColumn += this.$findCharacterAt(child, x);
+                    return screenColumn;
+                }
+            }
+            screenColumn += child.textContent.length;
         }
+        return screenColumn;
+    }
+    $findCharacterAt(element, x) {
+        var range = this.$scratchRange;
+        var children = element.childNodes;
+        var column = 0;
+        for (var i = 0; i < children.length; i++) {
+            var child = children[i];
+            if (child.nodeType === Node.TEXT_NODE) {
+                
+            } else if (child.nodeType === Node.ELEMENT_NODE) {
+                var rects = child.getClientRects();
+                for (var k = 0; k < rects.length; k++) {
+                    var rect = rects[k];
+                    if (rect.left <= x && x <= rect.right) {
+                        return this.$findCharacterAt(child, x);
+                    }
+                }
+            }
+        }
+        return column;
+    }
+
+    $findCharacterInTextNode(textNode, x) {
+        var range = this.$scratchRange;
+        var textLength = textNode.nodeValue.length;
+        for (var j = 0; j < textLength; j++) {
+            range.setStart(textNode, j);
+            range.setEnd(textNode, j + 1);
+            var rect = range.getBoundingClientRect();
+            if (rect.left <= x && x <= rect.right) {
+                return {col: j, found: true};
+            }
+        }
+        return  {col: textLength, found: false};
+    }
+
+    $findCharacterInElement(element, x) {
+        var children = element.childNodes;
+        var column = 0;
+        for (var i = 0; i < children.length; i++) {
+            var child = children[i];
+            if (child.nodeType === Node.TEXT_NODE) {
+                var result = this.$findCharacterInTextNode(child, x);
+                column += result.col;
+                if (result.found) {
+                    return column;
+                }
+            } else if (child.nodeType === Node.ELEMENT_NODE) {
+                var rects = child.getClientRects();
+                for (var k = 0; k < rects.length; k++) {
+                    var rect = rects[k];
+                    if (rect.left <= x && x <= rect.right) {
+                        return column + this.$findCharacterInElement(child, x);
+                    }
+                }
+                column += child.textContent.length;
+            }
+        }
+        return column;
     }
 
     getRects(startScreenPos, endScreenPos) {
@@ -320,6 +398,13 @@ class FontMetrics {
     } 
 
 }
+
+function findCharacterInDom(element, x) {
+    if (element.nodeType === Node.TEXT_NODE) {
+
+    }
+}
+
 
 
 function mergeTouchingRects(rects) {

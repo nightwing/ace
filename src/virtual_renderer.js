@@ -1687,6 +1687,8 @@ class VirtualRenderer {
         var row = (y + this.scrollTop - canvasPos.top) / this.lineHeight;
         var col = this.$blockCursor ? Math.floor(offset) : Math.round(offset);
 
+        col = this.$fontMetrics.$pixelToColumn(row, offsetX);
+
         return {row: row, column: col, side: offset - col > 0 ? 1 : -1, offsetX:  offsetX};
     }
 
