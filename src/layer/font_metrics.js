@@ -214,7 +214,7 @@ class FontMetrics {
         var textLayer = this.textLayer;
         var data = textLayer.$lines.$getCellByScreenRow(screenRow, textLayer.config);
         var lineElement = data && data.cell.element;
-        console.log("cell", lineElement, screenRow);
+        // console.trace("cell", lineElement, screenRow);
 
         if (lineElement && textLayer.$useLineGroups()) {
             var index = Math.floor(data.offset / textLayer.config.lineHeight);
@@ -224,7 +224,7 @@ class FontMetrics {
     }
     
     textWidth(row, column) {
-        if (column === 0) return 0;
+
         var textLayer = this.textLayer;
 
         var lineElement = this.$findElementForScreenRow(row);
@@ -243,7 +243,6 @@ class FontMetrics {
         }
 
         try {
-
             var position = this.$findColumnPosition(lineElement, screenColumn);
             if (!position) {
                 return screenColumn * textLayer.config.characterWidth;
@@ -287,83 +286,57 @@ class FontMetrics {
         };
     }
 
-    $pixelToColumn(screenRow, x) {
+    $pixelToColumn(screenRow, screenColumn1, x) {
+        var scratchRange = this.$scratchRange;
         var lineElement = this.$findElementForScreenRow(screenRow);
+        if (!lineElement) return screenColumn1;
+
         var screenColumn = 0;
-        var childNodes = lineElement.childNodes;
-        for (var i = 0; i < childNodes.length; i++) {
-            var child = childNodes[i];
-            var rects = child.getClientRects();
-            for (var j = 0; j < rects.length; j++) {
-                var rect = rects[j];
-                if (rect.left < x && x < rect.left + rect.width) {
-                    screenColumn += this.$findCharacterAt(child, x);
-                    return screenColumn;
+        function getRects(node) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                scratchRange.setStart(node, 0);
+                scratchRange.setEnd(node, node.nodeValue.length);
+                return scratchRange.getClientRects();
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+                return node.getClientRects();
+            }
+            return [];
+        }
+        function search(node) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                var textLength = node.nodeValue.length;
+                for (var j = 0; j < textLength; j++) {
+                    scratchRange.setStart(node, j);
+                    scratchRange.setEnd(node, j + 1);
+                    let rect = scratchRange.getBoundingClientRect();
+                    if (rect.left <= x && x <= rect.right) {
+                        screenColumn += j
+                        return screenColumn;
+                    }
+                }
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+                var childNodes = node.childNodes;
+
+                for (var i = 0; i < childNodes.length; i++) {
+                    var child = childNodes[i];
+                    var rects = getRects(child);
+                    for (var j = 0; j < rects.length; j++) {
+                        let rect = rects[j];
+                        if (rect.left < x && x < rect.left + rect.width) {
+                            search(child);
+                            return screenColumn;
+                        }
+                    }
+                    screenColumn += child.nodeType === Node.TEXT_NODE ? child.nodeValue.length : child.textContent.length;
                 }
             }
-            screenColumn += child.textContent.length;
         }
+        search(lineElement);
+
         return screenColumn;
-    }
-    $findCharacterAt(element, x) {
-        var range = this.$scratchRange;
-        var children = element.childNodes;
-        var column = 0;
-        for (var i = 0; i < children.length; i++) {
-            var child = children[i];
-            if (child.nodeType === Node.TEXT_NODE) {
-                
-            } else if (child.nodeType === Node.ELEMENT_NODE) {
-                var rects = child.getClientRects();
-                for (var k = 0; k < rects.length; k++) {
-                    var rect = rects[k];
-                    if (rect.left <= x && x <= rect.right) {
-                        return this.$findCharacterAt(child, x);
-                    }
-                }
-            }
-        }
-        return column;
-    }
+    } 
 
-    $findCharacterInTextNode(textNode, x) {
-        var range = this.$scratchRange;
-        var textLength = textNode.nodeValue.length;
-        for (var j = 0; j < textLength; j++) {
-            range.setStart(textNode, j);
-            range.setEnd(textNode, j + 1);
-            var rect = range.getBoundingClientRect();
-            if (rect.left <= x && x <= rect.right) {
-                return {col: j, found: true};
-            }
-        }
-        return  {col: textLength, found: false};
-    }
-
-    $findCharacterInElement(element, x) {
-        var children = element.childNodes;
-        var column = 0;
-        for (var i = 0; i < children.length; i++) {
-            var child = children[i];
-            if (child.nodeType === Node.TEXT_NODE) {
-                var result = this.$findCharacterInTextNode(child, x);
-                column += result.col;
-                if (result.found) {
-                    return column;
-                }
-            } else if (child.nodeType === Node.ELEMENT_NODE) {
-                var rects = child.getClientRects();
-                for (var k = 0; k < rects.length; k++) {
-                    var rect = rects[k];
-                    if (rect.left <= x && x <= rect.right) {
-                        return column + this.$findCharacterInElement(child, x);
-                    }
-                }
-                column += child.textContent.length;
-            }
-        }
-        return column;
-    }
+  
 
     getRects(startScreenPos, endScreenPos) {
         var row = startScreenPos.row;

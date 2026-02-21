@@ -1626,45 +1626,6 @@ class VirtualRenderer {
     }
 
     /**
-     * Convert pixel to column using binary search with actual measurements
-     */
-    $pixelToColumn(row, offsetX) {
-         
-        if (row == undefined || offsetX <= 0) return 0;
-
-        var lineText = this.session.getLine(row) || "";
-
-        var left = 0;
-        var right = lineText.length;
-        var bestCol = 0;
-
-        while (left <= right) {
-            var mid = Math.floor((left + right) / 2);
-            var width = this.$fontMetrics.textWidth(row, mid);
-
-            if (width <= offsetX) {
-                bestCol = mid;
-                left = mid + 1;
-            } else {
-                right = mid - 1;
-            }
-        }
-
-        if (bestCol < lineText.length) {
-            var currentWidth = this.$fontMetrics.textWidth(row, bestCol);
-            var nextWidth = this.$fontMetrics.textWidth(row, bestCol + 1);
-            var charWidth = nextWidth - currentWidth;
-            var clickPos = offsetX - currentWidth;
-
-            if (clickPos > charWidth / 2) {
-                bestCol++;
-            }
-        }
-
-        return Math.min(bestCol, lineText.length);
-    }
-
-    /**
      *
      * @param {number} x
      * @param {number} y
@@ -1687,7 +1648,7 @@ class VirtualRenderer {
         var row = (y + this.scrollTop - canvasPos.top) / this.lineHeight;
         var col = this.$blockCursor ? Math.floor(offset) : Math.round(offset);
 
-        col = this.$fontMetrics.$pixelToColumn(row, offsetX);
+        col = this.$fontMetrics.$pixelToColumn(row, col, x);
 
         return {row: row, column: col, side: offset - col > 0 ? 1 : -1, offsetX:  offsetX};
     }
