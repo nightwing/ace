@@ -64,6 +64,8 @@ class Marker {
 
         this.config = config;
 
+        this.element.style.display = "none";
+
         this.i = 0;
         var html;
         for (var key in this.markers) {
@@ -99,6 +101,8 @@ class Marker {
             while (this.i < this.element.childElementCount)
                 this.element.removeChild(this.element.lastChild);
         }
+
+        this.element.style.display = "";
     }
 
     /**

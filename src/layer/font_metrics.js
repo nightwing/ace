@@ -286,7 +286,7 @@ class FontMetrics {
         };
     }
 
-    $pixelToColumn(screenRow, screenColumn1, x) {
+    $pixelToColumn(screenRow, screenColumn1, x, blockCursor) {
         var scratchRange = this.$scratchRange;
         var lineElement = this.$findElementForScreenRow(screenRow);
         if (!lineElement) return screenColumn1;
@@ -311,6 +311,9 @@ class FontMetrics {
                     let rect = scratchRange.getBoundingClientRect();
                     if (rect.left <= x && x <= rect.right) {
                         screenColumn += j
+                        if (!blockCursor && x > rect.left + rect.width / 2) {
+                            screenColumn++;
+                        }
                         return screenColumn;
                     }
                 }

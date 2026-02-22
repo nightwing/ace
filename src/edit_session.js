@@ -2102,8 +2102,9 @@ class EditSession {
             // tab
             if (c == 9) {
                 screenColumn += this.getScreenTabSize(screenColumn);
+            } else {
+                screenColumn += 1;
             }
-            screenColumn += 1;
             if (screenColumn > maxScreenColumn) {
                 break;
             }
