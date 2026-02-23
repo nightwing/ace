@@ -1,10 +1,10 @@
+"use strict";
+var test = require("../test/run.js")(module.exports);
+
 
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("../test/mockdom");
 }
-
-"use strict";
 
 var Editor = require("../editor").Editor;
 var EditSession = require("../edit_session").EditSession;
@@ -81,8 +81,8 @@ var setupInlineTooltip = function() {
     inlineTooltip.moreOptions.getElement().style.heightHint = editor.renderer.lineHeight * 2;
 };
 
-module.exports = {
-    setUp: function(done) {
+
+    test.beforeEach(function(done) {
         wrapperEl = document.createElement("div");
         wrapperEl.style.position = "fixed";
         wrapperEl.style.left = "400px";
@@ -102,16 +102,16 @@ module.exports = {
         setupInlineTooltip();
         editor.focus();
         done();
-    },
-    "test: autocomplete completion shows up": function(done) {
+    });
+    test("autocomplete completion shows up", function(done) {
         autocomplete.show(editor);
         assert.strictEqual(autocomplete.getIndex(), 0);
         assert.strictEqual(autocomplete.getData().value, "foo");
         editor.renderer.$loop._flush();
         assert.strictEqual(getAllLines(), "foo");
         done();
-    },
-    "test: autocomplete start keybinding works": function(done) {
+    });
+    test("autocomplete start keybinding works", function(done) {
         type("Alt-C");
         assert.strictEqual(autocomplete.isOpen(), true);
         assert.strictEqual(autocomplete.getIndex(), 0);
@@ -129,8 +129,8 @@ module.exports = {
         assert.strictEqual(getAllLines(), "f");
 
         done();
-    },
-    "test: replaces different autocomplete implementation for the editor when opened": function(done) {
+    });
+    test("replaces different autocomplete implementation for the editor when opened", function(done) {
         var completer = Autocomplete.for(editor);
         completer.showPopup(editor, {});
         assert.strictEqual(editor.completer, completer);
@@ -143,16 +143,16 @@ module.exports = {
         assert.strictEqual(getAllLines(), "foo");
 
         done();
-    },
-    "test: autocomplete tooltip is shown according to the selected option": function(done) {
+    });
+    test("autocomplete tooltip is shown according to the selected option", function(done) {
         autocomplete.show(editor);
         assert.strictEqual(inlineTooltip.isShown(), true);
 
         autocomplete.detach();
         assert.strictEqual(inlineTooltip.isShown(), false);
         done();
-    },
-    "test: autocomplete keyboard navigation works": function(done) {
+    });
+    test("autocomplete keyboard navigation works", function(done) {
         autocomplete.show(editor);
         editor.renderer.$loop._flush();
         assert.strictEqual(autocomplete.getIndex(), 0);
@@ -171,8 +171,8 @@ module.exports = {
         assert.strictEqual(autocomplete.getData().value, "foo");
         assert.equal(getAllLines(), "foo");
         done();
-    },
-    "test: autocomplete tooltip navigation works": function(done) {
+    });
+    test("autocomplete tooltip navigation works", function(done) {
         autocomplete.show(editor);
         assert.strictEqual(autocomplete.getInlineTooltip().isShown(), true);
 
@@ -234,8 +234,8 @@ module.exports = {
         assert.strictEqual(getAllLines(), "function");
 
         done();
-    },
-    "test: verify goTo commands": function(done) {
+    });
+    test("verify goTo commands", function(done) {
         autocomplete.show(editor);
         autocomplete.setIndex(1);
         editor.renderer.$loop._flush();
@@ -283,8 +283,8 @@ module.exports = {
         assert.strictEqual(autocomplete.getData().value, "fundraiser");
         assert.strictEqual(getAllLines(), "fundraiser");
         done();
-    },
-    "test: set index to negative value hides suggestions": function(done) {
+    });
+    test("set index to negative value hides suggestions", function(done) {
         autocomplete.show(editor);
         editor.renderer.$loop._flush();
         assert.strictEqual(autocomplete.getIndex(), 0);
@@ -295,8 +295,8 @@ module.exports = {
         assert.strictEqual(autocomplete.isOpen(), false);
         assert.strictEqual(getAllLines(), "f");
         done();
-    },
-    "test: autocomplete can be closed": function(done) {
+    });
+    test("autocomplete can be closed", function(done) {
         autocomplete.show(editor);
         editor.renderer.$loop._flush();
         assert.strictEqual(autocomplete.isOpen(), true);
@@ -307,8 +307,8 @@ module.exports = {
         assert.strictEqual(autocomplete.isOpen(), false);
         assert.equal(getAllLines(), "f");
         done();
-    },
-    "test: autocomplete can be accepted": function(done) {
+    });
+    test("autocomplete can be accepted", function(done) {
         autocomplete.show(editor);
         editor.renderer.$loop._flush();
         assert.strictEqual(autocomplete.isOpen(), true);
@@ -325,8 +325,8 @@ module.exports = {
         assert.strictEqual(document.querySelectorAll(".ace_ghost_text").length, 0);
         assert.strictEqual(getAllLines(), "foo");
         done();
-    },
-    "test: autocomplete can be accepted via tooltip": function(done) {
+    });
+    test("autocomplete can be accepted via tooltip", function(done) {
         autocomplete.show(editor);
         editor.renderer.$loop._flush();
         assert.strictEqual(autocomplete.isOpen(), true);
@@ -348,8 +348,8 @@ module.exports = {
         assert.strictEqual(document.querySelectorAll(".ace_ghost_text").length, 0);
         assert.strictEqual(getAllLines(), "foo");
         done();
-    },
-    "test: incremental typing filters results": function(done) {
+    });
+    test("incremental typing filters results", function(done) {
         autocomplete.show(editor);
         editor.renderer.$loop._flush();
         assert.strictEqual(autocomplete.isOpen(), true);
@@ -376,8 +376,8 @@ module.exports = {
         assert.equal(getAllLines(), "fr");
 
         done();
-    },
-    "test: tooltip stays open on incremental typing": function(done) {
+    });
+    test("tooltip stays open on incremental typing", function(done) {
         autocomplete.show(editor);
         assert.strictEqual(inlineTooltip.isShown(), true);
         editor.renderer.$loop._flush();
@@ -388,8 +388,8 @@ module.exports = {
         assert.strictEqual(autocomplete.isOpen(), true);
         assert.strictEqual(inlineTooltip.isShown(), true);
         done();
-    },
-    "test: can toggle tooltip display mode via tooltip button": function(done) {
+    });
+    test("can toggle tooltip display mode via tooltip button", function(done) {
         autocomplete.show(editor);
         assert.strictEqual(inlineTooltip.isShown(), true);
 
@@ -418,8 +418,8 @@ module.exports = {
         assert.strictEqual(inlineTooltip.getAlwaysShow(), false);
         assert.strictEqual(inlineTooltip.isMoreOptionsShown(), false);
         done();
-    },
-    "test: verify detach": function(done) {
+    });
+    test("verify detach", function(done) {
         autocomplete.show(editor);
         editor.renderer.$loop._flush();
         assert.strictEqual(autocomplete.getIndex(), 0);
@@ -435,8 +435,8 @@ module.exports = {
         assert.equal(autocomplete.completionProvider, null);
         assert.strictEqual(getAllLines(), "f");
         done();
-    },
-    "test: verify destroy": function(done) {
+    });
+    test("verify destroy", function(done) {
         autocomplete.show(editor);
         editor.renderer.$loop._flush();
         assert.strictEqual(autocomplete.getIndex(), 0);
@@ -460,15 +460,13 @@ module.exports = {
         autocomplete.destroy();
         editor.renderer.$loop._flush();
         done();
-    },
+    });
 
-    tearDown: function() {
+    test.afterEach(function() {
         autocomplete.destroy();
         editor.destroy();
         wrapperEl.parentElement.removeChild(wrapperEl);
-    }
-};
+    });
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

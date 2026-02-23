@@ -1,9 +1,9 @@
+"use strict";
+var test = require("./test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("./test/mockdom");
 }
-
-"use strict";
 
 var EditSession = require("./edit_session").EditSession;
 var Editor = require("./editor").Editor;
@@ -13,8 +13,8 @@ var MockRenderer = require("./test/mockrenderer").MockRenderer;
 var assert = require("./test/assertions");
 var whitespace = require("./ext/whitespace");
 
-module.exports = {
-    "test: delete line from the middle" : function() {
+
+    test("delete line from the middle", function() {
         var session = new EditSession(["a", "b", "c", "d"].join("\n"));
         var editor = new Editor(new MockRenderer(), session);
 
@@ -38,9 +38,9 @@ module.exports = {
 
         assert.equal(session.toString(), "");
         assert.position(editor.getCursorPosition(), 0, 0);
-    },
+    });
 
-    "test: delete multiple selected lines" : function() {
+    test("delete multiple selected lines", function() {
         var session = new EditSession(["a", "b", "c", "d"].join("\n"));
         var editor = new Editor(new MockRenderer(), session);
 
@@ -50,9 +50,9 @@ module.exports = {
         editor.removeLines();
         assert.equal(session.toString(), "a\nd");
         assert.position(editor.getCursorPosition(), 1, 0);
-    },
+    });
 
-    "test: delete first line" : function() {
+    test("delete first line", function() {
         var session = new EditSession(["a", "b", "c"].join("\n"));
         var editor = new Editor(new MockRenderer(), session);
 
@@ -60,9 +60,9 @@ module.exports = {
 
         assert.equal(session.toString(), "b\nc");
         assert.position(editor.getCursorPosition(), 0, 0);
-    },
+    });
 
-    "test: delete last should also delete the new line of the previous line" : function() {
+    test("delete last should also delete the new line of the previous line", function() {
         var session = new EditSession(["a", "b", "c", ""].join("\n"));
         var editor = new Editor(new MockRenderer(), session);
 
@@ -75,9 +75,9 @@ module.exports = {
         editor.removeLines();
         assert.equal(session.toString(), "a\nb");
         assert.position(editor.getCursorPosition(), 1, 1);
-    },
+    });
 
-    "test: indent block" : function() {
+    test("indent block", function() {
         var session = new EditSession(["a12345", "b12345", "c12345"].join("\n"));
         var editor = new Editor(new MockRenderer(), session);
 
@@ -99,9 +99,9 @@ module.exports = {
         editor.selection.moveTo(0, 3);
         editor.indent();
         assert.equal("\tx", session.toString());
-    },
+    });
 
-    "test: indent selected lines" : function() {
+    test("indent selected lines", function() {
         var session = new EditSession(["a12345", "b12345", "c12345"].join("\n"));
         var editor = new Editor(new MockRenderer(), session);
 
@@ -110,18 +110,18 @@ module.exports = {
 
         editor.indent();
         assert.equal(["a12345", "    b12345", "c12345"].join("\n"), session.toString());
-    },
+    });
 
-    "test: no auto indent if cursor is before the {" : function() {
+    test("no auto indent if cursor is before the {", function() {
         var session = new EditSession("{", new JavaScriptMode());
         var editor = new Editor(new MockRenderer(), session);
 
         editor.moveCursorTo(0, 0);
         editor.onTextInput("\n");
         assert.equal(["", "{"].join("\n"), session.toString());
-    },
+    });
     
-    "test: outdent block" : function() {
+    test("outdent block", function() {
         var session = new EditSession(["        a12345", "    b12345", "        c12345"].join("\n"));
         var editor = new Editor(new MockRenderer(), session);
 
@@ -144,9 +144,9 @@ module.exports = {
         var range = editor.getSelectionRange();
         assert.position(range.start, 0, 0);
         assert.position(range.end, 2, 0);
-    },
+    });
 
-    "test: outent without a selection should update cursor" : function() {
+    test("outent without a selection should update cursor", function() {
         var session = new EditSession("        12");
         var editor = new Editor(new MockRenderer(), session);
 
@@ -155,9 +155,9 @@ module.exports = {
 
         assert.equal(session.toString(), "    12");
         assert.position(editor.getCursorPosition(), 0, 0);
-    },
+    });
 
-    "test: comment lines should perserve selection" : function() {
+    test("comment lines should perserve selection", function() {
         var session = new EditSession(["  abc", "cde"].join("\n"), new JavaScriptMode());
         var editor = new Editor(new MockRenderer(), session);
         whitespace.detectIndentation(session);
@@ -171,9 +171,9 @@ module.exports = {
         var selection = editor.getSelectionRange();
         assert.position(selection.start, 0, 5);
         assert.position(selection.end, 1, 5);
-    },
+    });
 
-    "test: uncomment lines should perserve selection" : function() {
+    test("uncomment lines should perserve selection", function() {
         var session = new EditSession(["//   abc", "//cde"].join("\n"), new JavaScriptMode());
         var editor = new Editor(new MockRenderer(), session);
         session.setTabSize(2);
@@ -187,9 +187,9 @@ module.exports = {
 
         assert.equal(["  abc", "cde"].join("\n"), session.toString());
         assert.range(editor.getSelectionRange(), 0, 0, 1, 1);
-    },
+    });
 
-    "test: toggle comment lines twice should return the original text" : function() {
+    test("toggle comment lines twice should return the original text", function() {
         var session = new EditSession(["  abc", "cde", "fg"], new JavaScriptMode());
         var editor = new Editor(new MockRenderer(), session);
 
@@ -201,10 +201,10 @@ module.exports = {
         editor.toggleCommentLines();
 
         assert.equal(["  abc", "cde", "fg"].join("\n"), session.toString());
-    },
+    });
 
 
-    "test: comment lines - if the selection end is at the line start it should stay there": function() {
+    test("comment lines - if the selection end is at the line start it should stay there", function() {
         //select down
         var session = new EditSession(["abc", "cde"].join("\n"), new JavaScriptMode());
         var editor = new Editor(new MockRenderer(), session);
@@ -224,9 +224,9 @@ module.exports = {
 
         editor.toggleCommentLines();
         assert.range(editor.getSelectionRange(), 0, 3, 1, 0);
-    },
+    });
 
-    "test: move lines down should keep selection on moved lines" : function() {
+    test("move lines down should keep selection on moved lines", function() {
         var session = new EditSession(["11", "22", "33", "44"].join("\n"));
         var editor = new Editor(new MockRenderer(), session);
 
@@ -251,9 +251,9 @@ module.exports = {
         assert.position(editor.getCursorPosition(), 3, 1);
         assert.position(editor.getSelection().getSelectionAnchor(), 2, 1);
         assert.position(editor.getSelection().getSelectionLead(), 3, 1);
-    },
+    });
 
-    "test: move lines up should keep selection on moved lines" : function() {
+    test("move lines up should keep selection on moved lines", function() {
         var session = new EditSession(["11", "22", "33", "44"].join("\n"));
         var editor = new Editor(new MockRenderer(), session);
 
@@ -271,9 +271,9 @@ module.exports = {
         assert.position(editor.getCursorPosition(), 1, 1);
         assert.position(editor.getSelection().getSelectionAnchor(), 0, 1);
         assert.position(editor.getSelection().getSelectionLead(), 1, 1);
-    },
+    });
 
-    "test: move line without active selection should not move cursor relative to the moved line" : function() {
+    test("move line without active selection should not move cursor relative to the moved line", function() {
         var session = new EditSession(["11", "22", "33", "44"].join("\n"));
         var editor = new Editor(new MockRenderer(), session);
 
@@ -289,9 +289,9 @@ module.exports = {
         editor.moveLinesUp();
         assert.equal(["11", "22", "33", "44"].join("\n"), session.toString());
         assert.position(editor.getCursorPosition(), 1, 1);
-    },
+    });
 
-    "test: copy lines down should keep selection" : function() {
+    test("copy lines down should keep selection", function() {
         var session = new EditSession(["11", "22", "33", "44"].join("\n"));
         var editor = new Editor(new MockRenderer(), session);
 
@@ -304,9 +304,9 @@ module.exports = {
         assert.position(editor.getCursorPosition(), 4, 1);
         assert.position(editor.getSelection().getSelectionAnchor(), 3, 1);
         assert.position(editor.getSelection().getSelectionLead(), 4, 1);
-    },
+    });
 
-    "test: copy lines up should keep selection" : function() {
+    test("copy lines up should keep selection", function() {
         var session = new EditSession(["11", "22", "33", "44"].join("\n"));
         var editor = new Editor(new MockRenderer(), session);
 
@@ -319,9 +319,9 @@ module.exports = {
         assert.position(editor.getCursorPosition(), 2, 1);
         assert.position(editor.getSelection().getSelectionAnchor(), 1, 1);
         assert.position(editor.getSelection().getSelectionLead(), 2, 1);
-    },
+    });
 
-    "test: input a tab with soft tab should convert it to spaces" : function() {
+    test("input a tab with soft tab should convert it to spaces", function() {
         var session = new EditSession("");
         var editor = new Editor(new MockRenderer(), session);
 
@@ -334,9 +334,9 @@ module.exports = {
         session.setTabSize(5);
         editor.onTextInput("\t");
         assert.equal(session.toString(), "       ");
-    },
+    });
 
-    "test: input tab without soft tabs should keep the tab character" : function() {
+    test("input tab without soft tabs should keep the tab character", function() {
         var session = new EditSession("");
         var editor = new Editor(new MockRenderer(), session);
 
@@ -344,9 +344,9 @@ module.exports = {
 
         editor.onTextInput("\t");
         assert.equal(session.toString(), "\t");
-    },
+    });
 
-    "test: undo/redo for delete line" : function() {
+    test("undo/redo for delete line", function() {
         var session = new EditSession(["111", "222", "333"]);
         var undoManager = new UndoManager();
         session.setUndoManager(undoManager);
@@ -384,27 +384,27 @@ module.exports = {
         undoManager.undo();
         session.$syncInformUndoManager();
         assert.equal(session.toString(), initialText);
-    },
+    });
 
-    "test: remove left should remove character left of the cursor" : function() {
+    test("remove left should remove character left of the cursor", function() {
         var session = new EditSession(["123", "456"]);
 
         var editor = new Editor(new MockRenderer(), session);
         editor.moveCursorTo(1, 1);
         editor.remove("left");
         assert.equal(session.toString(), "123\n56");
-    },
+    });
 
-    "test: remove left should remove line break if cursor is at line start" : function() {
+    test("remove left should remove line break if cursor is at line start", function() {
         var session = new EditSession(["123", "456"]);
 
         var editor = new Editor(new MockRenderer(), session);
         editor.moveCursorTo(1, 0);
         editor.remove("left");
         assert.equal(session.toString(), "123456");
-    },
+    });
 
-    "test: remove left should remove tabsize spaces if cursor is on a tab stop and preceeded by spaces" : function() {
+    test("remove left should remove tabsize spaces if cursor is on a tab stop and preceeded by spaces", function() {
         var session = new EditSession(["123", "        456"]);
         session.setUseSoftTabs(true);
         session.setTabSize(4);
@@ -413,9 +413,9 @@ module.exports = {
         editor.moveCursorTo(1, 8);
         editor.remove("left");
         assert.equal(session.toString(), "123\n    456");
-    },
+    });
     
-    "test: transpose at line start should be a noop": function() {
+    test("transpose at line start should be a noop", function() {
         var session = new EditSession(["123", "4567", "89"]);
         
         var editor = new Editor(new MockRenderer(), session);
@@ -423,9 +423,9 @@ module.exports = {
         editor.transposeLetters();
         
         assert.equal(session.getValue(), ["123", "4567", "89"].join("\n"));
-    },
+    });
     
-    "test: transpose in line should swap the charaters before and after the cursor": function() {
+    test("transpose in line should swap the charaters before and after the cursor", function() {
         var session = new EditSession(["123", "4567", "89"]);
         
         var editor = new Editor(new MockRenderer(), session);
@@ -433,9 +433,9 @@ module.exports = {
         editor.transposeLetters();
         
         assert.equal(session.getValue(), ["123", "4657", "89"].join("\n"));
-    },
+    });
     
-    "test: transpose at line end should swap the last two characters": function() {
+    test("transpose at line end should swap the last two characters", function() {
         var session = new EditSession(["123", "4567", "89"]);
         
         var editor = new Editor(new MockRenderer(), session);
@@ -443,9 +443,9 @@ module.exports = {
         editor.transposeLetters();
         
         assert.equal(session.getValue(), ["123", "4576", "89"].join("\n"));
-    },
+    });
     
-    "test: transpose with non empty selection should be a noop": function() {
+    test("transpose with non empty selection should be a noop", function() {
         var session = new EditSession(["123", "4567", "89"]);
         
         var editor = new Editor(new MockRenderer(), session);
@@ -454,27 +454,27 @@ module.exports = {
         editor.transposeLetters();
         
         assert.equal(session.getValue(), ["123", "4567", "89"].join("\n"));
-    },
+    });
     
-    "test: transpose should move the cursor behind the last swapped character": function() {
+    test("transpose should move the cursor behind the last swapped character", function() {
         var session = new EditSession(["123", "4567", "89"]);
         
         var editor = new Editor(new MockRenderer(), session);
         editor.moveCursorTo(1, 2);
         editor.transposeLetters();
         assert.position(editor.getCursorPosition(), 1, 3);
-    },
+    });
     
-    "test: remove to line end": function() {
+    test("remove to line end", function() {
         var session = new EditSession(["123", "4567", "89"]);
         
         var editor = new Editor(new MockRenderer(), session);
         editor.moveCursorTo(1, 2);
         editor.removeToLineEnd();
         assert.equal(session.getValue(), ["123", "45", "89"].join("\n"));
-    },
+    });
     
-    "test: remove to line end at line end should remove the new line": function() {
+    test("remove to line end at line end should remove the new line", function() {
         var session = new EditSession(["123", "4567", "89"]);
         
         var editor = new Editor(new MockRenderer(), session);
@@ -482,9 +482,9 @@ module.exports = {
         editor.removeToLineEnd();
         assert.position(editor.getCursorPosition(), 1, 4);
         assert.equal(session.getValue(), ["123", "456789"].join("\n"));
-    },
+    });
 
-    "test: transform selection to uppercase": function() {
+    test("transform selection to uppercase", function() {
         var session = new EditSession(["ajax", "dot", "org"]);
 
         var editor = new Editor(new MockRenderer(), session);
@@ -492,9 +492,9 @@ module.exports = {
         editor.getSelection().selectLineEnd();
         editor.toUpperCase();
         assert.equal(session.getValue(), ["ajax", "DOT", "org"].join("\n"));
-    },
+    });
 
-    "test: transform word to uppercase": function() {
+    test("transform word to uppercase", function() {
         var session = new EditSession(["ajax", "dot", "org"]);
 
         var editor = new Editor(new MockRenderer(), session);
@@ -502,9 +502,9 @@ module.exports = {
         editor.toUpperCase();
         assert.equal(session.getValue(), ["ajax", "DOT", "org"].join("\n"));
         assert.position(editor.getCursorPosition(), 1, 0);
-    },
+    });
 
-    "test: transform selection to lowercase": function() {
+    test("transform selection to lowercase", function() {
         var session = new EditSession(["AJAX", "DOT", "ORG"]);
 
         var editor = new Editor(new MockRenderer(), session);
@@ -512,9 +512,9 @@ module.exports = {
         editor.getSelection().selectLineEnd();
         editor.toLowerCase();
         assert.equal(session.getValue(), ["AJAX", "dot", "ORG"].join("\n"));
-    },
+    });
 
-    "test: transform word to lowercase": function() {
+    test("transform word to lowercase", function() {
         var session = new EditSession(["AJAX", "DOT", "ORG"]);
 
         var editor = new Editor(new MockRenderer(), session);
@@ -522,10 +522,8 @@ module.exports = {
         editor.toLowerCase();
         assert.equal(session.getValue(), ["AJAX", "dot", "ORG"].join("\n"));
         assert.position(editor.getCursorPosition(), 1, 0);
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

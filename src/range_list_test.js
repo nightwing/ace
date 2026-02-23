@@ -1,4 +1,5 @@
 "use strict";
+var test = require("./test/run.js")(module.exports);
 
 var Range = require("./range").Range;
 var RangeList = require("./range_list").RangeList;
@@ -16,11 +17,9 @@ function testRangeList(rangeList, points) {
     assert.equal("" + flatten(rangeList), "" + points);
 }
 
-module.exports = {
+ 
 
-    name: "ACE range_list.js",
-
-    "test: rangeList pointIndex": function() {
+    test("rangeList pointIndex", function() {
         var rangeList = new RangeList();
         rangeList.ranges = [
             new Range(1,2,3,4),
@@ -36,9 +35,9 @@ module.exports = {
         assert.equal(rangeList.pointIndex({row: 5, column: 1}), 1);
         assert.equal(rangeList.pointIndex({row: 8, column: 9}), 2);
         assert.equal(rangeList.pointIndex({row: 18, column: 9}), -4);
-    },
+    });
     
-    "test: rangeList pointIndex excludeEdges": function() {
+    test("rangeList pointIndex excludeEdges", function() {
         var rangeList = new RangeList();
         rangeList.ranges = [
             new Range(1,2,3,4),
@@ -56,9 +55,9 @@ module.exports = {
         assert.equal(rangeList.pointIndex({row: 8, column: 9}, true), 2);
         assert.equal(rangeList.pointIndex({row: 10, column: 10}, true), 3);
         assert.equal(rangeList.pointIndex({row: 18, column: 9}, true), -5);
-    },
+    });
 
-    "test: rangeList add": function() {
+    test("rangeList add", function() {
         var rangeList = new RangeList();
         rangeList.addList([
             new Range(9,0,9,1),
@@ -78,9 +77,9 @@ module.exports = {
         assert.range(rangeList.ranges[3], 7,7,7,7);
         rangeList.add(new Range(7,8,7,8));
         assert.range(rangeList.ranges[4], 7,8,7,8);
-    },
+    });
 
-    "test: rangeList add empty": function() {
+    test("rangeList add empty", function() {
         var rangeList = new RangeList();
         rangeList.addList([
             new Range(7,10,7,10),
@@ -91,9 +90,9 @@ module.exports = {
 
         rangeList.add(new Range(9,10,9,10));
         testRangeList(rangeList, [7,10,7,10,8,10,8,10,9,10,9,10]);
-    },
+    });
 
-    "test: rangeList merge": function() {
+    test("rangeList merge", function() {
         var rangeList = new RangeList();
         rangeList.addList([
             new Range(1,2,3,4),
@@ -121,9 +120,9 @@ module.exports = {
         rangeList.ranges.push(new Range(10,10,10,10));
         removed = rangeList.merge();
         assert.equal(rangeList.ranges.length, 2);
-    },
+    });
 
-    "test: rangeList remove": function() {
+    test("rangeList remove", function() {
         var rangeList = new RangeList();
         var list = [
             new Range(1,2,3,4),
@@ -137,10 +136,8 @@ module.exports = {
         assert.equal(rangeList.ranges.length, 3);
         rangeList.substractPoint({row: 6, column: 7});
         assert.equal(rangeList.ranges.length, 2);
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

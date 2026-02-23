@@ -1,45 +1,46 @@
 "use strict";
+var test = require("./test/run.js")(module.exports);
 
 var LineWidgets = require("./line_widgets").LineWidgets;
 var EditSession = require("./edit_session").EditSession;
 var assert = require("./test/assertions");
 var Range = require("./range").Range;
 
-module.exports = {
-    createSession : function(rows, cols) {
+
+    function createSession(rows, cols) {
         var line = new Array(cols + 1).join("a");
         var text = new Array(rows).join(line + "\n") + line;
         return new EditSession(text);
-    },
+    }
     
-    "test: selectAll" : function() {
-        var session = this.createSession(10, 10);
+    test("selectAll", function() {
+        var session = createSession(10, 10);
         var selection = session.selection;
         session.selection.selectAll();
         assert.position(selection.getAnchor(), 0, 0);
         assert.position(selection.getCursor(), 9, 10);
         assert.position(selection.getRange().end, 9, 10);
         assert.position(selection.getRange().start, 0, 0);
-    },
+    });
 
-    "test: move cursor to end of file should place the cursor on last row and column" : function() {
-        var session = this.createSession(200, 10);
+    test("move cursor to end of file should place the cursor on last row and column", function() {
+        var session = createSession(200, 10);
         var selection = session.getSelection();
 
         selection.moveCursorFileEnd();
         assert.position(selection.getCursor(), 199, 10);
-    },
+    });
 
-    "test: moveCursor to start of file should place the cursor on the first row and column" : function() {
-        var session = this.createSession(200, 10);
+    test("moveCursor to start of file should place the cursor on the first row and column", function() {
+        var session = createSession(200, 10);
         var selection = session.getSelection();
 
         selection.moveCursorFileStart();
         assert.position(selection.getCursor(), 0, 0);
-    },
+    });
 
-    "test: move selection lead to end of file" : function() {
-        var session = this.createSession(200, 10);
+    test("move selection lead to end of file", function() {
+        var session = createSession(200, 10);
         var selection = session.getSelection();
 
         selection.moveCursorTo(100, 5);
@@ -49,10 +50,10 @@ module.exports = {
 
         assert.position(range.start, 100, 5);
         assert.position(range.end, 199, 10);
-    },
+    });
 
-    "test: move selection lead to start of file" : function() {
-        var session = this.createSession(200, 10);
+    test("move selection lead to start of file", function() {
+        var session = createSession(200, 10);
         var selection = session.getSelection();
 
         selection.moveCursorTo(100, 5);
@@ -62,9 +63,9 @@ module.exports = {
 
         assert.position(range.start, 0, 0);
         assert.position(range.end, 100, 5);
-    },
+    });
 
-    "test: move cursor word right" : function() {
+    test("move cursor word right", function() {
         var session = new EditSession([
             "ab",
             " Juhu Kinners (abc, 12)",
@@ -95,9 +96,9 @@ module.exports = {
         
         selection.moveCursorWordRight();
         assert.position(selection.getCursor(), 2, 4);
-    },
+    });
 
-    "test: select word right if cursor in word" : function() {
+    test("select word right if cursor in word", function() {
         var session = new EditSession("Juhu Kinners");
         var selection = session.getSelection();
 
@@ -105,9 +106,9 @@ module.exports = {
         selection.moveCursorWordRight();
 
         assert.position(selection.getCursor(), 0, 4);
-    },
+    });
 
-    "test: moveCursor word left" : function() {
+    test("moveCursor word left", function() {
         var session = new EditSession([
             "ab",
             " Juhu Kinners (abc, 12)",
@@ -139,9 +140,9 @@ module.exports = {
 
         selection.moveCursorWordLeft();
         assert.position(selection.getCursor(), 0, 0);
-    },
+    });
 
-    "test: moveCursor word left with umlauts" : function() {
+    test("moveCursor word left with umlauts", function() {
         var session = new EditSession(" Fuß Füße");
         session.$selectLongWords = true;
 
@@ -152,9 +153,9 @@ module.exports = {
 
         selection.moveCursorWordLeft();
         assert.position(selection.getCursor(), 0, 1);
-    },
+    });
 
-    "test: select word left if cursor in word" : function() {
+    test("select word left if cursor in word", function() {
         var session = new EditSession("Juhu Kinners");
         var selection = session.getSelection();
         session.$selectLongWords = true;
@@ -163,9 +164,9 @@ module.exports = {
 
         selection.moveCursorWordLeft();
         assert.position(selection.getCursor(), 0, 5);
-    },
+    });
 
-    "test: select word right and select" : function() {
+    test("select word right and select", function() {
         var session = new EditSession("Juhu Kinners");
         var selection = session.getSelection();
 
@@ -176,9 +177,9 @@ module.exports = {
 
         assert.position(range.start, 0, 0);
         assert.position(range.end, 0, 4);
-    },
+    });
 
-    "test: select word left and select" : function() {
+    test("select word left and select", function() {
         var session = new EditSession("Juhu Kinners");
         var selection = session.getSelection();
 
@@ -189,9 +190,9 @@ module.exports = {
 
         assert.position(range.start, 0, 0);
         assert.position(range.end, 0, 3);
-    },
+    });
 
-    "test: select word with cursor in word should select the word" : function() {
+    test("select word with cursor in word should select the word", function() {
         var session = new EditSession("Juhu Kinners 123");
         var selection = session.getSelection();
 
@@ -201,9 +202,9 @@ module.exports = {
         var range = selection.getRange();
         assert.position(range.start, 0, 5);
         assert.position(range.end, 0, 12);
-    },
+    });
 
-    "test: select word with cursor in word including right whitespace should select the word" : function() {
+    test("select word with cursor in word including right whitespace should select the word", function() {
         var session = new EditSession("Juhu Kinners      123");
         var selection = session.getSelection();
 
@@ -213,9 +214,9 @@ module.exports = {
         var range = selection.getRange();
         assert.position(range.start, 0, 5);
         assert.position(range.end, 0, 18);
-    },
+    });
 
-    "test: select word with cursor betwen white space and word should select the word" : function() {
+    test("select word with cursor betwen white space and word should select the word", function() {
         var session = new EditSession("Juhu Kinners");
         var selection = session.getSelection();
         session.$selectLongWords = true;
@@ -233,9 +234,9 @@ module.exports = {
         var range = selection.getRange();
         assert.position(range.start, 0, 5);
         assert.position(range.end, 0, 12);
-    },
+    });
 
-    "test: select word with cursor in white space should select white space" : function() {
+    test("select word with cursor in white space should select white space", function() {
         var session = new EditSession("Juhu  Kinners");
         var selection = session.getSelection();
         session.$selectLongWords = true;
@@ -246,9 +247,9 @@ module.exports = {
         var range = selection.getRange();
         assert.position(range.start, 0, 4);
         assert.position(range.end, 0, 6);
-    },
+    });
 
-    "test: moving cursor should fire a 'changeCursor' event" : function() {
+    test("moving cursor should fire a 'changeCursor' event", function() {
         var session = new EditSession("Juhu  Kinners");
         var selection = session.getSelection();
         session.$selectLongWords = true;
@@ -262,9 +263,9 @@ module.exports = {
 
         selection.moveCursorTo(0, 6);
         assert.ok(called);
-    },
+    });
 
-    "test: calling setCursor with the same position should not fire an event": function() {
+    test("calling setCursor with the same position should not fire an event", function() {
         var session = new EditSession("Juhu  Kinners");
         var selection = session.getSelection();
         session.$selectLongWords = true;
@@ -278,9 +279,9 @@ module.exports = {
 
         selection.moveCursorTo(0, 5);
         assert.notOk(called);
-    },
+    });
 
-    "test: moveWordright should move past || and [": function() {
+    test("moveWordright should move past || and [", function() {
         var session = new EditSession("||foo[");
         var selection = session.getSelection();
         session.$selectLongWords = true;
@@ -292,9 +293,9 @@ module.exports = {
         // Move behind [
         selection.moveCursorWordRight();
         assert.position(selection.getCursor(), 0, 6);
-    },
+    });
 
-    "test: moveWordLeft should move past || and [": function() {
+    test("moveWordLeft should move past || and [", function() {
         var session = new EditSession("||foo[");
         var selection = session.getSelection();
         session.$selectLongWords = true;
@@ -308,9 +309,9 @@ module.exports = {
         // Move behind ||
         selection.moveCursorWordLeft();
         assert.position(selection.getCursor(), 0, 0);
-    },
+    });
 
-    "test: move cursor to line start should move cursor to end of the indentation first": function() {
+    test("move cursor to line start should move cursor to end of the indentation first", function() {
         var session = new EditSession("12\n    Juhu\n12");
         var selection = session.getSelection();
 
@@ -318,9 +319,9 @@ module.exports = {
         selection.moveCursorLineStart();
 
         assert.position(selection.getCursor(), 1, 4);
-    },
+    });
 
-    "test: move cursor to line start when the cursor is at the end of the indentation should move cursor to column 0": function() {
+    test("move cursor to line start when the cursor is at the end of the indentation should move cursor to column 0", function() {
         var session = new EditSession("12\n    Juhu\n12");
         var selection = session.getSelection();
 
@@ -328,9 +329,9 @@ module.exports = {
         selection.moveCursorLineStart();
 
         assert.position(selection.getCursor(), 1, 0);
-    },
+    });
 
-    "test: move cursor to line start when the cursor is at column 0 should move cursor to the end of the indentation": function() {
+    test("move cursor to line start when the cursor is at column 0 should move cursor to the end of the indentation", function() {
         var session = new EditSession("12\n    Juhu\n12");
         var selection = session.getSelection();
 
@@ -338,10 +339,10 @@ module.exports = {
         selection.moveCursorLineStart();
 
         assert.position(selection.getCursor(), 1, 4);
-    },
+    });
 
     // Eclipse style
-    "test: move cursor to line start when the cursor is before the initial indentation should move cursor to the end of the indentation": function() {
+    test("move cursor to line start when the cursor is before the initial indentation should move cursor to the end of the indentation", function() {
         var session = new EditSession("12\n    Juhu\n12");
         var selection = session.getSelection();
 
@@ -349,9 +350,9 @@ module.exports = {
         selection.moveCursorLineStart();
 
         assert.position(selection.getCursor(), 1, 4);
-    },
+    });
 
-    "test go line up when in the middle of the first line should go to document start": function() {
+    test("go line up when in the middle of the first line should go to document start", function() {
         var session = new EditSession("juhu kinners");
         var selection = session.getSelection();
 
@@ -359,9 +360,9 @@ module.exports = {
         selection.moveCursorUp();
 
         assert.position(selection.getCursor(), 0, 0);
-    },
+    });
 
-    "test: (wrap) go line up when in the middle of the first line should go to document start": function() {
+    test("(wrap) go line up when in the middle of the first line should go to document start", function() {
         var session = new EditSession("juhu kinners");
         session.setWrapLimitRange(5, 5);
         session.adjustWrapLimit(80);
@@ -372,10 +373,10 @@ module.exports = {
         selection.moveCursorUp();
 
         assert.position(selection.getCursor(), 0, 0);
-    },
+    });
 
 
-    "test go line down when in the middle of the last line should go to document end": function() {
+    test("go line down when in the middle of the last line should go to document end", function() {
         var session = new EditSession("juhu kinners");
         var selection = session.getSelection();
 
@@ -383,9 +384,9 @@ module.exports = {
         selection.moveCursorDown();
 
         assert.position(selection.getCursor(), 0, 12);
-    },
+    });
 
-    "test (wrap) go line down when in the middle of the last line should go to document end": function() {
+    test("(wrap) go line down when in the middle of the last line should go to document end", function() {
         var session = new EditSession("juhu kinners");
         session.setWrapLimitRange(8, 8);
         session.adjustWrapLimit(80);
@@ -396,9 +397,9 @@ module.exports = {
         selection.moveCursorDown();
 
         assert.position(selection.getCursor(), 0, 12);
-    },
+    });
 
-    "test go line up twice and then once down when in the second should go back to the previous column": function() {
+    test("go line up twice and then once down when in the second should go back to the previous column", function() {
         var session = new EditSession("juhu\nkinners");
         var selection = session.getSelection();
 
@@ -408,9 +409,9 @@ module.exports = {
         selection.moveCursorDown();
 
         assert.position(selection.getCursor(), 1, 4);
-    },
+    });
 
-    "test (keyboard navigation) when curLine is not EOL and targetLine is all whitespace new column should be current column": function() {
+    test("(keyboard navigation) when curLine is not EOL and targetLine is all whitespace new column should be current column", function() {
         var session = new EditSession("function (a) {\n    \n}");
         var selection = session.getSelection();
 
@@ -418,9 +419,9 @@ module.exports = {
         selection.moveCursorUp();
 
         assert.position(selection.getCursor(), 1, 0);
-    },
+    });
 
-    "test (keyboard navigation) when curLine is EOL and targetLine is shorter than current column, new column should be targetLine's EOL": function() {
+    test("(keyboard navigation) when curLine is EOL and targetLine is shorter than current column, new column should be targetLine's EOL", function() {
         var session = new EditSession("function (a) {\n    \n}");
         var selection = session.getSelection();
 
@@ -428,9 +429,9 @@ module.exports = {
         selection.moveCursorDown();
 
         assert.position(selection.getCursor(), 1, 4);
-    },
+    });
 
-    "test fromJSON/toJSON": function() {
+    test("fromJSON/toJSON", function() {
         var copy = function(data) { return JSON.parse(JSON.stringify(data)); };
         var session = new EditSession("function (a) {\n    \n}");
         var selection = session.getSelection();
@@ -485,9 +486,9 @@ module.exports = {
         selection.selectAll();
         assert.equal(nCursor, 0);
         assert.equal(nSelection, 1);
-    },
+    });
 
-    "test setRange inside fold": function() {
+    test("setRange inside fold", function() {
         var session = new EditSession("-\n-fold-\n-");
         var selection = session.getSelection();
 
@@ -495,9 +496,9 @@ module.exports = {
         selection.setRange(new Range(1, 1, 1, 5)); 
         
         assert.equal(session.getTextRange(), "fold");
-    },
+    });
     
-    "test navigate around line widgets": function() {
+    test("navigate around line widgets", function() {
         var session = new EditSession(["a", "b", "", "c", "d"]);
         session.widgetManager = new LineWidgets(session);
 
@@ -532,9 +533,9 @@ module.exports = {
         assert.position(selection.cursor, 2, 0);
         session.selection.moveCursorUp();
         assert.position(selection.cursor, 1, 1);
-    },
+    });
 
-    "test selectLine": function() {
+    test("selectLine", function() {
         var session = new EditSession("   text  -\n-fold-   \n-");
         var selection = session.getSelection();
 
@@ -550,10 +551,8 @@ module.exports = {
         
         selection.selectLineStart();
         assert.range(selection.getRange(), 1, 0, 1, 6);
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

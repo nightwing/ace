@@ -1,15 +1,16 @@
 "use strict";
+var test = require("../test/run.js")(module.exports);
 
 var EditSession = require("../edit_session").EditSession;
 var Mode = require("./ruby").Mode;
 var assert = require("../test/assertions");
 
-module.exports = {
-    setUp: function() {
-        this.mode = new Mode();
-    },
 
-    "test getNextLineIndent": function() {
+    test.beforeEach(function() {
+        this.mode = new Mode();
+    });
+
+    test("getNextLineIndent", function() {
         assert.equal(this.mode.getNextLineIndent("start", "class Foo", "  "), "  ");
         assert.equal(this.mode.getNextLineIndent("start", "  def thing(wut)", "  "), "    ");
         assert.equal(this.mode.getNextLineIndent("start", "  fork do", "  "), "    ");
@@ -17,17 +18,17 @@ module.exports = {
         assert.equal(this.mode.getNextLineIndent("start", "  something = :ruby", "  "), "  ");
         assert.equal(this.mode.getNextLineIndent("start", "  if something == 3", "  "), "    ");
         assert.equal(this.mode.getNextLineIndent("start", "  else", "  "), "    ");
-    },
+    });
 
-    "test: checkOutdent": function() {
+    test("checkOutdent", function() {
         assert.ok(this.mode.checkOutdent("start", "        en", "d"));
         assert.ok(this.mode.checkOutdent("start", "        els", "e"));
         assert.ok(this.mode.checkOutdent("start", "        ", "}"));
         assert.equal(this.mode.checkOutdent("start", "  end", "\n"), false);
         assert.equal(this.mode.checkOutdent("start", "foo = ba", "r"), false);
-    },
+    });
 
-    "test: auto outdent": function() {
+    test("auto outdent", function() {
         var session = new EditSession([
             "class Phil",
             "  Foo = 'bar'",
@@ -41,9 +42,9 @@ module.exports = {
         assert.equal("    }", session.getLine(6));
         this.mode.autoOutdent("start", session, 7);
         assert.equal("  end", session.getLine(7));
-    },
+    });
 
-    "test: different delimiters in percent strings": function() {
+    test("different delimiters in percent strings", function() {
         var tokenizer = this.mode.getTokenizer();
         var tokens = tokenizer.getLineTokens("%q<t(es)t>", "start").tokens;
         assert.equal("string", tokens[1].type);
@@ -67,9 +68,9 @@ module.exports = {
         tokens = tokenizer.getLineTokens("%S{test}", "start").tokens;
         assert.equal("constant.other.symbol.ruby", tokens[0].type);
         assert.equal("constant.other.symbol.ruby", tokens[tokens.length - 1].type);
-    },
+    });
 
-    "test: nested and unescaped pairs of delimiters": function() {
+    test("nested and unescaped pairs of delimiters", function() {
         var tokenizer = this.mode.getTokenizer();
 
         var tokens = tokenizer.getLineTokens("%(t(es)t)(", "start").tokens;
@@ -99,9 +100,9 @@ module.exports = {
         tokens = tokenizer.getLineTokens("%S[te[s]|t[", "start").tokens;
         assert.equal("constant.other.symbol.ruby", tokens[tokens.length - 1].type);
         assert.equal(1, tokens.length);
-    },
+    });
 
-    "test: percent Regexp strings": function() {
+    test("percent Regexp strings", function() {
         var tokenizer = this.mode.getTokenizer();
         //percent regexp strings supports interpolation
         var tokens = tokenizer.getLineTokens("%r(#{ \"interpolated\" } regexp)", "start").tokens;
@@ -113,9 +114,9 @@ module.exports = {
         tokens = tokenizer.getLineTokens("%r((a|b)*)#comment", "start").tokens;
         assert.equal("string.regexp", tokens[0].type);
         assert.notEqual("string.regexp", tokens[tokens.length - 1].type);
-    },
+    });
 
-    "test: uppercase letter in percent strings should allow interpolation and escaped characters": function() {
+    test("uppercase letter in percent strings should allow interpolation and escaped characters", function() {
         var tokenizer = this.mode.getTokenizer();
         var tokens = tokenizer.getLineTokens("%Q(interpolated string #{1 + 1})", "start").tokens;
         assert.equal("string.end", tokens[tokens.length - 1].type);
@@ -129,9 +130,9 @@ module.exports = {
         assert.equal("string.start", tokens[0].type);
         assert.equal("string", tokens[1].type);
         assert.equal("interpolated string #{1 + 1}", tokens[1].value);
-    },
+    });
 
-    "test: different Heredoc tests": function() {
+    test("different Heredoc tests", function() {
         var tokenizer = this.mode.getTokenizer();
         var firstLine = tokenizer.getLineTokens("herDocs = [<<'FOO', <<BAR, <<-BAZ, <<~`EXEC`] #comment", "start");
         assert.equal(8, firstLine.state.length);
@@ -159,11 +160,9 @@ module.exports = {
         nextLine = tokenizer.getLineTokens("    EXEC", nextLine.state);
         assert.equal("support.class", nextLine.tokens[1].type);
         assert.equal("start", nextLine.state);
-    }
-
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+
+

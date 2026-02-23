@@ -1,12 +1,13 @@
 "use strict";
+var test = require("../../test/run.js")(module.exports);
 
 var MarkdownMode = require("../markdown").Mode;
 var EditSession = require("../../edit_session").EditSession;
 var assert = require("../../test/assertions");
 
-module.exports = {
 
-    "test: markdown folding": function() {
+
+    test("markdown folding", function() {
         var session = new EditSession([
             "# heading 1",
             "## heading 2",
@@ -33,9 +34,5 @@ module.exports = {
         });
 
         assert.equal(ranges.toString().replace(/Range:|[\s]|->/g, ""), expected);
-    }
-};
+    });
 
-
-if (typeof module !== "undefined" && module === require.main)
-    require("asyncjs").test.testcase(module.exports).exec();

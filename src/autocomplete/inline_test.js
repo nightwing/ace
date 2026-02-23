@@ -1,9 +1,9 @@
+"use strict";
+var test = require("../test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("../test/mockdom");
 }
-
-"use strict";
 
 var assert = require("../test/assertions");
 var AceInline = require("./inline").AceInline;
@@ -70,8 +70,8 @@ var createEditor = function(element) {
     return new Editor(renderer, session);
 };
 
-module.exports = {
-    setUp: function(done) {
+
+    test.beforeEach(function(done) {
         var el = document.createElement("div");
         el.style.left = "20px";
         el.style.top = "30px";
@@ -84,14 +84,14 @@ module.exports = {
         editor.getSelection().moveCursorFileEnd();
         editor.renderer.$loop._flush();
         done();
-    },
-    "test: displays the ghost text in the editor on show": function(done) {
+    });
+    test("displays the ghost text in the editor on show", function(done) {
         inline.show(editor, completions[0], "f");
         editor.renderer.$loop._flush();
         assert.equal(getAllLines(), textBase + "foo");
         done();
-    },
-    "test: replaces the ghost text in the editor with the latest show": function(done) {
+    });
+    test("replaces the ghost text in the editor with the latest show", function(done) {
         inline.show(editor, completions[0], "f");
         editor.renderer.$loop._flush();
         assert.equal(getAllLines(), textBase + "foo");
@@ -99,16 +99,16 @@ module.exports = {
         editor.renderer.$loop._flush();
         assert.equal(getAllLines(), textBase + "function");
         done();
-    },
-    "test: renders multi-line ghost text indentation": function(done) {
+    });
+    test("renders multi-line ghost text indentation", function(done) {
         assert.equal(editor.renderer.$ghostTextWidget, null);
         inline.show(editor, completions[3], "f");
         editor.renderer.$loop._flush();
         assert.strictEqual(getAllLines(), textBase + "function foo() {");
         assert.strictEqual(editor.renderer.$ghostTextWidget.el.innerHTML, `<div><span class="ace_ghost_text">        console.log('test');</span></div><div><span class="ace_ghost_text">    }</span><span></span></div>`);
         done();
-    },
-    "test: boundary tests": function(done) {
+    });
+    test("boundary tests", function(done) {
         var noRenderTestCases = [
             [null, null, null],
             [editor, null, null],
@@ -145,14 +145,14 @@ module.exports = {
         assert.equal(editor.renderer.$ghostTextWidget, null);
         
         done();
-    },
-    "test: only renders the ghost text without the prefix": function(done) {
+    });
+    test("only renders the ghost text without the prefix", function(done) {
         inline.show(editor, completions[1], "fun");
         editor.renderer.$loop._flush();
         assert.equal(getAllLines(), textBase + "fction");
         done();
-    },
-    "test: verify explicit and implicit hide": function(done) {
+    });
+    test("verify explicit and implicit hide", function(done) {
         inline.show(editor, completions[1], "f");
         editor.renderer.$loop._flush();
         assert.equal(getAllLines(), textBase + "function");
@@ -167,8 +167,8 @@ module.exports = {
         assert.strictEqual(getAllLines(), textBase + "f");
         assert.strictEqual(inline.isOpen(), false);
         done();
-    },
-    "test: does not hide previous ghost text if cannot show current one": function(done) {
+    });
+    test("does not hide previous ghost text if cannot show current one", function(done) {
         inline.show(editor, completions[1], "f");
         editor.renderer.$loop._flush();
         assert.equal(getAllLines(), textBase + "function");
@@ -182,8 +182,8 @@ module.exports = {
         assert.strictEqual(getAllLines(), textBase + "f");
         assert.strictEqual(inline.isOpen(), false);
         done();
-    },
-    "test: removes ghost text from previous editor if new valid editor is passed to show function": function(done) {
+    });
+    test("removes ghost text from previous editor if new valid editor is passed to show function", function(done) {
         var el = document.createElement("div");
         el.style.left = "520px";
         el.style.top = "530px";
@@ -216,8 +216,8 @@ module.exports = {
         assert.strictEqual(inline.isOpen(), true);
 
         done();
-    },
-    "test: verify destroy": function(done) {
+    });
+    test("verify destroy", function(done) {
         inline.show(editor, completions[0], "f");
         editor.renderer.$loop._flush();
         assert.strictEqual(getAllLines(), textBase + "foo");
@@ -237,8 +237,8 @@ module.exports = {
         assert.strictEqual(inline.isOpen(), false);
         assert.strictEqual(getAllLines(), textBase + "f");
         done();
-    },
-    "test: should respect hideInlinePreview": function(done) {
+    });
+    test("should respect hideInlinePreview", function(done) {
         // By default, this option is set to hide.
         inline.show(editor, completions[5], "f");
         editor.renderer.$loop._flush();
@@ -271,8 +271,8 @@ module.exports = {
         completions[5].hideInlinePreview = true;
 
         done();
-    },
-    "test: should scroll if inline preview outside": function(done) {
+    });
+    test("should scroll if inline preview outside", function(done) {
         // Fill the editor with new lines to get the cursor to the bottom
         // of the container
         editor.execCommand("insertstring", "\n".repeat(200));
@@ -308,16 +308,16 @@ module.exports = {
                 done();
             }, 50); 
         }, 50);  
-    },
-    "test: renders multi-line ghost text with empty lines": function(done) {
+    });
+    test("renders multi-line ghost text with empty lines", function(done) {
         assert.equal(editor.renderer.$ghostTextWidget, null);
         inline.show(editor, completions[8], "f");
         editor.renderer.$loop._flush();
         assert.strictEqual(getAllLines(), textBase + "foo suggestion with a");
         assert.strictEqual(editor.renderer.$ghostTextWidget.el.innerHTML, `<div><span class="ace_ghost_text"> </span></div><div><span class="ace_ghost_text"> </span></div><div><span class="ace_ghost_text">gap</span><span></span></div>`);
         done();
-    },
-    "test: moves tokens to the right of cursor to the end of ghost text for multi line ghost text": function(done) {
+    });
+    test("moves tokens to the right of cursor to the end of ghost text for multi line ghost text", function(done) {
         editor.execCommand("removetolinestarthard");
         editor.execCommand("insertstring", "f hi I should be hidden");
         editor.execCommand("gotolinestart");
@@ -347,8 +347,8 @@ module.exports = {
         assert.strictEqual(tokens[0].type, "text");
 
         done();
-    },
-    "test: moves tokens to the right of cursor to the end of ghost text for multi line ghost text when triggered inside token": function(done) {
+    });
+    test("moves tokens to the right of cursor to the end of ghost text for multi line ghost text when triggered inside token", function(done) {
         editor.execCommand("removetolinestarthard");
         editor.execCommand("insertstring", "fhi I should be hidden");
         editor.execCommand("gotolinestart");
@@ -378,16 +378,14 @@ module.exports = {
         assert.strictEqual(tokens[0].type, "text");
 
         done();
-    },
-    tearDown: function() {
+    });
+    test.afterEach(function() {
         inline.destroy();
         editor.destroy();
         if (editor2) {
             editor2.destroy();
         }
-    }
-};
+    });
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

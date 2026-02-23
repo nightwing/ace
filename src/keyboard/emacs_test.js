@@ -1,9 +1,9 @@
+"use strict";
+var test = require("../test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("../test/mockdom");
 }
-
-"use strict";
 
 require("../multi_select");
 var {type} = require("../test/user");
@@ -33,33 +33,33 @@ function pluck(arr, what) {
     return arr.map(function(ea) { return ea[what]; });
 }
 
-module.exports = {
-    tearDown: function() {
+
+    test.afterEach(function() {
         editor.container.remove();
         editor.destroy();
-    },
-    "test: detach removes emacs commands from command manager": function() {
+    });
+    test("detach removes emacs commands from command manager", function() {
         initEditor('');
         assert.ok(!!editor.commands.byName["keyboardQuit"], 'setup error: emacs commands not installed');
         editor.keyBinding.removeKeyboardHandler(editor.getKeyboardHandler());
         assert.ok(!editor.commands.byName["keyboardQuit"], 'emacs commands not removed');
-    },
+    });
 
-    "test: keyboardQuit clears selection": function() {
+    test("keyboardQuit clears selection", function() {
         initEditor('foo');
         editor.selectAll();
         type('Ctrl-g');
         assert.ok(editor.selection.isEmpty(), 'selection non-empty');
-    },
+    });
 
-    "test: exchangePointAndMark without mark set": function() {
+    test("exchangePointAndMark without mark set", function() {
         initEditor('foo');
         sel.setRange(Range.fromPoints({row: 0, column: 1}, {row: 0, column: 3}));
         type('Ctrl-x', 'Ctrl-x');
         assert.deepEqual({row: 0, column: 1}, editor.getCursorPosition(), print(editor.getCursorPosition()));
-    },
+    });
 
-    "test: exchangePointAndMark with mark set": function() {
+    test("exchangePointAndMark with mark set", function() {
         initEditor('foo');
         // push marks
         editor.selection.moveTo(0, 1);
@@ -71,9 +71,9 @@ module.exports = {
         type('Ctrl-4', 'Ctrl-x', 'Ctrl-x');
         assert.deepEqual({row: 0, column: 2}, editor.getCursorPosition(), print(editor.getCursorPosition()));
         assert.deepEqual([{row: 0, column: 1}, {row: 0, column: 0}], editor.session.$emacsMarkRing, print(editor.session.$emacsMarkRing));
-    },
+    });
 
-    "test: exchangePointAndMark with selection": function() {
+    test("exchangePointAndMark with selection", function() {
         initEditor('foo');
         editor.pushEmacsMark({row: 0, column: 1});
         editor.pushEmacsMark({row: 0, column: 2});
@@ -81,9 +81,9 @@ module.exports = {
         editor.execCommand('exchangePointAndMark');
         assert.deepEqual({row: 0, column: 1}, editor.getCursorPosition(), print(editor.getCursorPosition()));
         assert.deepEqual([{row: 0, column: 1}, {row: 0, column: 2}], editor.session.$emacsMarkRing, print(editor.session.$emacsMarkRing));
-    },
+    });
 
-    "test: exchangePointAndMark with multi selection": function() {
+    test("exchangePointAndMark with multi selection", function() {
         initEditor('foo\nhello world\n123');
         var ranges = [[{row: 0, column: 0}, {row: 0, column: 3}],
                       [{row: 1, column: 0}, {row: 1, column: 5}],
@@ -95,9 +95,9 @@ module.exports = {
         editor.execCommand('exchangePointAndMark');
         assert.equal("foo\nhello\nworld", editor.getSelectedText());
         assert.deepEqual(pluck(ranges, 0), pluck(sel.getAllRanges(), 'cursor'), "selections dir not inverted");
-    },
+    });
 
-    "test: exchangePointAndMark with multi cursors": function() {
+    test("exchangePointAndMark with multi cursors", function() {
         initEditor('foo\nhello world\n123');
         var ranges = [[{row: 0, column: 0}, {row: 0, column: 3}],
                       [{row: 1, column: 0}, {row: 1, column: 5}],
@@ -111,9 +111,9 @@ module.exports = {
         assert.deepEqual(pluck(ranges, 0), pluck(sel.getAllRanges(), 'cursor'), print(sel.getAllRanges()));
         editor.execCommand('exchangePointAndMark');
         assert.deepEqual(pluck(ranges, 1), pluck(sel.getAllRanges(), 'cursor'), "not inverted: " + print(sel.getAllRanges()));
-    },
+    });
 
-    "test: setMark with multi cursors": function() {
+    test("setMark with multi cursors", function() {
         initEditor('foo\nhello world\n123');
         var positions = [{row: 0, column: 0},
                          {row: 1, column: 0},
@@ -121,9 +121,9 @@ module.exports = {
         positions.forEach(function(p) { sel.addRange(Range.fromPoints(p,p)); });
         editor.execCommand('setMark');
         assert.deepEqual(positions, editor.session.$emacsMarkRing, print(editor.session.$emacsMarkRing));
-    },
+    });
     
-    "test: killLine": function() {
+    test("killLine", function() {
         initEditor("foo  \n Hello world\n  \n  123");
         sel.setRange(new Range(0, 0, 0, 2));
         editor.endOperation();
@@ -142,11 +142,9 @@ module.exports = {
         type("Ctrl-k");
         type("Ctrl-y");
         assert.equal(editor.getValue(),"foo  \n Hello world\n  \n  123");
-    }
-
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+
+

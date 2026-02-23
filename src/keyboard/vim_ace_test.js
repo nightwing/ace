@@ -1,7 +1,8 @@
+"use strict";
+var test = require("../test/run.js")(module.exports);
+
 /*global CustomEvent*/
  
-"use strict";
-
 var assert = require("./../test/assertions");
 var Range = require("../range").Range;
 require("./../test/mockdom");
@@ -88,8 +89,8 @@ function scrollTop() {
     return editor.renderer.scrollTop / editor.renderer.lineHeight;
 }
 
-module.exports = {
-    setUp: function() {
+
+    test.beforeEach(function() {
         if (!editor) {
             editor = ace.edit(null);
             document.body.appendChild(editor.container);
@@ -106,15 +107,15 @@ module.exports = {
         textarea = editor.textInput.getElement();
         changes = [];
         editor.focus();
-    },
-    tearDown: function() {
+    });
+    test.afterEach(function() {
         if (editor) {
             editor.destroy();
             editor.container.remove();
             editor = textarea = null;
         }
-    },
-    "test: multiselect and composition": function() {
+    });
+    test("multiselect and composition", function() {
         editor.setValue("hello world\n\thello world");
         editor.execCommand("gotoend");
         [
@@ -156,8 +157,8 @@ module.exports = {
             applyEvent(data);
         });
         assert.equal(editor.getValue(), "hello x\n\thello x");
-    },
-    "test: vim virtual selection": function() {
+    });
+    test("vim virtual selection", function() {
         editor.setValue("hello world\n\thello world");
         editor.execCommand("gotoend");
         [
@@ -199,8 +200,8 @@ module.exports = {
             applyEvent(data);
         });
         assert.equal(editor.getValue(), "hello x\n\thello x");
-    },
-    "test: vim visual selection": function() {
+    });
+    test("vim visual selection", function() {
         editor.setValue("xxx\nccc\n\nzzz\nccc");
         setSelection(editor, [2,0]);
         [
@@ -251,8 +252,8 @@ module.exports = {
         ].forEach(function(data) {
             applyEvent(data);
         });
-    },
-    "test vim gq": function() {
+    });
+    test("vim gq", function() {
         editor.setValue(
             "1\n2\nhello world\n"
              + "xxx ".repeat(20) + "\nyyy"
@@ -286,8 +287,8 @@ module.exports = {
         user.type("gqq")
 
         assert.equal(editor.session.getLine(6), "yyy")
-    },
-    "test vim search": function() {
+    });
+    test("vim search", function() {
         editor.renderer.setOption("animatedScroll", false);
         editor.setValue(
             "very\nlong\n\ntext\n".repeat(10)
@@ -313,8 +314,8 @@ module.exports = {
         user.type("6", "/", "more", "Enter");
         editor.endOperation();
         assert.ok(scrollTop() > 40 + 16 - screenSize);
-    },
-    "test: vim normal mode brackets highlighting": function () {
+    });
+    test("vim normal mode brackets highlighting", function () {
         editor.setValue("{((hello, world))}");
         editor.focus();
 
@@ -341,8 +342,8 @@ module.exports = {
             }, isBackwards);
             assert.range(ranges[1], el.startRow, el.startColumn, el.endRow, el.endColumn);
         });
-    },
-    "test: gotoline": function () {
+    });
+    test("gotoline", function () {
         editor.renderer.setOption("animatedScroll", false);
         editor.setValue(
             "very\nlong\n\ntext\n".repeat(20),
@@ -358,10 +359,8 @@ module.exports = {
 
         assert.ok(scrollTop() > 30 - screenSize);
         assert.ok(scrollTop() < 30);
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

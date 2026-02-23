@@ -1,15 +1,16 @@
 "use strict";
+var test = require("../../test/run.js")(module.exports);
 
 var BasicMode = require("../basic").Mode;
 var EditSession = require("../../edit_session").EditSession;
 var assert = require("../../test/assertions");
 
-module.exports = {
-    setUp: function() {
-        this.mode = new BasicMode();
-    },
 
-    "test: ms-basic mode folding with markbeginend": function() {
+    test.beforeEach(function() {
+        this.mode = new BasicMode();
+    });
+
+    test("ms-basic mode folding with markbeginend", function() {
         var session = new EditSession([
             '10 INPUT"HOW MANY DIGITS";N',
             '20 T=TIME',
@@ -87,8 +88,5 @@ module.exports = {
 
         range = session.getFoldWidgetRange(24);
         assert.range(range, 6, 25, 24, 4);
-    }
-};
+    });
 
-if (typeof module !== "undefined" && module === require.main)
-    require("asyncjs").test.testcase(module.exports).exec();

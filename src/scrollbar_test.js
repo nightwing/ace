@@ -1,9 +1,9 @@
+"use strict";
+var test = require("./test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("./test/mockdom");
 }
-
-"use strict";
 
 var assert = require("./test/assertions");
 var VirtualRenderer = require("./virtual_renderer").VirtualRenderer;
@@ -27,9 +27,8 @@ var WheelEvent = function (opts) {
 };
 var editor = null;
 var renderer = null;
-module.exports = {
-    name: "ACE scrollbar_custom.js",
-    setUp: function () {
+ 
+    test.beforeEach(function () {
         if (editor) editor.destroy();
         var el = document.createElement("div");
 
@@ -49,17 +48,18 @@ module.exports = {
         editor.setOptions({
             customScrollbar: true
         });
-    },
-    tearDown: function () {
+    });
+    test.afterEach(function () {
         editor && editor.destroy();
         editor = null;
-    },
-    "test: vertical scrolling": function () {
+    });
+    test("vertical scrolling", function () {
         editor.setValue("a" + "\n".repeat(100) + "b" + "\nxxxxxx", -1);
         renderer.$loop._flush();
+        var rect = renderer.scrollBarV.element.getBoundingClientRect(); 
         renderer.scrollBarV.element.dispatchEvent(MouseEvent("down", {
-            x: 0,
-            y: 80,
+            x: rect.left + rect.width / 2,
+            y: 80 + rect.top,
             button: 0
         }));
         renderer.$loop._flush();
@@ -71,30 +71,32 @@ module.exports = {
         }));
         renderer.$loop._flush();
         assert.ok(renderer.scrollBarV.thumbTop > thumbTop);
-    },
-    "test: dragging vertical scroll thumb": function (done) {
+    });
+    test("dragging vertical scroll thumb", function (done) {
         editor.setValue("a" + "\n".repeat(100) + "b" + "\nxxxxxx", -1);
         renderer.$loop._flush();
 
+        var rect = renderer.scrollBarV.inner.getBoundingClientRect(); 
+
         renderer.scrollBarV.inner.dispatchEvent(MouseEvent("down", {
-            x: 5,
-            y: 10,
+            x: 5 + rect.left,
+            y: 10 + rect.top,
             button: 0
         }));
         renderer.$loop._flush();
 
         renderer.scrollBarV.inner.dispatchEvent(MouseEvent("move", {
-            x: 5,
-            y: 80,
+            x: 5 + rect.left,
+            y: 80 + rect.top,
             button: 0
         }));
 
         setTimeout(function () {
             assert.ok(renderer.scrollBarV.thumbTop > 0);
             done();
-        }, 200);
-    },
-    "test: horizontal scrolling": function () {
+        }, 30);
+    });
+    test("horizontal scrolling", function () {
         assert.ok(!renderer.scrollBarH.isVisible);
         editor.setValue("a".repeat(1000), -1);
 
@@ -108,8 +110,8 @@ module.exports = {
         renderer.$loop._flush();
 
         assert.ok(renderer.scrollBarH.thumbLeft > 0);
-    },
-    "test: dragging horizontal scroll thumb": function (done) {
+    });
+    test("dragging horizontal scroll thumb", function (done) {
         editor.setValue("a".repeat(1000), -1);
         renderer.$loop._flush();
 
@@ -130,11 +132,9 @@ module.exports = {
             assert.ok(renderer.scrollBarH.thumbLeft > 0);
             done();
         }, 200);
-    }
-
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+
+

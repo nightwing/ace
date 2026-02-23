@@ -1,4 +1,5 @@
 "use strict";
+var test = require("../test/run.js")(module.exports);
 
 var assert = require("assert");
 var highlighter = require("./static_highlight");
@@ -9,18 +10,16 @@ var dom = require("../lib/dom");
 var config = require("../config");
 
 // Execution ORDER: test.setUpSuite, setUp, testFn, tearDown, test.tearDownSuite
-module.exports = {
-    timeout: 10000,
 
-    "test loading in node": function(next) {
+    test("loading in node", function(next) {
         require("../test/mockdom").unload();
         if (typeof process != "undefined")
             assert.equal(typeof window, "undefined");
         require("../ace");
         next();
-    },
+    });
 
-    "test simple snippet": function(next) {
+    test("simple snippet", function(next) {
         var theme = require("../theme/tomorrow");
         var snippet = [
             "/** this is a function",
@@ -47,9 +46,9 @@ module.exports = {
 </div></div></div>`);
         assert.ok(!!result.css);
         next();
-    },
+    });
 
-    "test css from theme is used": function(next) {
+    test("css from theme is used", function(next) {
         var theme = require("../theme/tomorrow");
         var snippet = [
             "/** this is a function",
@@ -66,9 +65,9 @@ module.exports = {
         assert.ok(result.css.indexOf(theme.cssText) !== -1);
 
         next();
-    },
+    });
 
-    "test theme classname should be in output html": function(next) {
+    test("theme classname should be in output html", function(next) {
         var theme = require("../theme/tomorrow");
         var snippet = [
             "/** this is a function",
@@ -84,9 +83,9 @@ module.exports = {
         assert.equal(!!result.html.match(/<div class='ace-tomorrow'>/), true);
 
         next();
-    },
+    });
     
-    "test js string replace specials": function(next) {
+    test("js string replace specials", function(next) {
         var theme = require("../theme/tomorrow");
         var snippet = "$'$1$2$$$&";
         var mode = new TextMode();
@@ -95,9 +94,9 @@ module.exports = {
         assert.ok(result.html.indexOf("</span>$&#39;$1$2$$$&#38;\n</div>") != -1);
 
         next();
-    },
+    });
     
-    "test html special chars": function(next) {
+    test("html special chars", function(next) {
         var theme = require("../theme/tomorrow");
         var snippet = "&<>'\"";
         var mode = new TextMode();
@@ -110,9 +109,9 @@ module.exports = {
         assert.ok(result.html.indexOf("<span class='ace_comment'>/*&#38;&#60;>&#39;&#34;</span>") != -1);
         
         next();
-    },
+    });
     
-    "test async highlight": function(next) {
+    test("async highlight", function(next) {
         require("../test/mockdom");
         EditSession.prototype.$modes["./mode/javascript"] = new JavaScriptMode();
         var el = dom.buildDom(["div", {}, "var a = 1"]);
@@ -123,10 +122,7 @@ module.exports = {
             assert.ok(/class="ace_storage ace_type">var/.test(el.innerHTML));
             next();
         });
-    }
-};
+    }); 
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+

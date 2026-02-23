@@ -68,6 +68,8 @@ body {
 
 #sidePanel a {
     display: inline-block;
+    line-height: 2;
+    color: whitesmoke;
 }
 
 #sidePanel:not(.closed) .toggleButton >div:nth-child(1) {transform: translate(0px, 5px) rotate(-45deg)}

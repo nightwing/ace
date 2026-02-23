@@ -1,9 +1,10 @@
+"use strict";
+var test = require("./test/run.js")(module.exports);
+
 /*global CustomEvent*/
 if (typeof process !== "undefined") {
     require("./test/mockdom");
 }
-
-"use strict";
 
 var ace = require("./ace");
 var assert = require("./test/assertions");
@@ -12,8 +13,8 @@ var Range = require("./range").Range;
 var dom = require("./lib/dom");
 
 var editor, docTooltip;
-module.exports = {
-    setUp: function() {
+
+    test.beforeEach(function() {
         docTooltip = new HoverTooltip();
         editor = ace.edit(null, {
             value: "Hello empty world"
@@ -34,13 +35,13 @@ module.exports = {
             domNode.className = "doc-tooltip";
             docTooltip.showForRange(editor, range, domNode, e);
         });
-    },
-    tearDown: function() {
+    });
+    test.afterEach(function() {
         editor.destroy();
         docTooltip.destroy();
         editor = docTooltip = null;
-    },
-    "test: show doc tooltip" : function(next) {
+    });
+    test("show doc tooltip", function(next) {
         docTooltip.addToEditor(editor);
         
         editor.resize(true);
@@ -106,8 +107,8 @@ module.exports = {
                 }, 6);
             }, 6);
         }, 6);
-    },
-    "test: find best position": function() {
+    });
+    test("find best position", function() {
         editor.resize(true); 
         editor.setValue("very long text ".repeat(100), 1);
         editor.renderer.scrollCursorIntoView();
@@ -150,8 +151,8 @@ module.exports = {
         docTooltip.showForRange(editor, range, domNode);
         rect = docTooltip.$element.getBoundingClientRect();
         assert.ok(rect.left < w - 100);
-    },
-    "test: remove listeners": function() {
+    });
+    test("remove listeners", function() {
         var l = editor._eventRegistry.mousemove.length;
         docTooltip.addToEditor(editor);
         assert.ok(!docTooltip.timeout);
@@ -161,8 +162,8 @@ module.exports = {
         docTooltip.removeFromEditor(editor);
         assert.ok(!docTooltip.timeout);
         assert.equal(editor._eventRegistry.mousemove.length, l);
-    }
-};
+    });
+
 
 function mouse(type, pos, properties) {
     var target = editor.renderer.getMouseEventTarget();
@@ -183,6 +184,4 @@ function mouse(type, pos, properties) {
 }
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+

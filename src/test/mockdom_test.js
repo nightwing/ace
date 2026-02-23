@@ -1,16 +1,16 @@
+"use strict";
+var test = require("./run.js")(module.exports);
+
 /*global CustomEvent*/
 
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("./mockdom");
 }
 
-"use strict";
-
 var assert = require("./assertions");
 
-module.exports = {
-    "test: selectors": function() {
+
+    test("selectors", function() {
         document.body.innerHTML = `<div x=1 y='2'>
             <span z=dd>span1</span>
             xxx
@@ -29,8 +29,8 @@ module.exports = {
         assert.equal(document.querySelectorAll("html * * [x]").length, 1);
         assert.equal(document.querySelectorAll(" * * * * [x]").length, 0);
 
-    },
-    "test: getBoundingClientRect" : function() {
+    });
+    test("getBoundingClientRect", function() {
         var span = document.createElement("span");
         span.textContent = "x";
         
@@ -74,9 +74,9 @@ module.exports = {
         div.style.height = "150%";
         rect = div.getBoundingClientRect();
         assert.equal(rect.height, window.innerHeight * 1.5);
-    },
+    });
     
-   "test: eventListener" : function() {
+    test("eventListener", function() {
         var div = document.createElement("div");
         document.body.appendChild(div);
         
@@ -104,10 +104,8 @@ module.exports = {
         div.dispatchEvent(event);
         assert.equal(divMousedown, 3);
         assert.equal(windowMousedown, 1);
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

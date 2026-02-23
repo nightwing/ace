@@ -1,4 +1,5 @@
 "use strict";
+var test = require("../../test/run.js")(module.exports);
 
 var CoffeeMode = require("../coffee").Mode;
 var EditSession = require("../../edit_session").EditSession;
@@ -41,8 +42,8 @@ function testFoldWidgets(array) {
         assert.equal(pos.column, w);
     }
 }
-module.exports = {
-    "test: coffee script indentation based folding": function() {
+
+    test("coffee script indentation based folding", function() {
        testFoldWidgets([
             '>,1,l,l',         ' ## indented comment',
             '',                '  # ',
@@ -58,9 +59,5 @@ module.exports = {
             '',                '   foo: 1',
             '',                '   baz: lighter'
         ]);
-    }
-};
+    });
 
-
-if (typeof module !== "undefined" && module === require.main)
-    require("asyncjs").test.testcase(module.exports).exec();

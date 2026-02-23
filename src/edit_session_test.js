@@ -1,9 +1,9 @@
+"use strict";
+var test = require("./test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("./test/mockdom");
 }
-
-"use strict";
 
 var lang = require("./lib/lang");
 var EditSession = require("./edit_session").EditSession;
@@ -49,9 +49,8 @@ function insert(row, column, text, session) {
     session.$syncInformUndoManager();
 }
 
-module.exports = {
 
-   "test: find matching opening bracket in Text mode" : function() {
+    test("find matching opening bracket in Text mode", function() {
         var session = new EditSession(["(()(", "())))"]);
 
         assert.position(session.findMatchingBracket({row: 0, column: 3}), 0, 1);
@@ -59,9 +58,9 @@ module.exports = {
         assert.position(session.findMatchingBracket({row: 1, column: 3}), 0, 3);
         assert.position(session.findMatchingBracket({row: 1, column: 4}), 0, 0);
         assert.equal(session.findMatchingBracket({row: 1, column: 5}), null);
-    },
+    });
 
-    "test: find matching closing bracket in Text mode" : function() {
+    test("find matching closing bracket in Text mode", function() {
         var session = new EditSession(["(()(", "())))"]);
 
         assert.position(session.findMatchingBracket({row: 1, column: 1}), 1, 1);
@@ -70,9 +69,9 @@ module.exports = {
         assert.position(session.findMatchingBracket({row: 0, column: 2}), 0, 2);
         assert.position(session.findMatchingBracket({row: 0, column: 1}), 1, 3);
         assert.equal(session.findMatchingBracket({row: 0, column: 0}), null);
-    },
+    });
 
-    "test: find matching opening bracket in JavaScript mode" : function() {
+    test("find matching opening bracket in JavaScript mode", function() {
         var lines = [
             "function foo() {",
             "    var str = \"{ foo()\";",
@@ -92,9 +91,9 @@ module.exports = {
         assert.position(session.findMatchingBracket({row: 3, column: 31}), 3, 21);
         assert.position(session.findMatchingBracket({row: 4, column: 24}), 4, 19);
         assert.equal(session.findMatchingBracket({row: 0, column: 1}), null);
-    },
+    });
 
-    "test: find matching closing bracket in JavaScript mode" : function() {
+    test("find matching closing bracket in JavaScript mode", function() {
         var lines = [
             "function foo() {",
             "    var str = \"{ foo()\";",
@@ -113,9 +112,9 @@ module.exports = {
         assert.position(session.findMatchingBracket({row: 1, column: 21}), 1, 21);
         assert.position(session.findMatchingBracket({row: 3, column: 22}), 3, 30);
         assert.position(session.findMatchingBracket({row: 4, column: 20}), 4, 23);
-    },
+    });
 
-    "test: handle unbalanced brackets in JavaScript mode" : function() {
+    test("handle unbalanced brackets in JavaScript mode", function() {
         var lines = [
             "function foo() {",
             "    var str = \"{ foo()\";",
@@ -131,9 +130,9 @@ module.exports = {
         assert.equal(session.findMatchingBracket({row: 0, column: 16}), null);
         assert.equal(session.findMatchingBracket({row: 3, column: 30}), null);
         assert.equal(session.findMatchingBracket({row: 1, column: 16}), null);
-    },
+    });
 
-    "test: match different bracket types" : function() {
+    test("match different bracket types", function() {
         var session = new EditSession(["({[", ")]}"]);
 
         assert.position(session.findMatchingBracket({row: 0, column: 1}), 1, 0);
@@ -143,9 +142,9 @@ module.exports = {
         assert.position(session.findMatchingBracket({row: 1, column: 1}), 0, 0);
         assert.position(session.findMatchingBracket({row: 1, column: 2}), 0, 2);
         assert.position(session.findMatchingBracket({row: 1, column: 3}), 0, 1);
-    },
+    });
 
-    "test: move lines down" : function() {
+    test("move lines down", function() {
         var session = new EditSession(["a1", "a2", "a3", "a4"]);
 
         session.moveLinesDown(0, 1);
@@ -159,9 +158,9 @@ module.exports = {
 
         session.moveLinesDown(2, 2);
         assert.equal(session.getValue(), ["a3", "a4", "a2", "a1"].join("\n"));
-    },
+    });
 
-    "test: move lines up" : function() {
+    test("move lines up", function() {
         var session = new EditSession(["a1", "a2", "a3", "a4"]);
 
         session.moveLinesUp(2, 3);
@@ -175,30 +174,30 @@ module.exports = {
 
         session.moveLinesUp(2, 2);
         assert.equal(session.getValue(), ["a3", "a1", "a4", "a2"].join("\n"));
-    },
+    });
 
-    "test: duplicate lines" : function() {
+    test("duplicate lines", function() {
         var session = new EditSession(["1", "2", "3", "4"]);
 
         session.duplicateLines(1, 2);
         assert.equal(session.getValue(), ["1", "2", "3", "2", "3", "4"].join("\n"));
-    },
+    });
 
-    "test: duplicate last line" : function() {
+    test("duplicate last line", function() {
         var session = new EditSession(["1", "2", "3"]);
 
         session.duplicateLines(2, 2);
         assert.equal(session.getValue(), ["1", "2", "3", "3"].join("\n"));
-    },
+    });
 
-    "test: duplicate first line" : function() {
+    test("duplicate first line", function() {
         var session = new EditSession(["1", "2", "3"]);
 
         session.duplicateLines(0, 0);
         assert.equal(session.getValue(), ["1", "1", "2", "3"].join("\n"));
-    },
+    });
 
-    "test: getScreenLastRowColumn": function() {
+    test("getScreenLastRowColumn", function() {
         var session = new EditSession([
             "juhu",
             "12\t\t34",
@@ -208,9 +207,9 @@ module.exports = {
         assert.equal(session.getScreenLastRowColumn(0), 4);
         assert.equal(session.getScreenLastRowColumn(1), 10);
         assert.equal(session.getScreenLastRowColumn(2), 5);
-    },
+    });
 
-    "test: convert document to screen coordinates" : function() {
+    test("convert document to screen coordinates", function() {
         var session = new EditSession("01234\t567890\t1234");
         session.setTabSize(4);
 
@@ -230,9 +229,9 @@ module.exports = {
         assert.equal(session.documentToScreenColumn(0, 7), 7);
         assert.equal(session.documentToScreenColumn(0, 12), 12);
         assert.equal(session.documentToScreenColumn(0, 13), 14);
-    },
+    });
 
-    "test: convert document to screen coordinates with leading tabs": function() {
+    test("convert document to screen coordinates with leading tabs", function() {
         var session = new EditSession("\t\t123");
         session.setTabSize(4);
 
@@ -240,9 +239,9 @@ module.exports = {
         assert.equal(session.documentToScreenColumn(0, 1), 4);
         assert.equal(session.documentToScreenColumn(0, 2), 8);
         assert.equal(session.documentToScreenColumn(0, 3), 9);
-    },
+    });
 
-    "test: documentToScreen without soft wrap": function() {
+    test("documentToScreen without soft wrap", function() {
         var session = new EditSession([
             "juhu",
             "12\t\t34",
@@ -253,9 +252,9 @@ module.exports = {
         assert.position(session.documentToScreenPosition(1, 3), 1, 4);
         assert.position(session.documentToScreenPosition(1, 4), 1, 8);
         assert.position(session.documentToScreenPosition(2, 2), 2, 4);
-    },
+    });
 
-    "test: documentToScreen with soft wrap": function() {
+    test("documentToScreen with soft wrap", function() {
         var session = new EditSession(["foo bar foo bar"]);
         session.setUseWrapMode(true);
         session.setWrapLimitRange(12, 12);
@@ -263,9 +262,9 @@ module.exports = {
         session.setOption("wrapMethod", "text");
         assert.position(session.documentToScreenPosition(0, 11), 0, 11);
         assert.position(session.documentToScreenPosition(0, 12), 1, 0);
-    },
+    });
 
-    "test: documentToScreen with soft wrap and multibyte characters": function() {
+    test("documentToScreen with soft wrap and multibyte characters", function() {
         var session = new EditSession(["ぁぁa"]);
         session.setUseWrapMode(true);
         session.setWrapLimitRange(2, 2);
@@ -274,16 +273,16 @@ module.exports = {
         assert.position(session.documentToScreenPosition(0, 1), 1, 0);
         assert.position(session.documentToScreenPosition(0, 2), 2, 0);
         assert.position(session.documentToScreenPosition(0, 4), 2, 1);
-    },
+    });
 
-    "test: documentToScreen should clip position to the document boundaries": function() {
+    test("documentToScreen should clip position to the document boundaries", function() {
         var session = new EditSession("foo bar\njuhu kinners");
 
         assert.position(session.documentToScreenPosition(-1, 4), 0, 0);
         assert.position(session.documentToScreenPosition(3, 0), 1, 12);
-    },
+    });
 
-    "test: convert screen to document coordinates" : function() {
+    test("convert screen to document coordinates", function() {
         var session = new EditSession("01234\t567890\t1234");
         session.setTabSize(4);
 
@@ -306,9 +305,9 @@ module.exports = {
         assert.equal(session.screenToDocumentColumn(0, 12), 12);
         assert.equal(session.screenToDocumentColumn(0, 13), 12);
         assert.equal(session.screenToDocumentColumn(0, 14), 13);
-    },
+    });
 
-    "test: screenToDocument with soft wrap": function() {
+    test("screenToDocument with soft wrap", function() {
         var session = new EditSession(["foo bar foo bar"]);
         session.setUseWrapMode(true);
         session.setWrapLimitRange(12, 12);
@@ -319,9 +318,9 @@ module.exports = {
         // Check if the position is clamped the right way.
         assert.position(session.screenToDocumentPosition(0, 12), 0, 11);
         assert.position(session.screenToDocumentPosition(0, 20), 0, 11);
-    },
+    });
 
-    "test: screenToDocument with soft wrap and multi byte characters": function() {
+    test("screenToDocument with soft wrap and multi byte characters", function() {
         var session = new EditSession(["ぁ a"]);
         session.setUseWrapMode(true);
         session.adjustWrapLimit(80);
@@ -331,9 +330,9 @@ module.exports = {
         assert.position(session.screenToDocumentPosition(0, 3), 0, 2);
         assert.position(session.screenToDocumentPosition(0, 4), 0, 3);
         assert.position(session.screenToDocumentPosition(0, 5), 0, 3);
-    },
+    });
 
-    "test: screenToDocument should clip position to the document boundaries": function() {
+    test("screenToDocument should clip position to the document boundaries", function() {
         var session = new EditSession("foo bar\njuhu kinners");
 
         assert.position(session.screenToDocumentPosition(-1, 4), 0, 0);
@@ -351,9 +350,9 @@ module.exports = {
         session.setUseWrapMode(true);
         session.setWrapLimitRange(5,5);
         assert.position(session.screenToDocumentPosition(4, 1), 1, 12);
-    },
+    });
 
-    "test: wrapLine split function" : function() {
+    test("wrapLine split function", function() {
         function computeAndAssert(line, assertEqual, wrapLimit, tabSize) {
             wrapLimit = wrapLimit || 12;
             tabSize = tabSize || 4;
@@ -414,9 +413,9 @@ module.exports = {
         computeAndAssert("\t\tfoo bar fooooooooooobooooooo", [6, 10, 16, 22, 28]);
         computeAndAssert("\t\t\tfoo bar fooooooooooobooooooo", [3, 7, 11, 17, 23, 29]);
         computeAndAssert("\tfoo \t \t   \t \t bar", [6, 12]); // 14
-    },
+    });
 
-    "test get longest line" : function() {
+    test("get longest line", function() {
         var session = new EditSession(["12"]);
         session.setTabSize(4);
         assert.equal(session.getScreenWidth(), 2);
@@ -432,18 +431,18 @@ module.exports = {
 
         session.setTabSize(2);
         assert.equal(session.getScreenWidth(), 4);
-    },
+    });
 
-    "test getDisplayString": function() {
+    test("getDisplayString", function() {
         var session = new EditSession(["12"]);
         session.setTabSize(4);
 
         assert.equal(session.$getDisplayTokens("\t").length, 4);
         assert.equal(session.$getDisplayTokens("abc").length, 3);
         assert.equal(session.$getDisplayTokens("abc\t").length, 4);
-    },
+    });
 
-    "test issue 83": function() {
+    test("issue 83", function() {
         var session = new EditSession("");
         var editor = new Editor(new MockRenderer(), session);
         var document = session.getDocument();
@@ -453,9 +452,9 @@ module.exports = {
         document.insertFullLines(0, ["a", "b"]);
         document.insertFullLines(2, ["c", "d"]);
         document.removeFullLines(1, 2);
-    },
+    });
 
-    "test wrapMode init has to create wrapData array": function() {
+    test("wrapMode init has to create wrapData array", function() {
         var session = new EditSession("foo bar\nfoo bar");
         var editor = new Editor(new MockRenderer(), session);
 
@@ -467,23 +466,23 @@ module.exports = {
         assert.equal(session.$wrapData.length, 2);
         assert.equal(session.$wrapData[0].length, 1);
         assert.equal(session.$wrapData[1].length, 1);
-    },
+    });
 
-    "test first line blank with wrap": function() {
+    test("first line blank with wrap", function() {
         var session = new EditSession("\nfoo");
         session.setUseWrapMode(true);
         assert.equal(session.doc.getValue(), ["", "foo"].join("\n"));
-    },
+    });
 
-    "test first line blank with wrap 2" : function() {
+    test("first line blank with wrap 2", function() {
         var session = new EditSession("");
         session.setUseWrapMode(true);
         session.setValue("\nfoo");
 
         assert.equal(session.doc.getValue(), ["", "foo"].join("\n"));
-    },
+    });
     
-    "test foldAll": function() {
+    test("foldAll", function() {
         var session = createFoldTestSession();
         var editor = new Editor(new MockRenderer(), session);
         var value = "  /*\n*comment\n*/\n" + editor.getValue() + "\n";
@@ -530,9 +529,9 @@ module.exports = {
         editor.execCommand("unfold");
         assert.equal(session.$foldData.length, 4);
         assert.equal(session.$foldData[1].range.start.row, 4);
-    },
+    });
 
-    "test setting undefined value": function() {
+    test("setting undefined value", function() {
         var session = createFoldTestSession();
         var editor = new Editor(new MockRenderer(), session);
         editor.setOption("mode", new JavaScriptMode());
@@ -545,9 +544,9 @@ module.exports = {
 
         editor.setValue("test");
         assert.equal(session.getValue(), "test");
-    },
+    });
 
-    "test foldOther": function() {
+    test("foldOther", function() {
         var session = new EditSession("{\n\t1{\n\t\t\n\t\t1.1 {\n\t\t}\n\t}\n\t2 {\n\t\t2.1 {\n\t\t\t2.2 {\n\t\t\t}\n\t\t\t2.3 {\n\t\t\t}\n\t\t}\n\t}\n}\n\n{\n}");
         var editor = new Editor(new MockRenderer(), session);
         editor.setOption("mode", new JavaScriptMode());
@@ -574,9 +573,9 @@ module.exports = {
         function foldRows() {
             return session.$foldData.map(function(x) {return x.start.row;}).join(",");
         }
-    },
+    });
 
-    "test fold getFoldDisplayLine": function() {
+    test("fold getFoldDisplayLine", function() {
         var session = createFoldTestSession();
         function assertDisplayLine(foldLine, str) {
             var line = session.getLine(foldLine.end.row);
@@ -587,9 +586,9 @@ module.exports = {
 
         assertDisplayLine(session.$foldData[0], "function foo(args...) {");
         assertDisplayLine(session.$foldData[1], "    for (vfoo...ert(items[bar...\"juhu\");");
-    },
+    });
 
-    "test foldLine idxToPosition": function() {
+    test("foldLine idxToPosition", function() {
         var session = createFoldTestSession();
 
         function assertIdx2Pos(foldLineIdx, idx, row, column) {
@@ -616,9 +615,9 @@ module.exports = {
         assertIdx2Pos(1, 26, 2, 20);
         assertIdx2Pos(1, 27, 2, 20);
         assertIdx2Pos(1, 32, 2, 25);
-    },
+    });
 
-    "test fold documentToScreen": function() {
+    test("fold documentToScreen", function() {
         var session = createFoldTestSession();
         function assertDoc2Screen(docRow, docCol, screenRow, screenCol) {
             assert.position(
@@ -657,9 +656,9 @@ module.exports = {
 
         // Test one position after the folds. Should be all like normal.
         assertDoc2Screen(3,  0, 2,  0);
-    },
+    });
 
-    "test fold screenToDocument": function() {
+    test("fold screenToDocument", function() {
         var session = createFoldTestSession();
         function assertScreen2Doc(docRow, docCol, screenRow, screenCol) {
             assert.position(
@@ -696,9 +695,9 @@ module.exports = {
 
         // Test one position after the folds. Should be all like normal.
         assertScreen2Doc(3,  0, 2,  0);
-    },
+    });
 
-    "test getFoldsInRange()": function() {
+    test("getFoldsInRange()", function() {
         var session = createFoldTestSession();
         var foldLines = session.$foldData;
         var folds = foldLines[0].folds.concat(foldLines[1].folds);
@@ -723,9 +722,9 @@ module.exports = {
         test(2, 10, 2, 20, [ ]);
         test(2, 10, 2, 11, [ ]);
         test(2, 19, 2, 20, [ ]);
-    },
+    });
 
-    "test fold one-line text insert": function() {
+    test("fold one-line text insert", function() {
         // These are mostly test for the FoldLine.addRemoveChars function.
         var session = createFoldTestSession();
         var undoManager = session.getUndoManager();
@@ -815,9 +814,9 @@ module.exports = {
         undoManager.undo(); // 0
         assert.range(foldLine.range, 0, 13, 0, 18);
         assert.range(fold.range,     0, 13, 0, 18);
-    },
+    });
 
-    "test fold multi-line insert/remove": function() {
+    test("fold multi-line insert/remove", function() {
         var session = createFoldTestSession(),
             undoManager = session.getUndoManager(),
             foldLines = session.$foldData;
@@ -876,9 +875,9 @@ module.exports = {
         assert.range(foldLines[0].range, 0, 13, 0, 18);
         assert.range(foldLines[1].range, 1, 10, 2, 25);
         // TODO: Add test for inseration inside of folds.
-    },
+    });
 
-    "test fold wrap data compution": function() {
+    test("fold wrap data compution", function() {
         function assertWrap(line0, line1, line2) {
             line0 && assertArray(wrapData[0], line0);
             line1 && assertArray(wrapData[1], line1);
@@ -969,9 +968,9 @@ module.exports = {
         removeFoldAssertWrap(0, 9, [8], [8], [8]);
 
         return session;
-    },
+    });
     
-    "test delete fold with wrap enabled": function() {
+    test("delete fold with wrap enabled", function() {
         var session = new EditSession("");
         session.setValue([
             "This is some placeholder text that will be folded inline.",
@@ -989,9 +988,9 @@ module.exports = {
         session.adjustWrapLimit(80);
         
         assert.equal(session.$wrapData + "", [[], [], [40, 76]] + "");
-    },
+    });
         
-    "test add fold": function() {
+    test("add fold", function() {
         var session = createFoldTestSession();
         var fold;
 
@@ -1032,9 +1031,9 @@ module.exports = {
         session.expandFolds(folds);
         folds = session.getFoldsInRange(new Range(0,0,100,100));
         assert.equal(folds.length, 0);
-    },
+    });
 
-    "test add subfolds": function() {
+    test("add subfolds", function() {
         var session = createFoldTestSession();
         var fold, oldFold;
         var foldData = session.$foldData;
@@ -1067,9 +1066,9 @@ module.exports = {
         session.addFold("fold0", new Range(0, 1, 0, 5));
         session.addFold("fold0", new Range(0, 6, 0, 8));
         assert.equal(fold.subFolds.length, 2);
-    },
+    });
 
-    "test row cache": function() {
+    test("row cache", function() {
         var session = createFoldTestSession();
 
         session.screenToDocumentPosition(2,3);
@@ -1110,9 +1109,9 @@ module.exports = {
         session.documentToScreenPosition(2,0);
         assertArray(session.$docRowCache, [1,2]);
         assertArray(session.$screenRowCache, [1,2]);
-    },
+    });
 
-    "test annotations": function() {
+    test("annotations", function() {
         var session = new EditSession([]),
             annotation = {row: 0, type: 'info', text: "This is a test."};
 
@@ -1120,9 +1119,9 @@ module.exports = {
         assertArray(session.getAnnotations(), []);
         session.setAnnotations([annotation]);
         assertArray(session.getAnnotations(), [annotation]);
-    },
+    });
     
-    "test: mode loading" : function(next) {
+    test("mode loading", function(next) {
         delete EditSession.prototype.$modes["ace/mode/javascript"];
         delete EditSession.prototype.$modes["ace/mode/css"];
         delete EditSession.prototype.$modes["ace/mode/sh"];
@@ -1147,9 +1146,9 @@ module.exports = {
         var originalOnChangeMode = session.$onChangeMode;
 
         // Create spy
-        session.$onChangeMode = function(...arguments) {
+        session.$onChangeMode = function(...args) {
             onChangeModeCallCount++;
-            originalOnChangeMode.apply(this, arguments);
+            originalOnChangeMode.apply(this, args);
         };
 
         session.setMode("ace/mode/javascript");   
@@ -1183,9 +1182,9 @@ module.exports = {
             next();
             });
         });
-    },
+    });
 
-    "test: sets destroyed flag when destroy called and tokenizer is never null": function() {
+    test("sets destroyed flag when destroy called and tokenizer is never null", function() {
         var session = new EditSession(["foo bar foo bar"]);
         assert.notEqual(session.bgTokenizer, null);
         assert.equal(session.destroyed, false);
@@ -1193,9 +1192,9 @@ module.exports = {
         session.destroy();
         assert.equal(session.destroyed, true);
         assert.notEqual(session.bgTokenizer, null);
-    },
+    });
 
-    "test: JSON serialization": function() {
+    test("JSON serialization", function() {
         var session = new EditSession(["Hello world!"]);
         session.setAnnotations([{row: 0, column: 0, text: "error test", type: "error"}]);
         session.setMode("ace/mode/javascript");
@@ -1206,43 +1205,9 @@ module.exports = {
         assert.equal(session.getScrollLeft(), 0);
         assert.equal(session.getScrollTop(), 0);
         assert.equal(session.getValue(), "Hello world!");
-    },
+    });
 
-    "test: JSON serialization preserves undo/redo history": function() {
-        var session = new EditSession(["Hello world!"]);
-        session.setUndoManager(new UndoManager());
-        var document = session.getDocument();
-
-        insert(0, 12, " test1", session);
-        insert(0, 18, " test2", session);
-        insert(0, 24, " test3", session);
-
-        assert.equal(session.getValue(), "Hello world! test1 test2 test3");
-
-        session.getUndoManager().undo(session);
-        assert.equal(session.getValue(), "Hello world! test1 test2");
-
-        var serialized = JSON.stringify(session);
-        session = EditSession.fromJSON(serialized);
-
-        assert.equal(session.getValue(), "Hello world! test1 test2");
-
-        // Test undo stack works
-        session.getUndoManager().undo(session);
-        assert.equal(session.getValue(), "Hello world! test1");
-
-        session.getUndoManager().undo(session);
-        assert.equal(session.getValue(), "Hello world!");
-
-        // Test redo stack works
-        session.getUndoManager().redo(session);
-        assert.equal(session.getValue(), "Hello world! test1");
-
-        session.getUndoManager().redo(session);
-        assert.equal(session.getValue(), "Hello world! test1 test2");
-    },
-
-    "test: operation handling : when session it not attached to an editor": function(done) {
+    test("operation handling : when session it not attached to an editor", function(done) {
         const session = new EditSession("Hello world!");
         const beforeEndOperationSpy = [];
         session.on("beforeEndOperation", () => {
@@ -1286,9 +1251,9 @@ module.exports = {
                 done();
             }, 10);
         }, 10);
-    },
+    });
 
-    "test: operation handling : when session is attached to an editor": function(done) {
+    test("operation handling : when session is attached to an editor", function(done) {
         const session = new EditSession("Hello world!");
         const editor = new Editor(new MockRenderer(), session);
         const beforeEndOperationSpySession = [];
@@ -1353,9 +1318,6 @@ module.exports = {
             assert.equal(beforeEndOperationSpyNewSession.length, 2);
             done();
         }, 10);
-    }
-};
+    });
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+

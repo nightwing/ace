@@ -1,3 +1,5 @@
+var test = require("../../test/run.js")(module.exports);
+
 var fs = require("fs");
 var path = require("path");
 var regexpTokenizer = require("../../../tool/regexp_tokenizer");

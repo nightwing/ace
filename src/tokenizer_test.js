@@ -1,14 +1,11 @@
-if (typeof process !== "undefined") {
-    require("amd-loader");
- }
-
 "use strict";
+var test = require("./test/run.js")(module.exports);
 
 var Tokenizer = require("./tokenizer").Tokenizer;
 var assert = require("./test/assertions");
 
-module.exports = {
-    "test: createSplitterRegexp" : function() {
+
+    test("createSplitterRegexp", function() {
         var t = new Tokenizer({});
         var re = t.createSplitterRegexp("(a)(b)(?=[x)(])");
         assert.equal(re.source, "^(a)(b)$");
@@ -22,15 +19,15 @@ module.exports = {
         assert.equal(re.source, "^(?=r)[(?=)](\\?=t)$");
         var re = t.createSplitterRegexp("[(?=)](\\?=t)");
         assert.equal(re.source, "^[(?=)](\\?=t)$");
-    },
+    });
 
-    "test: removeCapturingGroups" : function() {
+    test("removeCapturingGroups", function() {
         var t = new Tokenizer({});
         var re = t.removeCapturingGroups("(ax(by))[()]");
         assert.equal(re, "(?:ax(?:by))[()]");
-    },
+    });
     
-    "test: broken highlight rules": function() {
+    test("broken highlight rules", function() {
         var t = new Tokenizer({
             start: [{ 
                 token: 's',
@@ -56,10 +53,8 @@ module.exports = {
             state: 'start'
         });
         assert.equal(errorReports, 2);
-    } 
-};
+    }); 
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

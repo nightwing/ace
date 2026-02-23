@@ -1,9 +1,9 @@
+"use strict";
+var test = require("../test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("../test/mockdom");
 }
-
-"use strict";
 
 require("../multi_select");
 require("../theme/textmate");
@@ -36,8 +36,8 @@ function findVisibleTooltip() {
     return null;
 }
 
-module.exports = {
-    setUp : function(next) {
+
+    test.beforeEach(function(next) {
         this.editor = new Editor(new VirtualRenderer());
         this.editor.container.style.position = "absolute";
         this.editor.container.style.height = "500px";
@@ -47,8 +47,8 @@ module.exports = {
         document.body.appendChild(this.editor.container);
         editor = this.editor;
         next();
-    },
-    "test: gutter error tooltip" : function(done) {
+    });
+    test("gutter error tooltip", function(done) {
         var editor = this.editor;
         var value = "";
 
@@ -73,8 +73,8 @@ module.exports = {
             annotation.dispatchEvent(new MouseEvent("move", {x: 0, y: 0}));
             done();
         }, 100);
-    },
-    "test: gutter security tooltip" : function(done) {
+    });
+    test("gutter security tooltip", function(done) {
         var editor = this.editor;
         var value = "";
 
@@ -97,8 +97,8 @@ module.exports = {
             assert.ok(/security finding test/.test(tooltip.textContent));
             done();
         }, 100);
-    },
-    "test: gutter warning tooltip" : function(done) {
+    });
+    test("gutter warning tooltip", function(done) {
         var editor = this.editor;
         var value = "";
 
@@ -121,8 +121,8 @@ module.exports = {
             assert.ok(/warning test/.test(tooltip.textContent));
             done();
         }, 100);
-    },
-    "test: gutter info tooltip" : function(done) {
+    });
+    test("gutter info tooltip", function(done) {
         var editor = this.editor;
         var value = "";
 
@@ -145,8 +145,8 @@ module.exports = {
             assert.ok(/info test/.test(tooltip.textContent));
             done();
         }, 100);
-    },
-    "test: gutter hint tooltip" : function(done) {
+    });
+    test("gutter hint tooltip", function(done) {
         var editor = this.editor;
         var value = "";
 
@@ -169,8 +169,8 @@ module.exports = {
             assert.ok(/suggestion test/.test(tooltip.textContent));
             done();
         }, 100);
-    },
-    "test: gutter svg icons" : function() {
+    });
+    test("gutter svg icons", function() {
         var editor = this.editor;
         var value = "";
 
@@ -186,8 +186,8 @@ module.exports = {
 
         var annotation = line.children[2].firstChild;
         assert.ok(/ace_icon_svg/.test(annotation.className));
-    },
-    "test: error show up in fold" : function(done) {
+    });
+    test("error show up in fold", function(done) {
         var editor = this.editor;
         var value = "x {" + "\n".repeat(50) + "}";
         value = value.repeat(50);
@@ -222,8 +222,8 @@ module.exports = {
             assert.ok(/error in folded/.test(tooltip.textContent));
             done();
         }, 100);
-    },
-    "test: security show up in fold" : function(done) {
+    });
+    test("security show up in fold", function(done) {
         var editor = this.editor;
         var value = "x {" + "\n".repeat(50) + "}";
         value = value.repeat(50);
@@ -258,8 +258,8 @@ module.exports = {
             assert.ok(/security finding in folded/.test(tooltip.textContent));
             done();
         }, 100);
-    },
-    "test: warning show up in fold" : function(done) {
+    });
+    test("warning show up in fold", function(done) {
         var editor = this.editor;
         var value = "x {" + "\n".repeat(50) + "}";
         value = value.repeat(50);
@@ -294,8 +294,8 @@ module.exports = {
             assert.ok(/warning in folded/.test(tooltip.textContent));
             done();
         }, 100);
-    },
-    "test: info not show up in fold" : function() {
+    });
+    test("info not show up in fold", function() {
         var editor = this.editor;
         var value = "x {" + "\n".repeat(50) + "}";
         value = value.repeat(50);
@@ -319,8 +319,8 @@ module.exports = {
         // Annotation node should NOT have fold class.
         var annotation = lines.cells[0].element.children[2];
         assert.notOk(/fold/.test(annotation.className));
-    },
-    "test: hint not show up in fold" : function() {
+    });
+    test("hint not show up in fold", function() {
         var editor = this.editor;
         var value = "x {" + "\n".repeat(50) + "}";
         value = value.repeat(50);
@@ -344,8 +344,8 @@ module.exports = {
         // Annotation node should NOT have fold class.
         var annotation = lines.cells[0].element.children[2];
         assert.notOk(/fold/.test(annotation.className));
-    },
-    "test: severities are correctly ordered/ranked when folding": function() {
+    });
+    test("severities are correctly ordered/ranked when folding", function() {
         var editor = this.editor;
         var value = "x {" + "\n".repeat(50) + "}";
         value = value.repeat(50);
@@ -395,8 +395,8 @@ module.exports = {
         assert.notOk(/ace_error_fold/.test(firstLineGutterElement.className));
         assert.notOk(/ace_security_fold/.test(firstLineGutterElement.className));
         assert.ok(/ace_warning_fold/.test(firstLineGutterElement.className));
-    },
-    "test: gutter tooltip should properly display special characters (\" ' & <)" : function(done) {
+    });
+    test("gutter tooltip should properly display special characters (\" ' & <)", function(done) {
         var editor = this.editor;
         var value = "";
 
@@ -419,8 +419,8 @@ module.exports = {
             assert.ok(/special characters " ' & </.test(tooltip.textContent));
             done();
         }, 100);
-    },
-    "test: gutter hover tooltip should remain open when pressing ctrl key combination" : function(done) {
+    });
+    test("gutter hover tooltip should remain open when pressing ctrl key combination", function(done) {
         var editor = this.editor;
         var value = "";
 
@@ -451,8 +451,8 @@ module.exports = {
             assert.strictEqual(tooltip.style.display, "none");
             done();
         }, 100);
-    },
-    "test: gutter tooltip aria-describedby attribute": function(done) {
+    });
+    test("gutter tooltip aria-describedby attribute", function(done) {
         var editor = this.editor;
         var value = "";
 
@@ -487,14 +487,12 @@ module.exports = {
                 done();
             }, 100);
         }, 100);
-    },
+    });
 
-    tearDown : function() {
+    test.afterEach(function() {
         this.editor.destroy();
         document.body.removeChild(this.editor.container);
-    }
-};
+    });
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

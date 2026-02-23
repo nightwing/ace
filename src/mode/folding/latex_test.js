@@ -1,11 +1,12 @@
 "use strict";
+var test = require("../../test/run.js")(module.exports);
 
 var LatexMode = require("../latex").Mode;
 var EditSession = require("../../edit_session").EditSession;
 var assert = require("../../test/assertions");
 
-module.exports = {
-    "test: latex block folding": function () {
+
+    test("latex block folding", function () {
         var session = new EditSession([
             '\\usepackage{amsmath}', '\\title{\\LaTeX}', '\\date{}', '\\begin'
         ]);
@@ -23,7 +24,4 @@ module.exports = {
         session.setValue(session.getValue() + '{test}\nsome text here \n\\end{test}');
 
         assert.range(session.getFoldWidgetRange(3), 3, 12, 5, 0);
-    }
-};
-
-if (typeof module !== "undefined" && module === require.main) require("asyncjs").test.testcase(module.exports).exec();
+    });

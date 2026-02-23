@@ -13,6 +13,9 @@
     #log .failed {
         color: red;
     }
+    #log .skipped {
+        color: gray;
+    }
     
     #log pre.error {
         color: black;
@@ -27,7 +30,7 @@
 <script type="text/javascript">
     require.config({
         paths: {
-            ace: new URL("../", location).toString()
+            ace: new URL("..", location).toString()
         },
         packages : [{
             name: "asyncjs",

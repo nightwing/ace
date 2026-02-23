@@ -1,12 +1,13 @@
 "use strict";
+var test = require("../../test/run.js")(module.exports);
 
 var PythonMode = require("../python").Mode;
 var EditSession = require("../../edit_session").EditSession;
 var assert = require("../../test/assertions");
 
-module.exports = {
 
-    "test: bracket folding": function() {
+
+    test("bracket folding", function() {
         var session = new EditSession([
             '[ ',
             'stuff',
@@ -30,9 +31,9 @@ module.exports = {
         assert.range(session.getFoldWidgetRange(0), 0, 1, 2, 0);
         assert.equal(session.getFoldWidgetRange(3), null);
         assert.equal(session.getFoldWidgetRange(5), null);
-    },
+    });
 
-    "test: indentation folding": function() {
+    test("indentation folding", function() {
         var session = new EditSession([
             'def a: #',
             '',
@@ -55,9 +56,9 @@ module.exports = {
 
         assert.range(session.getFoldWidgetRange(0), 0, 6, 5, 3);
         assert.range(session.getFoldWidgetRange(2), 2, 3, 5, 3);
-    },
+    });
     
-    "test: indentation folding with strings": function() {
+    test("indentation folding with strings", function() {
         var session = new EditSession([
             'def a: #',
             '  print """',
@@ -76,9 +77,5 @@ module.exports = {
         assert.equal(session.getFoldWidget(0), "start");
         session.bgTokenizer.$worker();
         assert.range(session.getFoldWidgetRange(0), 0, 6, 5, 3);
-    }
-};
+    });
 
-
-if (typeof module !== "undefined" && module === require.main)
-    require("asyncjs").test.testcase(module.exports).exec();

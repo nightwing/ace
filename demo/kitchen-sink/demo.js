@@ -504,6 +504,10 @@ optionsPanel.add({
 var optionsPanelContainer = document.getElementById("optionsPanel");
 optionsPanel.render();
 optionsPanelContainer.insertBefore(optionsPanel.container, optionsPanelContainer.firstChild);
+optionsPanel.container.parentNode.scrollTop = localStorage.optionsPanelScrollTop;
+window.addEventListener("beforeunload", function() {
+    localStorage.optionsPanelScrollTop = optionsPanel.container.parentNode.scrollTop;
+});
 optionsPanel.on("setOption", function(e) {
     util.saveOption(e.name, e.value);
 });
@@ -660,9 +664,15 @@ function openTestDialog(animateHeight) {
 
     var dialog = dom.buildDom(["div", {
         style: "transition: all 1s; position: fixed; z-index: 100000;"
+          + "overflow: hidden; resize: both; box-shadow: 0 0 10px rgba(0,0,0,0.5);"
           + "background: darkblue; border: solid 1px black; display: flex; flex-direction: column"
         }, 
-        ["div", {}, "test dialog"],
+        ["div", {style: "display:flex"}, "test dialog",
+            ["span", {style: "flex:1"}], 
+            ["input", {type: "number", value: 1, step: 0.01, onchange: function() {
+                dialog.style.transform = "scale(" +this.value + ")";
+            }}]
+        ],
         editor.container
     ], document.body);
     editor.container.style.flex = "1";

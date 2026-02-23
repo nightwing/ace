@@ -1,14 +1,15 @@
 "use strict";
+var test = require("./test/run.js")(module.exports);
 
 var config = require("./config");
 var assert = require("./test/assertions");
 var {defaultEnglishMessages} = require("./lib/default_english_messages");
 
-module.exports = {
-    tearDown: function() {
+
+    test.afterEach(function() {
         config.setMessages(defaultEnglishMessages);
-    },
-    "test: path resolution" : function(done) {
+    });
+    test("path resolution", function(done) {
         config.set("packaged", true);
         var url = config.moduleUrl("kr_theme", "theme");
         assert.equal(url, "theme-kr_theme.js");
@@ -47,8 +48,8 @@ module.exports = {
             assert.equal(module, "success");
             done();
         });
-    },
-    "test: nls": function() {
+    });
+    test("nls", function() {
         var nls = config.nls;
         config.setMessages({
             foo: "hello world of $1",
@@ -61,8 +62,8 @@ module.exports = {
         assert.equal(nls("untranslated_key", "$0B is $1$$", [0.11, 22]), "0.11B is 22$");
         assert.equal(nls("untranslated_key_but_translated_default_string", "foo", {1: "goo"}), "hello world of goo");
         assert.equal(nls("test_key", "this text should not appear"), "hello world for test key");
-    },
-    "test: nls setting nlsPlaceholders": function() {
+    });
+    test("nls setting nlsPlaceholders", function() {
         var nls = config.nls;
 
         // Should default to using dollar signs
@@ -80,8 +81,8 @@ module.exports = {
             test_with_curly_brackets: "hello world $0 of {0} and $1 to the {1} degree"
         }, {placeholders: "dollarSigns"});
         assert.equal(nls("test_with_curly_brackets", "hello world $0 of {1} and $1 to the {1} degree", ["bar", "third"]), "hello world bar of {0} and third to the {1} degree");
-    },
-    "test: define options" : function() {
+    });
+    test("define options", function() {
         var o = {};
         config.defineOptions(o, "test_object", {
             opt1: {
@@ -134,10 +135,8 @@ module.exports = {
         config.resetOptions(o);
         assert.equal(o.getOption("opt1"), 1);
         assert.equal(o.getOption("forwarded"), 2);
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

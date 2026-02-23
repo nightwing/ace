@@ -1,9 +1,9 @@
+"use strict";
+var test = require("../test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("../test/mockdom");
 }
-
-"use strict";
 
 require("../multi_select");
 
@@ -21,9 +21,9 @@ function initEditor(docString) {
     editor.setKeyboardHandler(handler);
 }
 
-module.exports = {
 
-    "test: move by subwords": function() {
+
+    test("move by subwords", function() {
         initEditor("\n   abcDefGHKLmn_op ++ xyz$\nt");
         
         [0, 3, 6, 9, 12, 15, 18, 21, 25, 26, 0, 1, 1].forEach(function(col) {
@@ -34,10 +34,8 @@ module.exports = {
             assert.equal(editor.selection.lead.column, col);
             editor.execCommand(handler.commands.moveSubWordLeft);
         });
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

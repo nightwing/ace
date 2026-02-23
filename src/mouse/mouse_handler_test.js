@@ -1,16 +1,16 @@
+"use strict";
+var test = require("../test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("../test/mockdom");
 }
-
-"use strict";
 
 require("../multi_select");
 require("../theme/textmate");
 var Editor = require("../editor").Editor;
 var Mode = require("../mode/java").Mode;
 var VirtualRenderer = require("../virtual_renderer").VirtualRenderer;
-const { test } = require("asyncjs");
+
 var assert = require("../test/assertions");
 var MouseEvent = function(type, opts){
     var e = document.createEvent("MouseEvents");
@@ -47,9 +47,9 @@ function touchPos(row, column) {
 
 var editor;
 
-module.exports = {
 
-    setUp : function(next) {
+
+    test.beforeEach(function(next) {
         this.editor = new Editor(new VirtualRenderer());
         this.editor.session.setValue("Juhu kinners!");
         this.editor.container.style.position = "absolute";
@@ -60,9 +60,9 @@ module.exports = {
         document.body.appendChild(this.editor.container);
         editor = this.editor;
         next();
-    },
+    });
 
-    "test: double tap. issue #956" : function() {
+    test("double tap. issue #956", function() {
         // mouse up fired immediately after mouse down
         this.editor.resize(true);
         var pos = this.editor.renderer.textToScreenCoordinates(0, 1);
@@ -77,8 +77,8 @@ module.exports = {
         target.dispatchEvent(MouseEvent("down", {x: pos.pageX, y: pos.pageY}));
         target.dispatchEvent(MouseEvent("up", {x: pos.pageX, y: pos.pageY}));
         assert.equal(this.editor.getSelectedText(), "");
-    },
-    "test: multiselect" : function() {
+    });
+    test("multiselect", function() {
         var target = this.editor.renderer.getMouseEventTarget();
         this.editor.session.setValue("xyz\n\nabc efg");
         this.editor.resize(true);
@@ -118,8 +118,8 @@ module.exports = {
         target.dispatchEvent(MouseEvent("move", {x: pos2.pageX, y: pos2.pageY + 1, alt: true}));
         target.dispatchEvent(MouseEvent("up", {x: pos2.pageX, y: pos2.pageY + 1, alt: true}));
         assert.equal(this.editor.selection.toJSON() + "", "Range: [2/2] -> [2/2],Range: [1/0] -> [1/0],Range: [0/2] -> [0/2]");
-    },
-    "test: gutter" : function() {
+    });
+    test("gutter", function() {
         var editor = this.editor;
         var value = "x {" + "\n".repeat(50) + "}";
         value = value.repeat(50);
@@ -148,8 +148,8 @@ module.exports = {
         toggler.dispatchEvent(e);
         editor.renderer.$loop._flush();
         assert.ok(parseInt(lines.cells[0].element.textContent) > 1);
-    },
-    "test: gutter click on wrapped line" : function() {
+    });
+    test("gutter click on wrapped line", function() {
         var editor = this.editor;
         var value = "x {\n" + "  abc".repeat(100) + "\n}";
         value = value.repeat(10);
@@ -171,8 +171,8 @@ module.exports = {
         toggler.dispatchEvent(MouseEvent("up", {x: rect.left, y: rect.top + rect.height}));
         editor.renderer.$loop._flush();
         assert.position(editor.getCursorPosition(), 2, 0);
-    },
-    "test: wheel" : function() {
+    });
+    test("wheel", function() {
         var editor = this.editor;
         var lines = editor.renderer.$gutterLayer.$lines;
         editor.setValue("\n".repeat(100), -1);
@@ -194,9 +194,9 @@ module.exports = {
         editor.container.dispatchEvent(e);
         editor.renderer.$loop._flush();
         assert.ok(parseInt(lines.cells[0].element.textContent) > 10);
-    },
+    });
     
-    "test: touch" : function(done) {
+    test("touch", function(done) {
         var editor = this.editor;
         var value = "x {" + "\n  abc".repeat(10) + "\n}";
         value = value.repeat(10);
@@ -271,9 +271,9 @@ module.exports = {
                 done();
             }, 50);
         }, 2);
-    },
+    });
     
-    "test: touch selection with scrollMargin" : function() {
+    test("touch selection with scrollMargin", function() {
         editor.renderer.setScrollMargin(50, 50, 0, 15);
         editor.setValue("Juhu Kinners!");
         editor.renderer.$loop._flush();
@@ -294,23 +294,19 @@ module.exports = {
         sendTouchEvent("end", {touches: [touchPos(0, 8)]}, editor);
         
         assert.equal(editor.getSelectedText(), "Kin");
-    },
+    });
     
-    "test: destroy while mouse is pressed": function() {
+    test("destroy while mouse is pressed", function() {
         assert.ok(!this.editor.$mouseHandler.releaseMouse);
         var target = this.editor.renderer.getMouseEventTarget();
         target.dispatchEvent(MouseEvent("down", {x: 0, y: 0}));
         assert.ok(this.editor.$mouseHandler.releaseMouse);
         this.editor.destroy();
         assert.ok(!this.editor.$mouseHandler.releaseMouse);
-    },
-    tearDown : function() {
+    });
+    test.afterEach(function() {
         this.editor.destroy();
         document.body.removeChild(this.editor.container);
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}

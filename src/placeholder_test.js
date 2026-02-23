@@ -1,9 +1,9 @@
+"use strict";
+var test = require("./test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("./test/mockdom");
 }
-
-"use strict";
 
 var EditSession = require("./edit_session").EditSession;
 var Editor = require("./editor").Editor;
@@ -14,9 +14,9 @@ var PlaceHolder = require("./placeholder").PlaceHolder;
 var UndoManager = require("./undomanager").UndoManager;
 require("./multi_select");
 
-module.exports = {
 
-   "test: simple at the end appending of text" : function() {
+
+    test("simple at the end appending of text", function() {
         var session = new EditSession("var a = 10;\nconsole.log(a, a);", new JavaScriptMode());
         var editor = new Editor(new MockRenderer(), session);
         
@@ -31,9 +31,9 @@ module.exports = {
         editor.remove('left');
         editor.remove('left');
         assert.equal(session.doc.getValue(), "var a = 10;\nconsole.log(a, a);");
-    },
+    });
 
-    "test: inserting text outside placeholder" : function() {
+    test("inserting text outside placeholder", function() {
         var session = new EditSession("var a = 10;\nconsole.log(a, a);\n", new JavaScriptMode());
         var editor = new Editor(new MockRenderer(), session);
         
@@ -42,9 +42,9 @@ module.exports = {
         editor.moveCursorTo(2, 0);
         editor.insert('b');
         assert.equal(session.doc.getValue(), "var a = 10;\nconsole.log(a, a);\nb");
-    },
+    });
     
-   "test: insertion at the beginning" : function(next) {
+    test("insertion at the beginning", function(next) {
         var session = new EditSession("var a = 10;\nconsole.log(a, a);", new JavaScriptMode());
         var editor = new Editor(new MockRenderer(), session);
         
@@ -60,9 +60,9 @@ module.exports = {
             assert.equal(session.doc.getValue(), "var v$a = 10;\nconsole.log(v$a, v$a);");
             next();
         }, 20);
-    },
+    });
 
-   "test: detaching placeholder" : function() {
+    test("detaching placeholder", function() {
         var session = new EditSession("var a = 10;\nconsole.log(a, a);", new JavaScriptMode());
         var editor = new Editor(new MockRenderer(), session);
         
@@ -74,9 +74,9 @@ module.exports = {
         p.detach();
         editor.insert('cd');
         assert.equal(session.doc.getValue(), "var abcd = 10;\nconsole.log(ab, ab);");
-    },
+    });
 
-   "test: events" : function() {
+    test("events", function() {
         var session = new EditSession("var a = 10;\nconsole.log(a, a);", new JavaScriptMode());
         var editor = new Editor(new MockRenderer(), session);
         
@@ -97,9 +97,9 @@ module.exports = {
         editor.moveCursorTo(1, 0);
         p.onCursorChange(); // Have to do this by hand because moveCursorTo doesn't trigger the event
         assert.ok(left);
-    },
+    });
     
-    "test: cancel": function(next) {
+    test("cancel", function(next) {
         var session = new EditSession("var a = 10;\nconsole.log(a, a);", new JavaScriptMode());
         session.setUndoManager(new UndoManager());
         var editor = new Editor(new MockRenderer(), session);
@@ -116,10 +116,8 @@ module.exports = {
             assert.equal(session.doc.getValue(), "var a = 10;\nconsole.log(a, a);");
             next();
         }, 80);
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

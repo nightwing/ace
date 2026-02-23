@@ -1,8 +1,9 @@
+"use strict";
+var test = require("./test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
     require("./test/mockdom");
 }
-
-"use strict";
 
 var ace = require("./ace");
 var dom = require("./lib/dom");
@@ -13,8 +14,8 @@ var MarkerGroup = require("./marker_group").MarkerGroup;
 var editor;
 var session1, session2;
 
-module.exports = {
-    setUp: function(next) {
+
+    test.beforeEach(function(next) {
         var value = "Hello empty world\n"
             + "This is a second line"
             + "\n".repeat(100)
@@ -30,8 +31,8 @@ module.exports = {
         dom.importCssString('.ace_tooltip-marker_test { position: absolute; background: rgba(255, 0, 0, 0.3); }', 'marker_group_test');
 
         next();
-    },
-   "test: should show and update markers": function() {
+    });
+    test("should show and update markers", function() {
         editor.resize(true);
         editor.renderer.$loop._flush();
         var markerGroup = new MarkerGroup(session1);
@@ -64,8 +65,8 @@ module.exports = {
         markerGroup.setMarkers([]);
         editor.renderer.$loop._flush();
         assert.equal(editor.container.querySelectorAll(".m1").length, 0);
-    },
-    "test: should show markers of fullLine type": function() {
+    });
+    test("should show markers of fullLine type", function() {
         editor.resize(true);
         editor.renderer.$loop._flush();
         var markerGroup = new MarkerGroup(session1, {markerType: "fullLine"});
@@ -89,8 +90,8 @@ module.exports = {
         assert.equal(markerSize.left, editor.renderer.scroller.getBoundingClientRect().left);
         // Shoud be as wide as the marker layer itself.
         assert.equal(markerSize.width, editor.renderer.$markerBack.element.getBoundingClientRect().width);
-    },
-    "test: should show markers of line type": function() {
+    });
+    test("should show markers of line type", function() {
         editor.resize(true);
         editor.renderer.$loop._flush();
         var markerGroup = new MarkerGroup(session1, {markerType: "line"});
@@ -117,8 +118,8 @@ module.exports = {
         assert.equal(markerSize.left, 12 * characterWidth + 4 + baseRect.left);
         // Shoud be as wide as the marker layer - 12 characters and the offset on both sides.
         assert.equal(markerSize.width, baseRect.width - 12 * characterWidth - 4 - 4);
-    },
-    "test: should default to markers of text type": function() {
+    });
+    test("should default to markers of text type", function() {
         editor.resize(true);
         editor.renderer.$loop._flush();
 
@@ -147,12 +148,10 @@ module.exports = {
         assert.equal(markerSize.left, 12 * characterWidth + 4 + baseRect.left);
         // Shoud be as wide as the remaining characters in the range on the first line.
         assert.equal(Math.round(markerSize.width), Math.round(6 * characterWidth));
-    },
-    tearDown: function() {
+    });
+    test.afterEach(function() {
         editor.destroy();
-    }
-};
+    });
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

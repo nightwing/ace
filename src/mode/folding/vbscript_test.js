@@ -1,15 +1,16 @@
 "use strict";
+var test = require("../../test/run.js")(module.exports);
 
 var VBScriptMode = require("../vbscript").Mode;
 var EditSession = require("../../edit_session").EditSession;
 var assert = require("../../test/assertions");
 
-module.exports = {
-    setUp : function() {
-        this.mode = new VBScriptMode();
-    },
 
-    "test: visual basic script indentation based folding": function() {
+    test.beforeEach(function() {
+        this.mode = new VBScriptMode();
+    });
+
+    test("visual basic script indentation based folding", function() {
         var session = new EditSession([
             'Sub MakeHelloWorldFile (FileName)',
             '   \'Create a new file in C: drive or overwrite existing file',
@@ -47,9 +48,5 @@ module.exports = {
         assert.range(session.getFoldWidgetRange(0), 0, 33, 18, 46);
         assert.range(session.getFoldWidgetRange(3), 3, 45, 11, 37);
         assert.range(session.getFoldWidgetRange(12), 3, 45, 11, 37);
-    }
-};
+    });
 
-
-if (typeof module !== "undefined" && module === require.main)
-    require("asyncjs").test.testcase(module.exports).exec();

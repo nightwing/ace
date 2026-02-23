@@ -1,4 +1,5 @@
 "use strict";
+var test = require("../test/run.js")(module.exports);
 
 var oop = require("../lib/oop");
 var EventEmitter = require("./event_emitter").EventEmitter;
@@ -8,8 +9,8 @@ var Emitter = function() {};
 
 oop.implement(Emitter.prototype, EventEmitter);
 
-module.exports = {
-    "test: dispatch event with no data" : function() {
+
+    test("dispatch event with no data", function() {
         var emitter = new Emitter();
 
         var called = false;
@@ -20,10 +21,8 @@ module.exports = {
 
         emitter._emit("juhu");
         assert.ok(called);
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

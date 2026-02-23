@@ -1,16 +1,13 @@
-if (typeof process !== "undefined") {
-     require("amd-loader");
- }
-
 "use strict";
+var test = require("./test/run.js")(module.exports);
 
 var EditSession = require("./edit_session").EditSession;
 var JavaScriptMode = require("./mode/javascript").Mode;
 var TokenIterator = require("./token_iterator").TokenIterator;
 var assert = require("./test/assertions");
 
-module.exports = {
-    "test: token iterator initialization in JavaScript document" : function() {
+
+    test("token iterator initialization in JavaScript document", function() {
         var lines = [
             "function foo(items) {",
             "    for (var i=0; i<items.length; i++) {",
@@ -62,9 +59,9 @@ module.exports = {
 
         var iterator = new TokenIterator(session, 5, 0);
         assert.equal(iterator.getCurrentToken(), null);
-    },
+    });
 
-    "test: token iterator initialization in text document" : function() {
+    test("token iterator initialization in text document", function() {
         var lines = [
             "Lorem ipsum dolor sit amet, consectetur adipisicing elit,",
             "sed do eiusmod tempor incididunt ut labore et dolore magna",
@@ -95,9 +92,9 @@ module.exports = {
 
         var iterator = new TokenIterator(session, 4, 0);
         assert.equal(iterator.getCurrentToken(), null);
-    },
+    });
 
-    "test: token iterator step forward in JavaScript document" : function() {
+    test("token iterator step forward in JavaScript document", function() {
         var lines = [
             "function foo(items) {",
             "    for (var i=0; i<items.length; i++) {",
@@ -117,9 +114,9 @@ module.exports = {
             assert.equal(iterator.stepForward(), tokens[i]);
         assert.equal(iterator.stepForward(), null);
         assert.equal(iterator.getCurrentToken(), null);
-    },
+    });
 
-    "test: token iterator step backward in JavaScript document" : function() {
+    test("token iterator step backward in JavaScript document", function() {
         var lines = [
             "function foo(items) {",
             "     for (var i=0; i<items.length; i++) {",
@@ -139,9 +136,9 @@ module.exports = {
             assert.equal(iterator.stepBackward(), tokens[i]);
         assert.equal(iterator.stepBackward(), null);
         assert.equal(iterator.getCurrentToken(), null);
-    },
+    });
 
-    "test: token iterator reports correct row and column" : function() {
+    test("token iterator reports correct row and column", function() {
         var lines = [
             "function foo(items) {",
             "    for (var i=0; i<items.length; i++) {",
@@ -171,10 +168,8 @@ module.exports = {
         assert.equal(iterator.getCurrentToken().value, "for");
         assert.equal(iterator.getCurrentTokenRow(), 1);
         assert.equal(iterator.getCurrentTokenColumn(), 4);
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+
