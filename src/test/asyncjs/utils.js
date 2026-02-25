@@ -5,7 +5,7 @@
  */
 
 
-var async = require("asyncjs/async")
+var async = require("./async")
 
 async.plugin({
     delay: function(delay) {

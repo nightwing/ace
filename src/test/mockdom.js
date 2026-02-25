@@ -914,20 +914,25 @@ exports.load = function() {
     Object.keys(window).forEach(function(i) {
         var desc = Object.getOwnPropertyDescriptor(global, i);
         originalProperties[i] = desc;
-        global.__defineGetter__(i, function() {
-            return overriddenValues[i] || window[i];
-        });
-        global.__defineSetter__(i, function(value) {
-            if (!overridableProperties.includes(i)) {
-                console.log("attempt to set " + i);
-            } else if (value === window[i]) {
-                delete overriddenValues[i];
-                if (!loaded) {
-                    unloadProperty(i);
+        Object.defineProperty(global, i, {
+            get: function() {
+                return overriddenValues[i] || window[i];
+            }, 
+            set: function(value) {
+                if (!overridableProperties.includes(i)) {
+                    console.trace("attempt to set " + i);
+                } else if (value === window[i]) {
+                    delete overriddenValues[i];
+                    if (!loaded) {
+                        unloadProperty(i);
+                    }
+                } else {
+                    overriddenValues[i] = value;
                 }
-            } else {
-                overriddenValues[i] = value;
-            }
+            },
+            // writable: true, 
+            enumerable: true,
+            configurable: true,
         });
     });
     loaded = true;
@@ -941,6 +946,8 @@ exports.loadInBrowser = function(global, $setSize) {
     delete global.ResizeObserver;
     global.__origRoot__ = global.document.documentElement;
     global.__origBody__ = global.document.body;
+    global.document.createElementOrig = global.document.createElement;
+    global.document.createTextNodeOrig = global.document.createTextNode;
     Object.keys(window).forEach(function(i) {
         if (i != "document" && i != "window") {
             delete global[i];
@@ -951,7 +958,6 @@ exports.loadInBrowser = function(global, $setSize) {
         var val = window.document[i];
         if (typeof val == "function") {
             if (i == "createElement") {
-                global.document.createElementOrig = global.document.createElement;
                 val = function(n) {
                     if (n == "script")
                         return global.document.createElementOrig(n);
@@ -982,6 +988,7 @@ exports.loadInBrowser = function(global, $setSize) {
             );
         }
     }
+    global.__mockdom_ = exports;
     loaded = true;
 };
 
@@ -1007,3 +1014,31 @@ exports.unload = function() {
 };
 
 exports.load();
+
+exports.show = function(mockNode) {
+    var global = globalThis;
+    var el = global.document.createElementOrig.bind(global.document);
+    var text = global.document.createTextNodeOrig.bind(global.document);
+    function cloneNode(node) {
+        if (node.nodeType == 3) {
+            return text(node.data);
+        }
+        var newNode = el(node.localName);
+        node.attributes.forEach(function(attr) {
+            newNode.setAttribute(attr.name, attr.value);
+        });
+        node.childNodes.forEach(function(ch) {
+            newNode.appendChild(cloneNode(ch));
+        });
+        var rect = node.getBoundingClientRect(); // to compute sizes
+        newNode.style.top = rect.top + "px";
+        newNode.style.left = rect.left + "px";
+        newNode.style.height = rect.height + "px";
+        newNode.style.width = rect.width + "px";
+        newNode.style.position = "fixed";
+        return newNode;
+    }
+    var result = cloneNode(mockNode || global.document.documentElement);
+    return __origBody__.appendChild(result);
+
+};

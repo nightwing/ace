@@ -5,9 +5,9 @@
  */
 
 
-var oop = require("ace/lib/oop")
-var async = require("asyncjs/async")
-require("asyncjs/utils")
+var oop = require("../../lib/oop")
+var async = require("./async")
+require("./utils")
 
 exports.TestGenerator = function(source) {
     async.Generator.call(this, source)
