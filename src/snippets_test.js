@@ -1,9 +1,10 @@
+"use strict";
+var test = require("./test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("./test/mockdom");
 }
 
-"use strict";
 var Editor = require("./editor").Editor;
 var EditSession = require("./edit_session").EditSession;
 var MockRenderer = require("./test/mockrenderer").MockRenderer;
@@ -16,23 +17,23 @@ var assert = require("./test/assertions");
 var config = require("./config");
 var loadModule = config.loadModule;
 
-module.exports = {
-    setUp : function(next) {
+
+    test.beforeEach(function(next) {
         this.editor = new Editor(new MockRenderer());
         next();
-    },
-    tearDown: function() {
+    });
+    test.afterEach(function() {
         config.loadModule = loadModule;
-    },
+    });
     
-    "test: textmate style format strings" : function() {
+    test("textmate style format strings", function() {
         snippetManager.tmStrFormat("hello", {
             guard: "(..)(.)(.)",
             flag:"g",
             fmt: "a\\UO\\l$1\\E$2"
         }) == "aOHElo";
-    },
-    "test: parse snipmate file" : function() {
+    });
+    test("parse snipmate file", function() {
         var expected = [{
             name: "a",
             guard: "(?:(=)|(:))?\\s*)",
@@ -52,8 +53,8 @@ module.exports = {
         );
 
         assert.equal(JSON.stringify(expected, null, 4), JSON.stringify(parsed, null, 4));
-    },
-    "test: parse snippet": function() {
+    });
+    test("parse snippet", function() {
         var content = "-\\$$2a${1:x${$2:y$3\\}\\n\\}$TM_SELECTION}";
         var tokens = snippetManager.tokenizeTmSnippet(content);
         assert.equal(tokens.length, 14);
@@ -73,8 +74,8 @@ module.exports = {
         assert.equal(tokens[1].fmt[2], "\\/");
         assert.equal(tokens[1].guard, "as\\/d");
         assert.equal(tokens[1].flag, "g");
-    },
-    "test: register snippets in json format": function() {
+    });
+    test("register snippets in json format", function() {
         config.loadModule = function() {};
         this.editor.setOption("enableSnippets", true);
         this.editor.session.setMode(new JavascriptMode());
@@ -100,8 +101,8 @@ module.exports = {
         this.editor.onCommandKey(null, 0, 9);
         assert.equal(this.editor.getValue(), "x\nexpanded\ny");
         assert.position(this.editor.getCursorPosition(), 1, 0);
-    },
-    "test: expand snippet with nested tabstops": function() {
+    });
+    test("expand snippet with nested tabstops", function() {
         var content = "-${1}-${1:t\n1}--${2:2 ${3} 2}-${3:3 $1 3}-${4:4 $2 4}";
         this.editor.setValue("");
         snippetManager.insertSnippet(this.editor, content);
@@ -133,8 +134,8 @@ module.exports = {
         assert.equal(this.editor.getSelectedText(), "b\nba");
         this.editor.tabstopManager.tabNext();
         assert.equal(this.editor.getSelectedText(), "");
-    },
-    "test prevent infinite recursion": function() {
+    });
+    test("prevent infinite recursion", function() {
         var editor = this.editor;
         editor.setValue("");
         editor.setValue("");
@@ -142,8 +143,8 @@ module.exports = {
             + "THEN ${6:r}  } ${7:ELSE ${8:d}} END"
         );
         assert.equal(this.editor.getValue(), "CASE v WHEN p  \n\nTHEN r   ELSE d END");
-    },
-    "test: nested format strings": function() {
+    });
+    test("nested format strings", function() {
         var editor = this.editor;
         editor.setValue("");
         editor.insertSnippet([
@@ -175,8 +176,8 @@ module.exports = {
             "    prefix is l; text is LST;",
             ""
         ].join("\n")); 
-    },
-    "test: format if/else": function() {
+    });
+    test("format if/else", function() {
         var editor = this.editor;
         var snippetText = [
             "${CURRENT_LINE/.*/1 ${0:else}/i}",
@@ -191,8 +192,8 @@ module.exports = {
         editor.setValue("ACE");
         editor.insertSnippet(snippetText);
         assert.equal(editor.getValue(), "1 ACE\n2 ACE\n3 if\n4 if\n5 ace");
-    },
-    "test: file paths": function() {
+    });
+    test("file paths", function() {
         var editor = this.editor;
         snippetManager.variables.FILEPATH = function() { return "/dir/base name.ext"; };
         editor.setValue("");
@@ -201,8 +202,8 @@ module.exports = {
             + "\n$FILENAME_BASE\n$DIRECTORY\n$FILEPATH\n$FILENAME"
         );
         assert.equal(editor.getValue(), "BaseName\nbase name\n/dir/\n/dir/base name.ext\nbase name.ext");
-    },
-    "test: selected text": function() {
+    });
+    test("selected text", function() {
         var editor = this.editor;
         editor.setValue("foo\nbar");
         editor.selectAll();
@@ -217,8 +218,8 @@ module.exports = {
             "    </div>",
             "</div>"
         ].join("\n"));
-    },
-    "test: date variables": function() {
+    });
+    test("date variables", function() {
         var editor = this.editor;
         editor.setValue("foo\nbar");
         editor.selectAll();
@@ -246,8 +247,8 @@ module.exports = {
         }
         
         assert.equal(editor.getValue(), "1970\n70\n01\nJanuary\nJan\n01\nThursday\nThu\n04\n00\n00");
-    },
-    "test: choice": function() {
+    });
+    test("choice", function() {
         var editor = this.editor;
         editor.setValue("");
         editor.insertSnippet("${3:${1|and\\|\\,\\\\,another,trigger|}  ${2:$1}}");
@@ -260,8 +261,8 @@ module.exports = {
         this.editor.tabstopManager.tabNext();
         editor.execCommand("insertstring", "t");
         assert.equal(editor.getValue(), "t");
-    },
-    "test: deletion": function() {
+    });
+    test("deletion", function() {
         var editor = this.editor;
         editor.setValue("");
         editor.insertSnippet("CASE ${1:value} ${4:WHEN ${5:option2} "
@@ -278,8 +279,8 @@ module.exports = {
         assert.ok(editor.tabstopManager);
         editor.onCommandKey(null, 0, 27);
         assert.ok(!editor.tabstopManager);
-    },
-    "test: multiple cursors": function() {
+    });
+    test("multiple cursors", function() {
         var editor = this.editor;
         
         editor.setValue("\n");
@@ -298,8 +299,8 @@ module.exports = {
         assert.equal(editor.tabstopManager, null);
         
         assert.equal(editor.getValue(), "a-.-\na-.-\nx\na-.-\na-.-\nx");
-    },
-    "test: insert snippet inside snippet": function() {
+    });
+    test("insert snippet inside snippet", function() {
         var editor = this.editor;
         
         editor.session.setValue("");
@@ -317,8 +318,8 @@ module.exports = {
         testTabstop(tabstops[3], "[5/2]> [5/3],[2/2]> [2/3]");
         testTabstop(tabstops[4], "[5/3]> [5/3],[2/3]> [2/3]");
         testTabstop(tabstops[5], "[6/2]> [6/5]");
-    },
-    "test: insert snippet inside snippet and check markers": function() {
+    });
+    test("insert snippet inside snippet and check markers", function() {
         var editor = this.editor;
         editor.session.setValue("");
         editor.insertSnippet("{$1}");
@@ -334,8 +335,8 @@ module.exports = {
         assert.equal(snippetMarkers.length, 2);
         assert.jsonEquals(snippetMarkers[0].range.start, {row: 0, column: 15});
         assert.jsonEquals(snippetMarkers[1].range.start, {row: 0, column: 14});
-    },
-    "test: linking": function() {
+    });
+    test("linking", function() {
         var editor = this.editor;
         editor.setOption("enableMultiselect", false);
         editor.setValue("");
@@ -346,16 +347,16 @@ module.exports = {
         this.editor.tabstopManager.tabNext();
         editor.execCommand("insertstring", ".");
         assert.equal(editor.getValue(), "qt qt qt.");
-    },
-    "test: should work as expected with object of Range interface": function () {
+    });
+    test("should work as expected with object of Range interface", function () {
         var content = "test";
         this.editor.setValue("replace1");
         snippetManager.insertSnippet(this.editor, content, {
             start: {row: 0, column: 0}, end: {row: 0, column: 8}
         });
         assert.equal(this.editor.getValue(), "test");
-    },
-    "test: insert snippet without extra indentation": function() {
+    });
+    test("insert snippet without extra indentation", function() {
         var editor = this.editor;
         const options = {
             excludeExtraIndent: true
@@ -376,9 +377,9 @@ module.exports = {
         snippetManager.insertSnippet(this.editor, "def multiply_with_random(array):\n\t", options);
         snippetManager.insertSnippet(this.editor, "for i in range(len(array)):\n\t\tarray[i] *= random.randint(1, 10)\n\treturn array", options);
         assert.equal(editor.getValue(), correctlyFormattedCode);
-    },
+    });
     
-    "test: snippets without multiselct": function() {
+    test("snippets without multiselct", function() {
         var session = new EditSession([]);
         var editor = new Editor(new MockRenderer());
         editor.setOption("enableMultiselect", false);
@@ -387,9 +388,9 @@ module.exports = {
         editor.insertSnippet("hello $1 world $1");
         editor.onTextInput("!");
         assert.equal(editor.getValue(), "hello ! world !");
-    },
+    });
 
-    "test: TabstopManager does not throw unhandled errors when session becomes `undefined`": function() {
+    test("TabstopManager does not throw unhandled errors when session becomes `undefined`", function() {
         var editor = new Editor(new MockRenderer());
         var session = new EditSession("dummy content");
         editor.setSession(session);
@@ -397,10 +398,8 @@ module.exports = {
         assert.equal(session.$backMarkers[5].clazz, "ace_snippet-marker");
         editor.setSession(undefined);
         assert.equal(session.$backMarkers[5], undefined);
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

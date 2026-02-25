@@ -1,11 +1,11 @@
+"use strict";
+var test = require("../test/run.js")(module.exports);
+
 /* global Promise */
 
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("../test/mockdom");
 }
-
-"use strict";
 
 var ace = require("../ace");
 var codeLens = require("./code_lens");
@@ -17,8 +17,8 @@ function click(node) {
 }
 
 var editor = null;
-module.exports = {
-    setUp: function() {
+
+    test.beforeEach(function() {
         if (editor)
             editor.destroy();
         var el = document.createElement("div");
@@ -32,13 +32,13 @@ module.exports = {
         editor.on("destroy", function() {
             document.body.removeChild(el);
         });
-    },
-    tearDown: function() {
+    });
+    test.afterEach(function() {
         editor && editor.destroy();
         editor = null;
-    },
+    });
 
-    "test code lens": function() {
+    test("code lens", function() {
         editor.session.setValue("a\nb|c\nd" + "\n".repeat(100) + "\txxx");
 
         var commandId = "codeLensAction";
@@ -107,9 +107,9 @@ module.exports = {
         editor.renderer.$loop._flush();
         lens = editor.container.querySelector(".ace_codeLens");
         assert.ok(!lens);
-    },
+    });
 
-    "test async code lens": function(next) {
+    test("async code lens", function(next) {
         editor.session.setValue("a\nb\nc");
         new Promise(function(resolve) {
                 codeLens.registerCodeLensProvider(editor, {
@@ -132,9 +132,9 @@ module.exports = {
                 next();
             })
             .catch(next);
-    },
+    });
 
-    "test multiple code lens providers": function(next) {
+    test("multiple code lens providers", function(next) {
         editor.session.setValue("a\nb\nc\nd");
         new Promise(function(resolve) {
                 codeLens.registerCodeLensProvider(editor, {
@@ -166,9 +166,9 @@ module.exports = {
                 next();
             })
             .catch(next);
-    },
+    });
 
-    "test multiple code lens providers on the same line": function() {
+    test("multiple code lens providers on the same line", function() {
         editor.session.setValue("a\nb\nc");
         codeLens.registerCodeLensProvider(editor, {
             provideCodeLenses: function(session, callback) {
@@ -190,9 +190,9 @@ module.exports = {
         editor.renderer.$loop._flush();
         var lens = editor.container.querySelector(".ace_codeLens");
         assert.equal(lens.textContent, "1\xa0|\xa02");
-    },
+    });
 
-    "test code lens behavior with multiple sessions": function() {
+    test("code lens behavior with multiple sessions", function() {
         editor.session.setValue("a\nb");
         codeLens.registerCodeLensProvider(editor, {
             provideCodeLenses: function(session, callback) {
@@ -212,10 +212,8 @@ module.exports = {
         editor.renderer.$loop._flush();
         var lens = editor.container.querySelector(".ace_codeLens");
         assert.equal(lens.textContent, "c");
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

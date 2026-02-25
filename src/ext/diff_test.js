@@ -1,4 +1,5 @@
 "use strict";
+var test = require("../test/run.js")(module.exports);
 
 var assert = require("../test/assertions");
 require("../test/mockdom");
@@ -9,30 +10,28 @@ const {createDiffView} = require("./diff");
 
 var diffView;
 
-module.exports = {
-    tearDown: function () {
+
+    test.afterEach(function () {
         if (diffView) {
             diffView.destroy();
             diffView = null;
         }
-    },
-    "test: diff wrapper test": function () {
+    });
+    test("diff wrapper test", function () {
         diffView = createDiffView({inline: "a"});
         assert.ok(diffView instanceof InlineDiffView);
         diffView.destroy();
         diffView = createDiffView({});
         assert.ok(diffView instanceof SplitDiffView);
-    },
-    "test: diff setOptions": function () {
+    });
+    test("diff setOptions", function () {
         diffView = createDiffView({}, {
             maxDiffs: 1000,
             ignoreTrimWhitespace: true
         });
         assert.ok(diffView.getOption("maxDiffs"), 1000);
         assert.ok(diffView.getOption("ignoreTrimWhitespace"), true);
-    }
-};
+    });
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

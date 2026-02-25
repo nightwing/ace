@@ -1,9 +1,9 @@
+"use strict";
+var test = require("./test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("./test/mockdom");
 }
-
-"use strict";
 
 var assert = require("./test/assertions");
 var sendKey = require("./test/user").type;
@@ -30,8 +30,8 @@ function mouse(type, pos, properties) {
     target.dispatchEvent(event);
 }
 
-module.exports = {
-    setUp: function () {
+
+    test.beforeEach(function () {
         editor = ace.edit(null, {
             value: "999"
         });
@@ -40,12 +40,12 @@ module.exports = {
         editor.container.style.width = "300px";
         editor.focus();
 
-    },
-    tearDown: function () {
+    });
+    test.afterEach(function () {
         editor.destroy();
         editor = null;
-    },
-    "test readOnly Option": function (done) {
+    });
+    test("readOnly Option", function (done) {
         let readOnly = editor.getOption("readOnly");
         assert.equal(editor.$hoverTooltip, null);
         assert.equal(readOnly, false);
@@ -81,10 +81,8 @@ module.exports = {
                 }, 6);
             }, 6);
         }, 6);
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

@@ -1,4 +1,5 @@
 "use strict";
+var test = require("./test/run.js")(module.exports);
 
 var EditSession = require("./edit_session").EditSession;
 var JavaScriptMode = require("./mode/javascript").Mode;
@@ -17,9 +18,9 @@ function testStates(session, states) {
     assert.ok(l == states.length);
 }
 
-module.exports = {
 
-    "test background tokenizer update on session change" : function() {
+
+    test("background tokenizer update on session change", function() {
         var doc = new EditSession([
             "/*",
             "*/",
@@ -41,8 +42,8 @@ module.exports = {
         
         forceTokenize(doc);
         testStates(doc, ["comment1", "start", "no_regex"]);
-    },
-    "test background tokenizer sends update event" : function() {
+    });
+    test("background tokenizer sends update event", function() {
         var doc = new EditSession([
             "/*",
             "var",
@@ -84,8 +85,8 @@ module.exports = {
         
         forceTokenize(doc);
         testStates(doc, [comment, comment, comment, "start"]);
-    },
-    "test background tokenizer sends update event 2" : function(next) {
+    });
+    test("background tokenizer sends update event 2", function(next) {
         var doc = new EditSession([
             "-[[",
             "juhu",
@@ -107,10 +108,8 @@ module.exports = {
         });
         doc.bgTokenizer.running = 1;
         doc.bgTokenizer.$worker();
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

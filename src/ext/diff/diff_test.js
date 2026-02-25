@@ -1,4 +1,5 @@
 "use strict";
+var test = require("../../test/run.js")(module.exports);
 
 var assert = require("../../test/assertions");
 require("../../test/mockdom");
@@ -83,8 +84,8 @@ var longLinesDiff = [
     ["h"],
     ["i"],
 ];
-module.exports = {
-    setUpSuite: function() {
+
+    test.beforeAll(function() {
         ace.config.setLoader(function(moduleName, cb) {
             if (moduleName == "ace/ext/error_marker")
                 return cb(null, require("../error_marker"));
@@ -95,8 +96,8 @@ module.exports = {
         editorB = createEditor();
         editorB.container.style.left = "301px";
         editorA.focus();
-    },
-    tearDownSuite: function() {
+    });
+    test.afterAll(function() {
         if (DEBUG) return;
         [editorA, editorB].forEach(function(editor) {
             if (editor) {
@@ -105,15 +106,15 @@ module.exports = {
                 editor = null;
             }
         });
-    },
-    tearDown: function() {
+    });
+    test.afterEach(function() {
         if (DEBUG) return;
         if (diffView) {
             diffView.detach();
             diffView = null;
         }
-    },
-    "test: clean detach": function() {
+    });
+    test("clean detach", function() {
         var diffProvider = new DiffProvider();
 
         editorA.session.setValue(getValueA(simpleDiff));
@@ -216,8 +217,8 @@ module.exports = {
         diffView.detach();
         checkEventRegistry();
 
-    },
-    "test: diff at ends": function() {
+    });
+    test("diff at ends", function() {
         var diffProvider = new DiffProvider();
 
         var valueA = getValueA(diffAtEnds);
@@ -264,8 +265,8 @@ module.exports = {
         diffView.resize(true);
         assert.equal(diffView.chunks.length, 0);
         diffView.detach();
-    },
-    "test scroll": function() {
+    });
+    test("scroll", function() {
         var diffProvider = new DiffProvider();
 
         var valueA = getValueA(diffAtEnds);
@@ -309,8 +310,8 @@ module.exports = {
         assert.equal(diffView.sessionA.$foldData.length, 0);
         assert.equal(diffView.sessionA.$foldData.length, 0);
 
-    },
-    "test line widget at both sides of line": function() {
+    });
+    test("line widget at both sides of line", function() {
         var diffProvider = new DiffProvider();
 
         editorA.session.setValue("a\n");
@@ -326,9 +327,9 @@ module.exports = {
         assert.equal(markers[0].className, "ace_diff aligned_diff");
         assert.equal(markers[1].className, "ace_diff aligned_diff");
         assert.equal(markers.length, 4);
-    },
+    });
 
-    "test: toggle wrap": function() {
+    test("toggle wrap", function() {
         var diffProvider = new DiffProvider();
 
         editorA.session.setValue(getValueA(longLinesDiff));
@@ -349,9 +350,9 @@ module.exports = {
         var posA = diffView.sessionA.documentToScreenPosition(diffView.editorA.getCursorPosition());
         var posB = diffView.sessionB.documentToScreenPosition(diffView.editorB.getCursorPosition());
         assert.equal(posA.row, posB.row);
-    },
+    });
 
-    "test: restore options": function() {
+    test("restore options", function() {
         var diffProvider = new DiffProvider();
 
         editorA.session.setValue(getValueA(simpleDiff));
@@ -396,8 +397,8 @@ module.exports = {
         assert.ok(!editorB.renderer.$gutterLayer.$renderer);
 
         assert.ok(editorA.renderer.$scrollDecorator instanceof Decorator);
-    },
-    "test split diff scroll decorators": function(done) {
+    });
+    test("split diff scroll decorators", function(done) {
         editorA.session.setValue(["a", "b", "c"].join("\n"));
         editorB.session.setValue(["a", "c", "X"].join("\n"));
 
@@ -413,8 +414,8 @@ module.exports = {
             assertDecoratorsPlacement(editorA, false);
             done();
         }, 0);
-    },
-    "test inline diff scroll decorators": function(done) {
+    });
+    test("inline diff scroll decorators", function(done) {
         editorA.session.setValue(["a", "b", "c"].join("\n"));
         editorB.session.setValue(["a", "c", "X"].join("\n"));
 
@@ -428,8 +429,8 @@ module.exports = {
             assertDecoratorsPlacement(editorA, true);
             done();
         }, 0);
-    },
-    "test: second editor destroyed on detach in inline diff view": function() {
+    });
+    test("second editor destroyed on detach in inline diff view", function() {
         editorA.setOption("wrap", "free");
         diffView = new InlineDiffView({ editorA, inline: "a" });
 
@@ -438,8 +439,8 @@ module.exports = {
         assert.ok(!diffView.otherEditor.destroyed);
         diffView.detach();
         assert.ok(diffView.otherEditor.destroyed);
-    },
-    "test: wrap stays in sync": function() {
+    });
+    test("wrap stays in sync", function() {
         editorA.setOption("wrap", "off");
         diffView = new InlineDiffView({ editorA, inline: "a" });
 
@@ -468,8 +469,8 @@ module.exports = {
         assert.equal(diffView.editorA.getOption("wrap"), 50);
 
         diffView.detach();
-    }
-};
+    });
+
 
 function findPointFillStyle(imageData, y) {
     const data = imageData.slice(4 * y, 4 * (y + 1));
@@ -504,6 +505,4 @@ function assertDecoratorsPlacement(editor, inlineDiff) {
     assert.equal(findPointFillStyle(imgB, yB), decoA.colors.light.insert);
 }
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+

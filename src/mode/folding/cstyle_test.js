@@ -1,12 +1,13 @@
 "use strict";
+var test = require("../../test/run.js")(module.exports);
 
 var JavaScriptMode = require("../javascript").Mode;
 var EditSession = require("../../edit_session").EditSession;
 var assert = require("../../test/assertions");
 
-module.exports = {
 
-    "test: fold comments": function() {
+
+    test("fold comments", function() {
         var session = new EditSession([
             '/*',
             'stuff',
@@ -23,9 +24,9 @@ module.exports = {
         
         assert.range(session.getFoldWidgetRange(0), 0, 2, 2, 0);
         assert.range(session.getFoldWidgetRange(2), 0, 2, 2, 0);
-    },
+    });
     
-    "test: fold doc style comments": function() {
+    test("fold doc style comments", function() {
         var session = new EditSession([
             '/**',
             ' * stuff',
@@ -42,9 +43,9 @@ module.exports = {
         
         assert.range(session.getFoldWidgetRange(0), 0, 3, 2, 7);
         assert.range(session.getFoldWidgetRange(2), 0, 3, 2, 7);
-    },
+    });
     
-    "test: fold sections": function() {
+    test("fold sections", function() {
         var session = new EditSession([
             '/*** section0 ***/',
             '{',
@@ -66,9 +67,5 @@ module.exports = {
         assert.range(session.getFoldWidgetRange(0, true), 0, 18, 10, 3);
         assert.range(session.getFoldWidgetRange(2, true), 2, 22, 3, 9);
         assert.range(session.getFoldWidgetRange(5, true), 5, 22, 7, 9);
-    }
-};
+    });
 
-
-if (typeof module !== "undefined" && module === require.main)
-    require("asyncjs").test.testcase(module.exports).exec();

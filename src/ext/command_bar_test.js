@@ -1,10 +1,10 @@
+"use strict";
+var test = require("../test/run.js")(module.exports);
+
 /* global Promise */
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("../test/mockdom");
 }
-
-"use strict";
 
 var TOOLTIP_CLASS_NAME = require("./command_bar").TOOLTIP_CLASS_NAME;
 var BUTTON_CLASS_NAME = require("./command_bar").BUTTON_CLASS_NAME;
@@ -102,8 +102,8 @@ var tooltipVisibilityCheck = function(tooltipVisible = false, moreOptionsVisible
     assert.strictEqual(isElementVisible(tooltipDomElements[1]), moreOptionsVisible);
 };
 
-module.exports = {
-    setUp: function() {
+
+    test.beforeEach(function() {
         wrapperEl = document.createElement("div");
         wrapperEl.style.position = "fixed";
         wrapperEl.style.left = "400px";
@@ -118,16 +118,16 @@ module.exports = {
         testValues = {};
         editor.getSelection().moveCursorFileEnd();
         editor.renderer.$loop._flush();
-    },
-    "test: displays command bar tooltip above cursor with commands immediately in 'always show' mode": function(done) {
+    });
+    test("displays command bar tooltip above cursor with commands immediately in 'always show' mode", function(done) {
         createTooltip();
         tooltipVisibilityCheck(false, false);
 
         commandBarTooltip.attach(editor);
         tooltipVisibilityCheck(true, false);
         done();
-    },
-    "test: commands are disabled when enable check is falsy": function(done) {
+    });
+    test("commands are disabled when enable check is falsy", function(done) {
         createTooltip();
         commandBarTooltip.attach(editor);
         var buttonElements = Array.from(document.querySelectorAll("." + BUTTON_CLASS_NAME));
@@ -149,8 +149,8 @@ module.exports = {
         assert.strictEqual(counters["testEnabled1"], 2);
         assert.strictEqual(counters["testEnabled2"], 2);
         done();
-    },
-    "test: enabled commands are clickable": function(done) {
+    });
+    test("enabled commands are clickable", function(done) {
         createTooltip();
         commandBarTooltip.attach(editor);
         assert.strictEqual(commandBarTooltip.isShown(), true);
@@ -168,8 +168,8 @@ module.exports = {
         assert.strictEqual(counters["testCommand1"], 1);
         assert.strictEqual(counters["testCommand2"], undefined);
         done();
-    },
-    "test: tooltip is displayed on hover with the tooltip delay": function(done) {
+    });
+    test("tooltip is displayed on hover with the tooltip delay", function(done) {
         var delay = 10;
         var waitFor = function(ms) {
             return new Promise(function(resolve) { setTimeout(resolve, ms); });
@@ -236,8 +236,8 @@ module.exports = {
             assert.strictEqual(err, undefined);
             done(err);
         });
-    },
-    "test: tooltip supports checkbox buttons": function(done) {
+    });
+    test("tooltip supports checkbox buttons", function(done) {
         createTooltip();
         testValues.testCheckboxValue1 = true;
         commandBarTooltip.registerCommand("testCheckbox1", {
@@ -269,8 +269,8 @@ module.exports = {
         assert.strictEqual(checkboxElement.ariaChecked.toString(), "true");
         
         done();
-    },
-    "test: tooltip supports checkbox menu items": function(done) {
+    });
+    test("tooltip supports checkbox menu items", function(done) {
         createTooltip({ maxElementsOnTooltip: 2 });
         testValues.testCheckboxValue1 = true;
         commandBarTooltip.registerCommand("testCheckbox1", {
@@ -309,8 +309,8 @@ module.exports = {
         assert.strictEqual(checkboxElement.firstChild.classList.contains("ace_checkmark"), true);
         assert.strictEqual(checkboxElement.ariaChecked.toString(), "true");
         done();
-    },
-    "test: tooltip supports icon buttons": function(done) {
+    });
+    test("tooltip supports icon buttons", function(done) {
         createTooltip();
         commandBarTooltip.registerCommand("testIcon1", {
             name: "testIcon1",
@@ -335,8 +335,8 @@ module.exports = {
 
         assert.strictEqual(counters["testIcon1"], 1);
         done();
-    },
-    "test: tooltip supports text elements": function(done) {
+    });
+    test("tooltip supports text elements", function(done) {
         createTooltip();
         testValues.testTextValue1 = "test";
         commandBarTooltip.registerCommand("testText1", {
@@ -365,8 +365,8 @@ module.exports = {
         assert.strictEqual(textButtonElement.textContent, "updatedTest");
         assert.strictEqual(counters["testText1"], undefined);
         done();
-    },
-    "test: tooltip creates more options menu for overflow options": function(done) {
+    });
+    test("tooltip creates more options menu for overflow options", function(done) {
         createTooltip({ maxElementsOnTooltip: 2 });
 
         var buttonElements = Array.from(document.querySelectorAll("." + BUTTON_CLASS_NAME));
@@ -400,8 +400,8 @@ module.exports = {
         simulateClick(buttonElements[3]);
         assert.strictEqual(commandBarTooltip.isMoreOptionsShown(), false);
         done();
-    },
-    "test: more options opens below main tooltip, above only if there is no space below": function(done) {
+    });
+    test("more options opens below main tooltip, above only if there is no space below", function(done) {
         createTooltip({ maxElementsOnTooltip: 1 });
 
         wrapperEl.style.top = (window.innerHeight - editorPx) + "px";
@@ -445,8 +445,8 @@ module.exports = {
 
         assert.ok(tooltipEl.getBoundingClientRect().top > moreOptionsEl.getBoundingClientRect().top);
         done();
-    },
-    "test: keeps the editor in focus after the tooltip is clicked": function(done) {
+    });
+    test("keeps the editor in focus after the tooltip is clicked", function(done) {
         createTooltip({ maxElementsOnTooltip: 1 });
 
         var buttonElements = Array.from(document.querySelectorAll("." + BUTTON_CLASS_NAME));
@@ -474,8 +474,8 @@ module.exports = {
         assert.strictEqual(editor.isFocused(), true);
         
         done();
-    },
-    "test: shows windows keybindings when available": function(done) {
+    });
+    test("shows windows keybindings when available", function(done) {
         var origIsWin = useragent.isWin;
         var origIsMac = useragent.isMac;
         try {
@@ -510,8 +510,8 @@ module.exports = {
             useragent.isWin = origIsWin;
             useragent.isMac = origIsMac;
         }
-    },
-    "test: shows mac keybindings when available": function(done) {
+    });
+    test("shows mac keybindings when available", function(done) {
         var origIsWin = useragent.isWin;
         var origIsMac = useragent.isMac;
         try {
@@ -546,8 +546,8 @@ module.exports = {
             useragent.isWin = origIsWin;
             useragent.isMac = origIsMac;
         }
-    },
-    "test: does not display if the editor cursor is not visible": function(done) {
+    });
+    test("does not display if the editor cursor is not visible", function(done) {
         createTooltip();
 
         var charWidth = editor.renderer.$textLayer.getCharacterWidth();
@@ -606,8 +606,8 @@ module.exports = {
         tooltipVisibilityCheck(true);
         commandBarTooltip.detach();
         done();
-    },
-    "test: does not display if the tooltip does not fit into the screen": function(done) {
+    });
+    test("does not display if the tooltip does not fit into the screen", function(done) {
         createTooltip();
 
         var testString = "a".repeat(100) +
@@ -634,8 +634,8 @@ module.exports = {
         tooltipVisibilityCheck(false);
 
         done();
-    },
-    "test: detaches when session changes": function(done) {
+    });
+    test("detaches when session changes", function(done) {
         createTooltip();
         commandBarTooltip.attach(editor);
         tooltipVisibilityCheck(true);
@@ -650,8 +650,8 @@ module.exports = {
         commandBarTooltip.attach(editor);
         tooltipVisibilityCheck(true);
         done();
-    },
-    "test: verify detach": function(done) {
+    });
+    test("verify detach", function(done) {
         createTooltip();
         commandBarTooltip.attach(editor);
         tooltipVisibilityCheck(true);
@@ -662,8 +662,8 @@ module.exports = {
         commandBarTooltip.detach();
         tooltipVisibilityCheck(false);
         done();
-    },
-    "test: verify destroy": function(done) {
+    });
+    test("verify destroy", function(done) {
         createTooltip();
         commandBarTooltip.attach(editor);
         tooltipVisibilityCheck(true);
@@ -681,14 +681,12 @@ module.exports = {
         tooltipDomElements = document.querySelectorAll("." + TOOLTIP_CLASS_NAME);
         assert.strictEqual(tooltipDomElements.length, 0);
         done();
-    },
-    tearDown: function() {
+    });
+    test.afterEach(function() {
         commandBarTooltip.destroy();
         editor.destroy();
         wrapperEl.parentElement.removeChild(wrapperEl);
-    }
-};
+    });
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

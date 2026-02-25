@@ -1,4 +1,5 @@
 "use strict";
+var test = require("../../test/run.js")(module.exports);
 
 var YamlMode = require("../yaml").Mode;
 var EditSession = require("../../edit_session").EditSession;
@@ -41,8 +42,8 @@ function testFoldWidgets(array) {
         assert.equal(pos.column, w);
     }
 }
-module.exports = {
-    "test: yaml indentation based folding": function() {
+
+    test("yaml indentation based folding", function() {
        testFoldWidgets([
             '>,1,l,l',         ' ## indented comment',
             '',                '  # ',
@@ -74,9 +75,5 @@ module.exports = {
             '>,1',             '-item3',
             '',                ' item4'
         ]);
-    }
-};
+    });
 
-
-if (typeof module !== "undefined" && module === require.main)
-    require("asyncjs").test.testcase(module.exports).exec();

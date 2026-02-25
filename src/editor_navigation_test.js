@@ -1,9 +1,9 @@
+"use strict";
+var test = require("./test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("./test/mockdom");
 }
-
-"use strict";
 
 var EditSession = require("./edit_session").EditSession;
 var Editor = require("./editor").Editor;
@@ -20,15 +20,15 @@ function emit(keyCode) {
     el.dispatchEvent(event);
 }
 
-module.exports = {
-    createEditSession : function(rows, cols) {
+
+    function createEditSession(rows, cols) {
         var line = new Array(cols + 1).join("a");
         var text = new Array(rows).join(line + "\n") + line;
         return new EditSession(text);
-    },
+    }
 
-    "test: navigate to end of file should scroll the last line into view" : function() {
-        var doc = this.createEditSession(200, 10);
+    test("navigate to end of file should scroll the last line into view", function() {
+        var doc = createEditSession(200, 10);
         var editor = new Editor(new MockRenderer(), doc);
 
         editor.execCommand("gotoend");
@@ -36,20 +36,20 @@ module.exports = {
 
         assert.ok(editor.getFirstVisibleRow() <= cursor.row);
         assert.ok(editor.getLastVisibleRow() >= cursor.row);
-    },
+    });
 
-    "test: navigate to start of file should scroll the first row into view" : function() {
-        var doc = this.createEditSession(200, 10);
+    test("navigate to start of file should scroll the first row into view", function() {
+        var doc = createEditSession(200, 10);
         var editor = new Editor(new MockRenderer(), doc);
 
         editor.moveCursorTo(editor.getLastVisibleRow() + 20);
         editor.execCommand("gotostart");
 
         assert.equal(editor.getFirstVisibleRow(), 0);
-    },
+    });
 
-    "test: goto hidden line should scroll the line into the middle of the viewport" : function() {
-        var editor = new Editor(new MockRenderer(), this.createEditSession(200, 5));
+    test("goto hidden line should scroll the line into the middle of the viewport", function() {
+        var editor = new Editor(new MockRenderer(), createEditSession(200, 5));
 
         editor.navigateTo(0, 0);
         editor.renderer.scrollCursorIntoView();
@@ -86,10 +86,10 @@ module.exports = {
         editor.gotoLine(196);
         assert.position(editor.getCursorPosition(), 195, 0);
         assert.equal(editor.getFirstVisibleRow(), 180);
-    },
+    });
 
-    "test: goto visible line should only move the cursor and not scroll": function() {
-        var editor = new Editor(new MockRenderer(), this.createEditSession(200, 5));
+    test("goto visible line should only move the cursor and not scroll", function() {
+        var editor = new Editor(new MockRenderer(), createEditSession(200, 5));
 
         editor.navigateTo(0, 0);
         editor.renderer.scrollCursorIntoView();
@@ -102,9 +102,9 @@ module.exports = {
         editor.gotoLine(33);
         assert.position(editor.getCursorPosition(), 32, 0);
         assert.equal(editor.getFirstVisibleRow(), 30);
-    },
+    });
 
-    "test: navigate from the end of a long line down to a short line and back should maintain the curser column": function() {
+    test("navigate from the end of a long line down to a short line and back should maintain the curser column", function() {
         var editor = new Editor(new MockRenderer(), new EditSession(["123456", "1"]));
 
         editor.navigateTo(0, 6);
@@ -115,9 +115,9 @@ module.exports = {
 
         editor.navigateUp();
         assert.position(editor.getCursorPosition(), 0, 6);
-    },
+    });
 
-    "test: reset desired column on navigate left or right": function() {
+    test("reset desired column on navigate left or right", function() {
         var editor = new Editor(new MockRenderer(), new EditSession(["123456", "12"]));
 
         editor.navigateTo(0, 6);
@@ -131,9 +131,9 @@ module.exports = {
 
         editor.navigateUp();
         assert.position(editor.getCursorPosition(), 0, 1);
-    },
+    });
 
-    "test: navigate within soft tabs based on setting": function() {
+    test("navigate within soft tabs based on setting", function() {
         var editor = new Editor(new MockRenderer(), new EditSession(["        "]));
 
         editor.getSession().setUseSoftTabs(true);
@@ -154,9 +154,9 @@ module.exports = {
         editor.navigateTo(0, 4);
         editor.navigateLeft();
         assert.position(editor.getCursorPosition(), 0, 3);
-    },
+    });
     
-    "test: typing text should update the desired column": function() {
+    test("typing text should update the desired column", function() {
         var editor = new Editor(new MockRenderer(), new EditSession(["1234", "1234567890"]));
 
         editor.navigateTo(0, 3);
@@ -164,9 +164,9 @@ module.exports = {
         
         editor.navigateDown();
         assert.position(editor.getCursorPosition(), 1, 7);
-    },
+    });
 
-    "test: should allow to toggle between keyboard trapping modes": function() {
+    test("should allow to toggle between keyboard trapping modes", function() {
         var editor = new Editor(new VirtualRenderer(), new EditSession(["1234", "1234567890"]));
 
         // Should not trap focus
@@ -200,9 +200,9 @@ module.exports = {
         // Focus should still be on the textInput
         assert.equal(document.activeElement, editor.textInput.getElement());
         assert.notEqual(document.activeElement, editor.renderer.scroller);
-    },
+    });
 
-    "test: should allow to focus on textInput using keyboard in non-trapping mode": function() {
+    test("should allow to focus on textInput using keyboard in non-trapping mode", function() {
         var editor = new Editor(new VirtualRenderer(), new EditSession(["1234", "1234567890"]));
 
         // Set to not trap focus mode
@@ -221,10 +221,8 @@ module.exports = {
         // Focus should be on the textinput
         assert.equal(document.activeElement, editor.textInput.getElement());
         assert.notEqual(document.activeElement, editor.renderer.scroller);        
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

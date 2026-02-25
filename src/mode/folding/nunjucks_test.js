@@ -1,15 +1,16 @@
 "use strict";
+var test = require("../../test/run.js")(module.exports);
 
 var NunjucksMode = require("../nunjucks").Mode;
 var EditSession = require("../../edit_session").EditSession;
 var assert = require("../../test/assertions");
 
-module.exports = {
-    setUp : function() {
-        this.mode = new NunjucksMode();
-    },
 
-    "test: nunjucks folding": function() {
+    test.beforeEach(function() {
+        this.mode = new NunjucksMode();
+    });
+
+    test("nunjucks folding", function() {
         var session = new EditSession([
             '{% block header %}',
             '  <section class="left">',
@@ -55,9 +56,4 @@ module.exports = {
         assert.range(session.getFoldWidgetRange(6), 3, 27, 6, 4);
         assert.range(session.getFoldWidgetRange(7), 7, 19, 9, 4);
         assert.range(session.getFoldWidgetRange(11), 11, 14, 13, 4);
-    }
-};
-
-
-if (typeof module !== "undefined" && module === require.main)
-    require("asyncjs").test.testcase(module.exports).exec();
+    });

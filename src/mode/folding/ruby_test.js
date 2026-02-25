@@ -1,15 +1,16 @@
 "use strict";
+var test = require("../../test/run.js")(module.exports);
 
 var RubyMode = require("../ruby").Mode;
 var EditSession = require("../../edit_session").EditSession;
 var assert = require("../../test/assertions");
 
-module.exports = {
-    setUp : function() {
-        this.mode = new RubyMode();
-    },
 
-    "test: opening/ending tags matching/folding": function() {
+    test.beforeEach(function() {
+        this.mode = new RubyMode();
+    });
+
+    test("opening/ending tags matching/folding", function() {
         var session = new EditSession([
             'def Name(n)',
             '   if i == 0',
@@ -51,9 +52,9 @@ module.exports = {
         assert.equal(session.getFoldWidgetRange(2), null);
         assert.equal(session.getFoldWidgetRange(4), null);
         assert.range(session.getFoldWidgetRange(5), 3, 7, 4, 9);
-    },
+    });
 
-    "test: if/unless/while/until used as modifier shouldn't have matching tag and start/end fold": function() {
+    test("if/unless/while/until used as modifier shouldn't have matching tag and start/end fold", function() {
         var session = new EditSession([
             'if i == 0',
             '   a += 1 if a.zero?',
@@ -63,9 +64,9 @@ module.exports = {
         ]);
 
         session.setMode(this.mode);
-    },
+    });
 
-    "test: brackets folding": function() {
+    test("brackets folding", function() {
         var session = new EditSession([
             'def to_json(*a)',
             '{',
@@ -86,9 +87,9 @@ module.exports = {
 
         assert.range(session.getFoldWidgetRange(1), 1, 1, 4, 0);
         assert.range(session.getFoldWidgetRange(4), 1, 1, 4, 0);
-    },
+    });
 
-    "test: multiline comments matching and folding": function() {
+    test("multiline comments matching and folding", function() {
         var session = new EditSession([
             '=begin',
             'text line 1',
@@ -114,9 +115,9 @@ module.exports = {
 
         assert.range(session.getFoldWidgetRange(0), 0,6,3,11);
         assert.range(session.getFoldWidgetRange(4), 0,6,3,11);
-    },
+    });
 
-    "test: `case` with multiline `when` expressions matchings and foldings": function() {
+    test("`case` with multiline `when` expressions matchings and foldings", function() {
         var session = new EditSession([
             'case',
             'when a == 1',
@@ -163,9 +164,9 @@ module.exports = {
 
         assert.equal(session.getFoldWidget(1), "start");
         assert.range(session.getFoldWidgetRange(1), 1,11,2,16);
-    },
+    });
 
-    "test: `case` with single line `when` expressions matchings and foldings": function() {
+    test("`case` with single line `when` expressions matchings and foldings", function() {
         var session = new EditSession([
             'kind = case year',
             '       when 1850..1889 then "Blues"',
@@ -203,9 +204,9 @@ module.exports = {
 
         assert.equal(session.getFoldWidget(6), undefined);
         assert.equal(session.getFoldWidgetRange(6), null);
-    },
+    });
 
-    "test: loops `while` and `until` including `do` keyword and `do` loops should properly highlight": function() {
+    test("loops `while` and `until` including `do` keyword and `do` loops should properly highlight", function() {
         var session = new EditSession([
             'while a < 10 do',
             '   p a',
@@ -238,9 +239,5 @@ module.exports = {
         ranges = this.mode.getMatching(session, 5, 4);
         assert.range(ranges[1], 3, 12, 3, 14);
         assert.range(ranges[0], 5, 3, 5, 6);
-    }
-};
+    });
 
-
-if (typeof module !== "undefined" && module === require.main)
-    require("asyncjs").test.testcase(module.exports).exec();

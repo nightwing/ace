@@ -1,11 +1,12 @@
 "use strict";
+var test = require("../../test/run.js")(module.exports);
 
 var JavaScriptMode = require("../javascript").Mode;
 var EditSession = require("../../edit_session").EditSession;
 var assert = require("../../test/assertions");
 
-module.exports = {
-    "test: fold jsdoc style comments": function() {
+
+    test("fold jsdoc style comments", function() {
         var session = new EditSession([
             '/**',
              ' *',
@@ -26,8 +27,8 @@ module.exports = {
 
         assert.range(session.getFoldWidgetRange(0), 0, 3, 4, 0);
         assert.range(session.getFoldWidgetRange(4), 0, 3, 4, 0);
-    },
-    "test: fold mixed js and jsx": function () {
+    });
+    test("fold mixed js and jsx", function () {
         var session = new EditSession([
             'function Greeting(props) {', '    return (', '        <div>', '            {/* Comment inside JSX */}',
             '            <h1>Hello, {props.name}</h1>', '            <p>You are {props.age} years old.</p>',
@@ -51,10 +52,5 @@ module.exports = {
         assert.range(session.getFoldWidgetRange(0), 0, 26, 8, 0);
         assert.range(session.getFoldWidgetRange(1), 1, 12, 7, 4);
         assert.range(session.getFoldWidgetRange(2), 2, 13, 6, 8);
-    }
+    });
 
-};
-
-
-if (typeof module !== "undefined" && module === require.main)
-    require("asyncjs").test.testcase(module.exports).exec();

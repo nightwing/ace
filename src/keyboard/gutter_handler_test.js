@@ -1,10 +1,10 @@
+"use strict";
+var test = require("../test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("../test/mockdom");
 }
 
-"use strict";
- 
 require("../multi_select");
 require("../theme/textmate");
 var user = require("../test/user");
@@ -23,8 +23,8 @@ function findVisibleTooltip() {
     return null;
 }
 
-module.exports = {
-    setUp : function(done) {
+
+    test.beforeEach(function(done) {
         this.editor = new Editor(new VirtualRenderer());
         this.editor.container.style.position = "absolute";
         this.editor.container.style.height = "500px";
@@ -33,8 +33,8 @@ module.exports = {
         this.editor.container.style.top = "10px";
         document.body.appendChild(this.editor.container);
         done();
-    },
-    "test: keyboard code folding: basic functionality" : function(done) {
+    });
+    test("keyboard code folding: basic functionality", function(done) {
         var editor = this.editor;
         var value = "x {" + "\n".repeat(50) + "}\n";
         value = value.repeat(50);
@@ -72,8 +72,8 @@ module.exports = {
                 done();
             }, 20);
         }, 20);
-    },
-    "test: keyboard code folding: multiple folds" : function(done) {
+    });
+    test("keyboard code folding: multiple folds", function(done) {
         var editor = this.editor;
         var value = "\n x {" + "\n".repeat(5) + "}\n";
         value = value.repeat(50);
@@ -124,8 +124,8 @@ module.exports = {
                 }, 20);
             }, 20);
         }, 20);
-    },
-    "test: keyboard annotation: basic functionality" : function(done) {
+    });
+    test("keyboard annotation: basic functionality", function(done) {
         var editor = this.editor;
         var value = "x {" + "\n".repeat(50) + "}\n";
         value = value.repeat(50);
@@ -167,7 +167,8 @@ module.exports = {
                 done();
             }, 20);
         }, 20);
-    },"test: keyboard annotation: multiple annotations" : function(done) {
+    });
+    test("keyboard annotation: multiple annotations", function(done) {
         var editor = this.editor;
         var value = "x {" + "\n".repeat(50) + "}\n";
         value = value.repeat(50);
@@ -233,7 +234,9 @@ module.exports = {
                 }, 20);
             }, 20);
         }, 20);
-    },"test: keyboard annotation: no folds" : function(done) {
+    });
+
+    test("keyboard annotation: no folds", function(done) {
         var editor = this.editor;
         var value = "x\n";
         value = value.repeat(50);
@@ -257,8 +260,8 @@ module.exports = {
             assert.equal(document.activeElement, lines.cells[1].element.childNodes[2]);
             done();
         }, 20);
-    },
-    "test: aria attributes mode with getFoldWidgetRange" : function() {
+    });
+    test("aria attributes mode with getFoldWidgetRange", function() {
         var editor = this.editor;
         var value = "x {" + "\n".repeat(5) + "}";
         editor.session.setMode(new Mode());
@@ -279,8 +282,8 @@ module.exports = {
         assert.equal(toggler.getAttribute("aria-label"), "Toggle code folding, rows 1 through 6");
         assert.equal(toggler.getAttribute("aria-expanded"), "false");
         assert.equal(toggler.getAttribute("title"), "Unfold code");    
-    },
-    "test: aria attributes mode without getFoldWidgetRange" : function() {
+    });
+    test("aria attributes mode without getFoldWidgetRange", function() {
         var editor = this.editor;
         var value = "x {" + "\n".repeat(5) + "}";
         var mode = new Mode();
@@ -298,8 +301,8 @@ module.exports = {
         assert.equal(toggler.getAttribute("aria-label"), "Toggle code folding, row 1");
         assert.equal(toggler.getAttribute("aria-expanded"), "true");
         assert.equal(toggler.getAttribute("title"), "Fold code"); 
-    },
-    "test: should signal keyboard event" : function(done) {
+    });
+    test("should signal keyboard event", function(done) {
         var editor = this.editor;
         var value = "x {" + "\n".repeat(50) + "}\n";
         value = value.repeat(50);
@@ -339,8 +342,8 @@ module.exports = {
                 done();
             }, 20);
         }, 20);
-    },
-    "test: switching lanes with the custom widget should work" : function(done) {
+    });
+    test("switching lanes with the custom widget should work", function(done) {
         var editor = this.editor;
         var value = "x {" + "\n".repeat(50) + "}\n";
         value = value.repeat(50);
@@ -394,8 +397,8 @@ module.exports = {
                 done();
             }, 20);
         }, 20);
-    }, 
-    "test: moving up and down to custom widget and checking onclick callback as well" : function(done) {
+    }); 
+    test("moving up and down to custom widget and checking onclick callback as well", function(done) {
         var editor = this.editor;
         var value = "\n x {" + "\n".repeat(5) + "}\n";
         value = value.repeat(50);
@@ -445,8 +448,8 @@ module.exports = {
             assert.equal(document.activeElement, lines.cells[1].element.childNodes[1]);
             done();
         }, 20);
-    },
-    "test: add several custom widgets" : function() {
+    });
+    test("add several custom widgets", function() {
         var editor = this.editor;
         var value = "x {" + "\n".repeat(5) + "}\n";
         value = value.repeat(50);
@@ -474,15 +477,13 @@ module.exports = {
         assert.ok(editor.container.querySelector(".widget1"));
         assert.ok(!editor.container.querySelector(".widget2"));
 
-    },
+    });
     
-    tearDown : function() {
+    test.afterEach(function() {
         this.editor.destroy();
         document.body.removeChild(this.editor.container);
-    }
+    });
     
-};
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

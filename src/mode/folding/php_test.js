@@ -1,15 +1,16 @@
 "use strict";
+var test = require("../../test/run.js")(module.exports);
 
 var PHPMode = require("../php").Mode;
 var EditSession = require("../../edit_session").EditSession;
 var assert = require("../../test/assertions");
 
-module.exports = {
-    setUp: function () {
-        this.mode = new PHPMode();
-    },
 
-    "test: php folding with alternative syntax": function () {
+    test.beforeEach(function () {
+        this.mode = new PHPMode();
+    });
+
+    test("php folding with alternative syntax", function () {
         var session = new EditSession([
             '<?php', 
             'function checkNumber($number)', 
@@ -93,8 +94,5 @@ module.exports = {
         assert.range(session.getFoldWidgetRange(29), 29, 9, 31, 4); // Range for cstyle { } block
         assert.range(session.getFoldWidgetRange(31), 29, 9, 31, 4); // Range for closing cstyle { } block
         assert.range(session.getFoldWidgetRange(32), 28, 7, 32, 0); // Range for closing style tag
-    }
-};
+    });
 
-
-if (typeof module !== "undefined" && module === require.main) require("asyncjs").test.testcase(module.exports).exec();

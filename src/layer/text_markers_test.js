@@ -1,9 +1,9 @@
+"use strict";
+var test = require("../test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("../test/mockdom");
 }
-
-"use strict";
 
 var assert = require("../test/assertions");
 var EditSession = require("../edit_session").EditSession;
@@ -27,8 +27,8 @@ function getText(nodes) {
     return markedContent;
 }
 
-module.exports = {
-    setUp: function (next) {
+
+    test.beforeEach(function (next) {
         this.session = new EditSession("");
         this.session.setMode(new JavaScriptMode());
 
@@ -46,9 +46,9 @@ module.exports = {
         };
 
         next();
-    },
+    });
 
-    "test: marker splits single token into multiple DOM nodes": function () {
+    test("marker splits single token into multiple DOM nodes", function () {
         this.session.setValue('var functionName = "test";');
 
         this.textLayer.update(this.textLayer.config);
@@ -67,9 +67,9 @@ module.exports = {
                 class="ace_punctuation ace_operator">;</span>`);
         var actual = normalize(this.textLayer.element.childNodes[0].innerHTML);
         assert.equal(actual, result);
-    },
+    });
 
-    "test: marker partially overlaps multiple tokens": function () {
+    test("marker partially overlaps multiple tokens", function () {
         this.session.setValue('var test = 123;');
 
         this.textLayer.update(this.textLayer.config);
@@ -88,9 +88,9 @@ module.exports = {
     <span class=" overlap-marker">1</span>23</span><span class="ace_punctuation ace_operator">;</span>`);
         var actual = normalize(this.textLayer.element.childNodes[0].innerHTML);
         assert.equal(actual, result);
-    },
+    });
 
-    "test: multiple overlapping markers split tokens differently": function () {
+    test("multiple overlapping markers split tokens differently", function () {
         this.session.setValue('var longVariableName = 42;');
 
         this.textLayer.update(this.textLayer.config);
@@ -117,9 +117,9 @@ module.exports = {
             <span class="ace_constant ace_numeric">42</span><span class="ace_punctuation ace_operator">;</span>`);
         var actual = normalize(this.textLayer.element.childNodes[0].innerHTML);
         assert.equal(actual, result);
-    },
+    });
 
-    "test: marker with tab characters and invisible rendering": function () {
+    test("marker with tab characters and invisible rendering", function () {
         this.session.setValue("func\t\ttest");
         this.textLayer.setShowInvisibles("tab");
         this.textLayer.$computeTabString();
@@ -134,9 +134,9 @@ module.exports = {
         var result = `<span class="ace_identifier">fun<span class=" tab-marker">c</span></span><span class=" tab-marker">    </span><span class=" tab-marker">    </span><span class="ace_identifier"><span class=" tab-marker">t</span>est</span>`;
         var actual = this.textLayer.element.childNodes[0].innerHTML;
         assert.equal(actual, result);
-    },
+    });
 
-    "test: marker with CJK characters and proper width calculation": function () {
+    test("marker with CJK characters and proper width calculation", function () {
         this.session.setValue("测试function测试");
 
         this.textLayer.update(this.textLayer.config);
@@ -161,9 +161,9 @@ module.exports = {
             <span class="ace_cjk" style="width: 20px;">试</span></span>`);
         var actual = normalize(this.textLayer.element.childNodes[0].innerHTML);
         assert.equal(actual, result);
-    },
+    });
 
-    "test: marker removal properly cleans up split tokens": function() {
+    test("marker removal properly cleans up split tokens", function() {
         this.session.setValue('var functionName = "test";');
 
         this.textLayer.update(this.textLayer.config);
@@ -186,9 +186,9 @@ module.exports = {
 
         markerSpans = newLine.querySelectorAll('.temp-marker');
         assert.equal(markerSpans.length, 0, "Marker should be removed");
-    },
+    });
 
-    "test: invisible marker with mixed whitespace and complete cleanup verification": function() {
+    test("invisible marker with mixed whitespace and complete cleanup verification", function() {
         var value = "function\t  test() { //test     comment\n    var x = 1;\n}";
         this.session.setValue(value);
 
@@ -235,9 +235,4 @@ module.exports = {
 
         var elementsWithWhitespace = this.textLayer.element.querySelectorAll('[data-whitespace]');
         assert.equal(elementsWithWhitespace.length, 0, "No data-whitespace attributes should remain");
-    },
-};
-
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+    });

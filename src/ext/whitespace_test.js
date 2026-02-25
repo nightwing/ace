@@ -1,4 +1,5 @@
 "use strict";
+var test = require("../test/run.js")(module.exports);
 
 require("../test/mockdom");
 var ace = require("../ace");
@@ -8,10 +9,8 @@ var UndoManager = require("../undomanager").UndoManager;
 var whitespace = require("./whitespace");
 
 // Execution ORDER: test.setUpSuite, setUp, testFn, tearDown, test.tearDownSuite
-module.exports = {
-    timeout: 10000,
 
-    "test tab detection": function(next) {
+    test("tab detection", function(next) {
         var s = new EditSession([
             "define({",
             "\tfoo:1,",
@@ -42,9 +41,9 @@ module.exports = {
         assert.ok(!indent);
         
         next();
-    },
+    });
 
-    "test empty session": function(next) {
+    test("empty session", function(next) {
         var s = new EditSession([
             "define({",
             "foo:1,",
@@ -59,9 +58,9 @@ module.exports = {
         assert.equal(indent.length, 4);
         
         next();
-    },
+    });
     
-    "!test one line": function(next) {
+    test.skip("one line", function(next) {
         var s = new EditSession([
             "define({",
             "    foo:1,",
@@ -72,9 +71,9 @@ module.exports = {
         assert.equal(indent.length, 4);
         
         next();
-    },
+    });
     
-    "test 1 width indents": function(next) {
+    test("1 width indents", function(next) {
         var s = new EditSession([
             "define({",
             "    foo:1,",
@@ -108,9 +107,9 @@ module.exports = {
         assert.equal(indent.length, 1);
         
         next();
-    },
+    });
 
-    "test trimTrailingSpace": function(next) {
+    test("trimTrailingSpace", function(next) {
         var session = new EditSession([
             "a",
             "\t b \t",
@@ -189,9 +188,9 @@ module.exports = {
         });
         
         next();
-    },
+    });
 
-    "test convertIndentation": function() {
+    test("convertIndentation", function() {
         var value = "\ta\n\t\tb\n\t\t\n\t\tc";
         var editor = ace.edit(null, {value: value});
         editor.commands.addCommands(whitespace.commands);
@@ -204,11 +203,9 @@ module.exports = {
         editor.execCommand("convertIndentation", {text: "space"});
         editor.execCommand("trimTrailingSpace", {trimEmpty: true});
         assert.equal(editor.getValue(), value.replace(/\t/g, "  ").replace(/ *$/gm, ""));
-    }
-
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+
+

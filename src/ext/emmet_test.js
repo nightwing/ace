@@ -1,4 +1,5 @@
 "use strict";
+var test = require("../test/run.js")(module.exports);
 
 require("../test/mockdom");
 var Mode = require("../mode/html").Mode;
@@ -6,8 +7,8 @@ var ace = require("../ace");
 var assert = require("assert");
 require("./emmet");
 
-module.exports = {
-    "test doesn't break tab when emmet is not loaded": function() {
+
+    test("doesn't break tab when emmet is not loaded", function() {
         var editor = ace.edit(null, {
             mode: new Mode(),
             enableEmmet: true,
@@ -37,10 +38,8 @@ module.exports = {
         } finally {
             window.emmet = null;
         }
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

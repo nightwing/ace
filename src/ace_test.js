@@ -1,15 +1,16 @@
+"use strict";
+var test = require("./test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
     require("./test/mockdom");
 }
-
-"use strict";
 
 var dom = require("./lib/dom");
 var ace = require("./ace");
 var assert = require("./test/assertions");
 
-module.exports = {
-   "test: ace edit" : function() {
+
+    test("ace edit", function() {
         var editor = ace.edit(null, {
             value: "Helo world"
         });
@@ -21,8 +22,8 @@ module.exports = {
         
         assert.equal(editor, ace.edit(editor.container));
         editor.destroy();
-    },
-    "test: edit textarea" : function() {
+    });
+    test("edit textarea", function() {
         var el = document.createElement("textarea");
         document.body.appendChild(el);
         var editor = ace.edit(el);
@@ -32,8 +33,8 @@ module.exports = {
         assert.equal(editor, ace.edit("editor1"));
         editor.destroy();
         document.body.removeChild(editor.container);
-    },
-    "test: edit element by id" : function() {
+    });
+    test("edit element by id", function() {
         var el = document.createElement("div");
         document.body.appendChild(el);
         var editor = null;
@@ -49,8 +50,8 @@ module.exports = {
         assert.equal(el, editor.container);
         assert.equal("h", editor.getValue());
         document.body.removeChild(el);
-    },
-    "test: destroy": function(done) {
+    });
+    test("destroy", function(done) {
         var editor = ace.edit();
         var mouseTarget = editor.renderer.getMouseEventTarget();
         var textarea = editor.textInput.getElement();
@@ -85,8 +86,8 @@ module.exports = {
             
             done();
         });
-    },
-    "test: useStrictCSP": function() {
+    });
+    test("useStrictCSP", function() {
         ace.config.set("useStrictCSP", undefined);
         function getStyleNode() {
             return document.getElementById("test.css");
@@ -100,8 +101,8 @@ module.exports = {
 
         ace.config.set("useStrictCSP", false);
         assert.ok(getStyleNode());
-    },
-    "test: resizeObserver": function(done) {
+    });
+    test("resizeObserver", function(done) {
         var mockObserver = {
             disconnect: function() { mockObserver.target = null; },
             observe: function(el) {
@@ -156,8 +157,8 @@ module.exports = {
                 }, 15);
             }, 15);
         }, 15);
-    },
-    "test: edit template" : function() {
+    });
+    test("edit template", function() {
         var template = document.createElement("template");
         var div = document.createElement("div");
         template.content = document.createDocumentFragment();
@@ -170,8 +171,8 @@ module.exports = {
         var editor = ace.edit(el);
         assert.equal(editor.container, el);
         editor.destroy();
-    }
-};
+    });
+
 
 /*global CustomEvent*/
 function click(node) {
@@ -185,6 +186,4 @@ function sendText(textarea, text) {
 }
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+

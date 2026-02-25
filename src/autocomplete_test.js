@@ -1,8 +1,9 @@
+"use strict";
+var test = require("./test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
     require("./test/mockdom");
 }
-
-"use strict";
 
 var sendKey = require("./test/user").type;
 var {buildDom} = require("./lib/dom");
@@ -52,15 +53,15 @@ function afterRenderCheck(popup, callback) {
     });
 }
 
-module.exports = {
-    tearDown: function() {
+
+    test.afterEach(function() {
         if (editor) {
             editor.destroy();
             editor.container.remove();
             editor = null;
         }
-    },
-    "test: highlighting in the popup": function (done) {
+    });
+    test("highlighting in the popup", function (done) {
         editor = initEditor("\narraysort alooooooooooooooooooooooooooooong_word");
         //   editor.container.style.width = "500px";
         //  editor.container.style.height = "500px";
@@ -100,8 +101,8 @@ module.exports = {
                 callback();
             });
         }
-    },
-    "test: completions range and command properties": function (done) {
+    });
+    test("completions range and command properties", function (done) {
         editor = initEditor("goods ");
 
         editor.completers = [
@@ -139,8 +140,8 @@ module.exports = {
                 done();
             });
         });
-    },
-    "test: correct completion replacement range when completion prefix has more than one letter": function (done) {
+    });
+    test("correct completion replacement range when completion prefix has more than one letter", function (done) {
         editor = initEditor("<");
 
         editor.completers = [
@@ -179,8 +180,8 @@ module.exports = {
                 callback();
             }, 10);
         }
-    },
-    "test: symbols after selection are not removed when replacement range is present": function (done) {
+    });
+    test("symbols after selection are not removed when replacement range is present", function (done) {
         editor = initEditor("{}");
         editor.completers = [
             {
@@ -211,8 +212,8 @@ module.exports = {
 
             done();
         });
-    },
-    "test: should set correct aria attributes for popup items": function(done) {
+    });
+    test("should set correct aria attributes for popup items", function(done) {
         editor = initEditor("");
         var newLineCharacter = editor.session.doc.getNewLineCharacter();
         editor.completers = [
@@ -262,8 +263,8 @@ module.exports = {
             var actual = htmlElement.replace(/\s*style="[^"]+"|class="[^"]+"|(d)iv|(s)pan/g, "$1$2");
             return actual === expected;
         }
-    },
-    "test: different completers tooltips": function (done) {
+    });
+    test("different completers tooltips", function (done) {
         editor = initEditor("");
         var firstDoc = "<b>First</b>";
         var secondDoc = "Second";
@@ -342,8 +343,8 @@ module.exports = {
                 callback();
             }, 10);
         }
-    },
-    "test: completers tooltip filtering": function (done) {
+    });
+    test("completers tooltip filtering", function (done) {
         editor = initEditor("");
         var firstDoc = "First tooltip";
         var secondDoc = "Second tooltip";
@@ -394,8 +395,8 @@ module.exports = {
                 callback();
             }, 10);
         }
-    },
-    "test: slow and fast completers": function(done) {
+    });
+    test("slow and fast completers", function(done) {
         var syncCompleter={
             getCompletions: function(editor, session, pos, prefix, callback) {
                 callback(null,[{
@@ -441,8 +442,8 @@ module.exports = {
 
             done();
         }, 10);
-    },
-    "test: trigger autocomplete for specific characters": function (done) {
+    });
+    test("trigger autocomplete for specific characters", function (done) {
         editor = initEditor("document");
         var newLineCharacter = editor.session.doc.getNewLineCharacter();
 
@@ -490,8 +491,8 @@ module.exports = {
                 callback();
             });
         }
-    },
-    "test: empty message if no suggestions available": function(done) {
+    });
+    test("empty message if no suggestions available", function(done) {
         editor = initEditor("");
         var emptyMessageText = "No suggestions.";
         var autocomplete = Autocomplete.for(editor);
@@ -509,8 +510,8 @@ module.exports = {
         assert.equal(editor.completer.popup.isOpen, false);
 
         done();
-    },
-    "test: no empty message class if suggestions available": function(done) {
+    });
+    test("no empty message class if suggestions available", function(done) {
         editor = initEditor("");
         var emptyMessageText = "No suggestions.";
         var autocomplete = Autocomplete.for(editor);
@@ -548,8 +549,8 @@ module.exports = {
         assert.ok(!editor.completer.popup.renderer.container.classList.contains("ace_empty-message"));
 
         done();
-    },
-    "test: liveAutocompleteDelay": function(done) {
+    });
+    test("liveAutocompleteDelay", function(done) {
         editor = initEditor("hello world ");
         editor.setOptions({
             liveAutocompletionDelay: 10,
@@ -599,8 +600,8 @@ module.exports = {
                 }, 0);
             }, 0);
         }, 11);
-    },
-    "test: scroll and resize": function() {
+    });
+    test("scroll and resize", function() {
         editor = initEditor("hello world\n");
         user.type("Ctrl-Space");
         assert.equal(editor.completer.popup.isOpen, true);
@@ -613,8 +614,8 @@ module.exports = {
 
         editor.destroy();
         editor.container.remove();
-    },
-    "test: selection should follow hovermarker if setSelectOnHover true": function() {
+    });
+    test("selection should follow hovermarker if setSelectOnHover true", function() {
         editor = initEditor("hello world\n");
 
         editor.completers = [
@@ -657,8 +658,8 @@ module.exports = {
         // Selected row should follow mouse.
         editor.completer.popup.renderer.$loop._flush();
         assert.equal(completer.popup.getRow(), 1);
-    },
-    "test: selection should not follow hovermarker if setSelectOnHover not set": function(done) {
+    });
+    test("selection should not follow hovermarker if setSelectOnHover not set", function(done) {
         editor = initEditor("hello world\n");
 
         editor.completers = [
@@ -700,8 +701,8 @@ module.exports = {
         assert.equal(completer.popup.getRow(), 0);
 
         done();
-    },
-    "test: should respect hideInlinePreview": function(done) {
+    });
+    test("should respect hideInlinePreview", function(done) {
         editor = initEditor("hello world\n");
 
         editor.completers = [
@@ -769,8 +770,8 @@ module.exports = {
 
 
         done();
-    },
-    "test: should maintain selection on fast completer item when slow completer results come in": function(done) {
+    });
+    test("should maintain selection on fast completer item when slow completer results come in", function(done) {
         editor = initEditor("hello world\n");
 
         var slowCompleter = {
@@ -825,8 +826,8 @@ module.exports = {
 
             done();
         }, 500);
-    },
-    "test: should not maintain selection on fast completer item when slow completer results come in when stickySelectionDelay negative": function(done) {
+    });
+    test("should not maintain selection on fast completer item when slow completer results come in when stickySelectionDelay negative", function(done) {
         editor = initEditor("hello world\n");
 
         var slowCompleter = {
@@ -881,8 +882,8 @@ module.exports = {
 
             done();
         }, 500);
-    },
-    "test: should filter using caption if ignoreCaption false": function() {
+    });
+    test("should filter using caption if ignoreCaption false", function() {
         editor = initEditor("hello world\n");
 
         var completer = {
@@ -905,8 +906,8 @@ module.exports = {
         completer.ignoreCaption = false;
         user.type("cap");
         assert.equal(completer.popup.isOpen, true);
-    },
-    "test: should filter using value if ignoreCaption true": function() {
+    });
+    test("should filter using value if ignoreCaption true", function() {
         editor = initEditor("hello world\n");
 
         var completer = {
@@ -933,8 +934,8 @@ module.exports = {
         // Should filter using the value instead.
         user.type(" value");
         assert.equal(completer.popup.isOpen, true);
-    },
-    "test: should skip filter if skipFilter flag is set to true in completion": function() {
+    });
+    test("should skip filter if skipFilter flag is set to true in completion", function() {
         editor = initEditor("hello world\n");
 
         var completer = {
@@ -956,8 +957,8 @@ module.exports = {
         user.type("notMatchingText");
         assert.equal(completer.popup.data.length, 1);
         assert.equal(completer.popup.isOpen, true);
-    },
-    "test: should use filter if skipFilter flag is set to false in completion": function() {
+    });
+    test("should use filter if skipFilter flag is set to false in completion", function() {
         editor = initEditor("hello world\n");
 
         var completer = {
@@ -984,9 +985,9 @@ module.exports = {
         user.type(" ex");
         assert.equal(completer.popup.isOpen, true);
         assert.equal(completer.popup.data.length, 1);
-    },
+    });
 
-    "test: should add inline preview content to aria-describedby": function(done) {
+    test("should add inline preview content to aria-describedby", function(done) {
         editor = initEditor("fun");
 
         editor.completers = [
@@ -1026,8 +1027,8 @@ module.exports = {
         assert.strictEqual(document.getElementById("ace-inline-screenreader-line-2").textContent,"cool");
 
         done();
-    },
-    "test: update popup position only on mouse out when inline enabled and setSelectOnHover true": function() {
+    });
+    test("update popup position only on mouse out when inline enabled and setSelectOnHover true", function() {
         editor = initEditor("fun");
 
         editor.completers = [
@@ -1093,8 +1094,8 @@ module.exports = {
 
         editor.destroy();
         editor.container.remove();
-    },
-    "test: should display loading state": function(done) {
+    });
+    test("should display loading state", function(done) {
         editor = initEditor("hello world\n");
 
         var slowCompleter = {
@@ -1175,8 +1176,8 @@ module.exports = {
         function isLoading() {
             return completer.popup.renderer.container.classList.contains("ace_loading");
         }
-    },
-    "test: should not display loading state on no suggestion state": function(done) {
+    });
+    test("should not display loading state on no suggestion state", function(done) {
         editor = initEditor("hello world\n");
 
         var slowCompleter = {
@@ -1226,8 +1227,8 @@ module.exports = {
         function isLoading() {
             return completer.popup.renderer.container.classList.contains("ace_loading");
         }
-    },
-    "test: should display ghost text after loading state if inline preview enabled": function(done) {
+    });
+    test("should display ghost text after loading state if inline preview enabled", function(done) {
         editor = initEditor("hello world\n");
 
         var slowCompleter = {
@@ -1275,8 +1276,8 @@ module.exports = {
         function isLoading() {
             return completer.popup.renderer.container.classList.contains("ace_loading");
         }
-    },
-    "test: when completion gets inserted and call the onInsert method": function (done) {
+    });
+    test("when completion gets inserted and call the onInsert method", function (done) {
         var isInserted = false;
         editor = initEditor("hello world");
         var completer = {
@@ -1313,8 +1314,8 @@ module.exports = {
         assert.ok(isInserted);
 
         done();
-    },
-    "test: when completions get shown, call the onSeen method": function (done) {
+    });
+    test("when completions get shown, call the onSeen method", function (done) {
         var seen = [false, false, false];
         editor = initEditor("hello world");
         var completer = {
@@ -1354,8 +1355,8 @@ module.exports = {
         assert.equal(editor.completer.popup.getRow(), 0);
         assert.deepEqual(seen, [true, false, false]);
         done();
-    },
-    "test: when inline completions get shown, call the onSeen method": function (done) {
+    });
+    test("when inline completions get shown, call the onSeen method", function (done) {
         var seen = [false, false, false];
         var calledDouble = false;
         editor = initEditor("hello world");
@@ -1396,8 +1397,8 @@ module.exports = {
         assert.deepEqual(seen, [true, true, true]);
         assert.ok(!calledDouble);
         done();
-    },
-    "test: if there is very long ghost text, popup should be rendered at the bottom of the editor container": function(done) {
+    });
+    test("if there is very long ghost text, popup should be rendered at the bottom of the editor container", function(done) {
         editor = initEditor("hello world\n");
 
         // Give enough space for the popup to appear below the editor
@@ -1442,8 +1443,8 @@ module.exports = {
 
             done();
         }, 100);
-    },
-    "test: if there is ghost text, popup should be rendered at the bottom of the ghost text": function(done) {
+    });
+    test("if there is ghost text, popup should be rendered at the bottom of the ghost text", function(done) {
         editor = initEditor("");
 
         var longCompleter = {
@@ -1479,8 +1480,8 @@ module.exports = {
 
             done();
         }, 100);
-    },
-    "test: should not show loading state when empty completer array is provided": function(done) {
+    });
+    test("should not show loading state when empty completer array is provided", function(done) {
         editor = initEditor("");
         editor.completers = [];
         var completer = Autocomplete.for(editor);
@@ -1492,8 +1493,8 @@ module.exports = {
         assert.ok(!(completer.popup && completer.popup.isOpen));
 
         done();
-    },
-    "test: should update inline preview when typing when it's the only item in the popup": function(done) {
+    });
+    test("should update inline preview when typing when it's the only item in the popup", function(done) {
         editor = initEditor("");
 
         editor.completers = [
@@ -1538,8 +1539,8 @@ module.exports = {
                 done();
             }, 100);
         }, 100);
-    },
-    "test: should keep showing ghost text when typing ahead with whitespace": function(done) {
+    });
+    test("should keep showing ghost text when typing ahead with whitespace", function(done) {
         editor = initEditor("");
 
         editor.completers = [
@@ -1583,8 +1584,8 @@ module.exports = {
                 done();
             }, 100);
         }, 100);
-    },
-    "test: passing matches from execCommand": function() {
+    });
+    test("passing matches from execCommand", function() {
         editor = initEditor("");
         editor.execCommand('startAutocomplete', {
             matches: [
@@ -1601,8 +1602,8 @@ module.exports = {
         user.type("\n");
 
         assert.equal(editor.getValue(), "example value<b2-b2>");
-    },
-    "test: should close popup if backspacing until input is fully deleted": function() {
+    });
+    test("should close popup if backspacing until input is fully deleted", function() {
         editor = initEditor("");
 
         editor.completers = [
@@ -1636,16 +1637,16 @@ module.exports = {
 
         // Popup should be closed now
         assert.equal(completer.popup.isOpen, false);
-    },
-    "test: should set create shared Autocomplete with sharedPopups on": function() {
+    });
+    test("should set create shared Autocomplete with sharedPopups on", function() {
         assert.equal(Autocomplete.$sharedInstance == undefined, true);
         config.set("sharedPopups", true);
         var editor = initEditor("");
         var completer = Autocomplete.for(editor);
         assert.equal(Autocomplete.$sharedInstance == undefined, false);
         config.set("sharedPopups", false);
-    },
-    "test: changing completion should render scrollbars correctly": function (done) {
+    });
+    test("changing completion should render scrollbars correctly", function (done) {
         editor = initEditor("document");
         var newLineCharacter = editor.session.doc.getNewLineCharacter();
         var initialCompletions = [
@@ -1705,8 +1706,8 @@ module.exports = {
                 callback();
             });
         }
-    },
-    "test: doc tooltip positioning": async function(done) {
+    });
+    test("doc tooltip positioning", async function(done) {
         var editor = initEditor("");
         var longDoc = "This is a very long documentation text that should wrap and test the tooltip width constraints.";
 
@@ -1791,9 +1792,7 @@ module.exports = {
         assert.ok(tooltipRect.bottom <= popupRect.top, "Tooltip should appear above");
 
         done();
-    },
-};
+    });
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

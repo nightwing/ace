@@ -1,12 +1,13 @@
 "use strict";
+var test = require("../test/run.js")(module.exports);
 
 var assert = require("./../test/assertions");
 require("./../test/mockdom");
 var ace = require("../ace");
 var editor, changes;
 
-module.exports = {
-    setUp: function() {
+
+    test.beforeEach(function() {
         ace.config.setLoader(function(moduleName, cb) {
             if (moduleName == "ace/ext/error_marker")
                 return cb(null, require("../ext/error_marker"));
@@ -24,15 +25,15 @@ module.exports = {
         }
         changes = [];
         editor.focus();
-    },
-    tearDown: function() {
+    });
+    test.afterEach(function() {
         if (editor) {
             editor.destroy();
             editor.container.remove();
             editor = null;
         }
-    },
-    "test: go to next error": function() {
+    });
+    test("go to next error", function() {
         editor.session.setValue("1\nerror 2 warning\n3\n4 info\n5\n6\n");
         editor.execCommand("goToNextError");
         editor.resize(true);
@@ -66,10 +67,8 @@ module.exports = {
         editor.execCommand("insertstring", "\n");
         editor.renderer.$loop._flush();
         assert.notOk(/error_widget/.test(editor.container.innerHTML));
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

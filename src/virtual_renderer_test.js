@@ -1,9 +1,9 @@
+"use strict";
+var test = require("./test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("./test/mockdom");
 }
-
-"use strict";
 
 var Range = require("./range").Range;
 var Editor = require("./editor").Editor;
@@ -20,8 +20,8 @@ function setScreenPosition(node, rect) {
 }
 
 var editor = null;
-module.exports = {
-    setUp: function() {
+
+    test.beforeEach(function() {
         require("./config").setLoader(function(moduleName, cb) {
             if (moduleName == "ace/ext/error_marker")
                 return cb(null, require("./ext/error_marker"));
@@ -44,12 +44,12 @@ module.exports = {
         editor.on("destroy", function() {
             el.remove();
         });
-    },
-    tearDown: function() {
+    });
+    test.afterEach(function() {
         editor && editor.destroy();
         editor = null;
-    },
-    "test: screen2text the column should be rounded to the next character edge" : function(done) {
+    });
+    test("screen2text the column should be rounded to the next character edge", function(done) {
         var renderer = editor.renderer;
 
         renderer.setPadding(0);
@@ -70,8 +70,8 @@ module.exports = {
         testPixelToText(14, 0, 0, 1);
         testPixelToText(15, 0, 0, 2);
         done();
-    },
-    "test: handle css transforms" : function(done) {
+    });
+    test("handle css transforms", function(done) {
         var renderer = editor.renderer;
         var fontMetrics = renderer.$fontMetrics;
         setScreenPosition(editor.container, [20, 30, 300, 100]);
@@ -117,9 +117,9 @@ module.exports = {
         editor.renderer.$loop._flush();
         
         done();
-    },
+    });
     
-    "test scrollmargin + autosize": function(done) {
+    test("scrollmargin + autosize", function(done) {
         editor.setOptions({
             maxLines: 100,
             wrap: true
@@ -132,10 +132,10 @@ module.exports = {
                 done();
             }, 0);
         });
-    },
+    });
 
 
-    "test scrollbars after value change": function() {
+    test("scrollbars after value change", function() {
         editor.container.style.height = "0px";
         editor.setOptions({
             maxLines: 8,
@@ -182,9 +182,9 @@ module.exports = {
         assert.ok(editor.renderer.scrollBarH.isVisible);
         assert.ok(editor.renderer.scrollBar.isVisible);
         assert.equal(renderCount, 7);
-    },
+    });
 
-    "test autosize from 0 height": function() {
+    test("autosize from 0 height", function() {
         editor.container.style.height = "0px";
         editor.textInput.getElement().style.position = "fixed";
         editor.container.style.lineHeight = 1;
@@ -220,9 +220,9 @@ module.exports = {
         editor.renderer.$loop._flush();
         editor.resize(true);
         assert.equal(renderCount, 2);
-    },
+    });
     
-    "test invalid valus of minLines": function() {
+    test("invalid valus of minLines", function() {
         editor.setOptions({
             maxLines: Infinity,
             minLines: Infinity
@@ -238,18 +238,18 @@ module.exports = {
             minLines: Number.MAX_SAFE_INTEGER + 1
         });
         editor.renderer.$loop._flush();
-    },
+    });
     
-    "test line widgets": function() {
+    test("line widgets", function() {
         editor.session.setValue("a\nb|c\nd");
         editor.session.setAnnotations([{row: 1, column: 2, type: "error"}]);
         editor.execCommand(editor.commands.byName.goToNextError);
         assert.position(editor.getCursorPosition(), 1, 2);
         editor.renderer.$loop._flush();
         assert.ok(editor.session.lineWidgets[1]);
-    },
+    });
     
-    "test wrapped text rendering": function() {
+    test("wrapped text rendering", function() {
         editor.setValue("a".repeat(452) + "\n" + "b".repeat(100) + "\nxxxxxx", -1);
         editor.container.style.height = "500px";
         editor.setOption("wrap", 40);
@@ -263,14 +263,14 @@ module.exports = {
         var lines = editor.renderer.$textLayer.element.children;
         assert.notEqual(lines[0].style.height, lines[1].style.height);
         assert.equal(lines[0].style.height, lines[1].style.top);
-    },
+    });
     
-    "test resize": function() {
+    test("resize", function() {
         editor.setValue("Juhu kinners!");
         editor.resize(true);
-    },
+    });
 
-    "test placeholder": function() {
+    test("placeholder", function() {
         editor.setOption("placeholder", "hello");
         assert.equal(editor.renderer.content.textContent, "hello");
 
@@ -288,8 +288,8 @@ module.exports = {
         editor.renderer.$loop._flush();
         editor._signal("input", {});
         assert.equal(editor.renderer.content.textContent, "only visible for empty value");
-    },
-    "test: highlight indent guide": function (done) {
+    });
+    test("highlight indent guide", function (done) {
         editor.session.setValue(
             "function Test() {\n" + "    function Inner() {\n" + "        \n" + "        \n" + "    }\n" + "}");
         editor.setOption("highlightIndentGuides", false);
@@ -319,8 +319,8 @@ module.exports = {
             assertIndentGuides( 2);
             done();
         }, 100);
-    },
-    "test annotation marks": function() {
+    });
+    test("annotation marks", function() {
         function findPointFillStyle(imageData, x, y) {
             var data = imageData.slice(4 * y, 4 * (y + 1));
             var a = Math.round(data[3] / 256 * 100);
@@ -402,8 +402,8 @@ module.exports = {
             {x: 0, y: 6, color: "rgba(0,0,0,0)"}
         ];
         assertCoordsColor(values);
-    },
-    "test ghost text": function() {
+    });
+    test("ghost text", function() {
         editor.session.setValue("abcdef");
         editor.setGhostText("Ghost");
 
@@ -424,9 +424,9 @@ module.exports = {
 
         editor.renderer.$loop._flush();
         assert.equal(editor.renderer.content.textContent, "abcdef");
-    },
+    });
 
-    "test multiline ghost text": function() {
+    test("multiline ghost text", function() {
         editor.session.setValue("abcdef");
         editor.renderer.$loop._flush();
 
@@ -443,8 +443,8 @@ module.exports = {
         assert.equal(editor.renderer.content.textContent, "abcdef");
         
         assert.equal(editor.session.lineWidgets, null);
-    },
-    "test long multiline ghost text": function() {
+    });
+    test("long multiline ghost text", function() {
         editor.session.setValue("abcdef");
         editor.renderer.$loop._flush();
 
@@ -462,8 +462,8 @@ module.exports = {
         assert.equal(editor.renderer.content.textContent, "abcdef");
 
         assert.equal(editor.session.lineWidgets, null);
-    },
-    "test: brackets highlighting": function (done) {
+    });
+    test("brackets highlighting", function (done) {
         var renderer = editor.renderer;
         editor.session.setValue(
             "function Test() {\n" + "    function Inner(){\n" + "        \n" + "        \n" + "    }\n" + "}");
@@ -488,8 +488,8 @@ module.exports = {
                 }, 60);
             }, 60);
         }, 60);
-    },
-    "test: scroll cursor into view": function() {
+    });
+    test("scroll cursor into view", function() {
         function X(n) {
             return "X".repeat(n);
         }
@@ -515,8 +515,8 @@ module.exports = {
             scrollDelta >= leftBoundPixelPos && scrollDelta < rightBoundPixelPos,
             "Expected content to have been scrolled two characters beyond the cursor"
         );
-    },
-    "test: set gutter class": function(done) {
+    });
+    test("set gutter class", function(done) {
         editor.session.setMode("ace/mode/javascript", function() {
             editor.session.setValue("x = {\n  foo: 1\n}");
             editor.execCommand("toggleFoldWidget");
@@ -535,8 +535,8 @@ module.exports = {
             assert.equal(cell.element.className, "ace_gutter-cell ace_gutter-active-line hello");
             done();
         });
-    },
-    "test: screenToTextCoordinates with line widget offset, issue #5874": function() {
+    });
+    test("screenToTextCoordinates with line widget offset, issue #5874", function() {
         var renderer = editor.renderer;
         editor.setValue("line0\nline1\nline2\nline3\nline4");
         renderer.setPadding(0);
@@ -562,12 +562,10 @@ module.exports = {
         // Clicking bottom half of line 2 (y=75) should also return row 2
         pos = renderer.screenToTextCoordinates(r.left + 5, r.top + 75);
         assert.equal(pos.row, 2);
-    }
+    });
 
     // change tab size after setDocument (for text layer)
-};
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

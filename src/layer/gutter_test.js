@@ -1,5 +1,6 @@
+var test = require("../test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("../test/mockdom");
 }
 
@@ -22,8 +23,8 @@ function emit(keyCode) {
     el.dispatchEvent(event);
 }
 
-module.exports = {
-    setUp: function (done) {
+
+    test.beforeEach(function (done) {
         this.editor = new Editor(new VirtualRenderer());
         this.editor.container.style.position = "absolute";
         this.editor.container.style.height = "500px";
@@ -32,8 +33,8 @@ module.exports = {
         this.editor.container.style.top = "10px";
         document.body.appendChild(this.editor.container);
         done();
-    },
-    "test: custom icon replaces the fold icon sucessfully": function (done) {
+    });
+    test("custom icon replaces the fold icon sucessfully", function (done) {
         var editor = this.editor;
         var value = "x {" + "\n".repeat(50) + "}\n";
         value = value.repeat(50);
@@ -72,8 +73,8 @@ module.exports = {
                 done();
             }, 20);
         }, 20);
-    },
-    "test: after hiding custom icon fold icon is visible automatically": function (done) {
+    });
+    test("after hiding custom icon fold icon is visible automatically", function (done) {
         var editor = this.editor;
         var value = "x {" + "\n".repeat(50) + "}\n";
         value = value.repeat(50);
@@ -114,9 +115,9 @@ module.exports = {
                 done();
             }, 20);
         }, 20);
-    },
+    });
 
-    "test: folding is kept consistent when custom widget is shown first and then hidden": function (done) {
+    test("folding is kept consistent when custom widget is shown first and then hidden", function (done) {
         var editor = this.editor;
         var value = "x {" + "\n".repeat(50) + "}\n";
         value = value.repeat(50);
@@ -159,9 +160,9 @@ module.exports = {
                 done();
             }, 20);
         }, 20);
-    },
+    });
 
-    "test: onClick callback is getting called and updated when updating the custom widget": function (done) {
+    test("onClick callback is getting called and updated when updating the custom widget", function (done) {
         var editor = this.editor;
         var value = "x {" + "\n".repeat(50) + "}\n";
         value = value.repeat(50);
@@ -219,14 +220,12 @@ module.exports = {
                 done();
             }, 20);
         }, 20);
-    },
+    });
 
-    tearDown: function () {
+    test.afterEach(function () {
         this.editor.destroy();
         document.body.removeChild(this.editor.container);
-    }
-};
+    });
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

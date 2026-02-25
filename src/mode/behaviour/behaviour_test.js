@@ -1,9 +1,9 @@
+"use strict";
+var test = require("../../test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("../../test/mockdom");
 }
-
-"use strict";
 
 require("../../multi_select");
 var assert = require("../../test/assertions");
@@ -29,8 +29,8 @@ var testRanges = function(str) {
     assert.equal(editor.selection.getAllRanges() + "", str + "");
 };
 
-module.exports = {
-    "test: cstyle": function() {
+
+    test("cstyle", function() {
         function testValue(line) {
             assert.equal(editor.getValue(), Array(4).join(line + "\n"));
         }
@@ -161,8 +161,8 @@ module.exports = {
         exec("insertstring", 1, "var x=<div>\\n    ");
         exec("insertstring", 1, "{");
         assert.equal(editor.getValue(), "var x=<div>\\n    {}");
-    },
-    "test: xml": function() {
+    });
+    test("xml", function() {
         editor = new Editor(new MockRenderer());
         editor.session.setUndoManager(new UndoManager());
         editor.setValue(["<OuterTag>",
@@ -228,8 +228,8 @@ module.exports = {
         exec("selectleft", 1);
         exec("insertstring", 1, "'");
         assert.equal(editor.getValue(), "<div 'a'");
-    },
-    "test: html": function() {
+    });
+    test("html", function() {
         editor.session.setMode(new HTMLMode);
         editor.setWrapBehavioursEnabled(false);
         editor.setValue("<div a", 1);
@@ -288,8 +288,8 @@ module.exports = {
             exec("insertstring", 1, ch);
         });
         assert.equal(editor.getValue(), "<!DOCTYPE html></div><link><a></a>");
-    },
-    "test: quotes": function() {
+    });
+    test("quotes", function() {
         editor = new Editor(new MockRenderer());
         editor.session.setMode(new RustMode);
         editor.setValue("");
@@ -322,8 +322,8 @@ module.exports = {
         exec("insertstring", 1, 'b');
         exec("insertstring", 1, "`");
         assert.equal(editor.getValue(), "b``");
-    },
-    "test: css": function() {
+    });
+    test("css", function() {
         editor.session.setMode(new CSSMode());
         editor.setWrapBehavioursEnabled(true);
         editor.setValue("a {padding", 1);
@@ -394,8 +394,8 @@ module.exports = {
         editor.selection.moveTo(0, 3);
         exec("insertstring", 1, "!");
         assert.equal(editor.getValue(), "a {!padding:10px!important;}");
-    },
-    "test: markdown": function() {
+    });
+    test("markdown", function() {
         editor.session.setMode(new MarkdownMode());
         editor.setValue("```html", 1);
         exec("insertstring", 1, "\n");
@@ -429,8 +429,8 @@ module.exports = {
         exec("insertstring", 1, "`");
         exec("insertstring", 1, "`");
         assert.equal(editor.getValue(), "``-``");
-    },
-    "test: python": function() {
+    });
+    test("python", function() {
         editor.session.setMode(new PythonMode());
         editor.setValue("f", 1);
         exec("insertstring", 1, '"');
@@ -440,8 +440,8 @@ module.exports = {
         editor.setValue("p", 1);
         exec("insertstring", 1, '"');
         assert.equal(editor.getValue(), 'p"');
-    },
-    "test: doc comment auto-closing": function() {
+    });
+    test("doc comment auto-closing", function() {
         editor.session.setMode(new JavaScriptMode());
         editor.setWrapBehavioursEnabled(true);
 
@@ -491,18 +491,16 @@ module.exports = {
         exec("insertstring", 1, "\n");
         assert.equal(editor.getValue(), "/\n** comment */");
 
-    },
-    "test: fragment auto-closing": function () {
+    });
+    test("fragment auto-closing", function () {
         editor.setWrapBehavioursEnabled(true);
         editor.session.setMode(new JavaScriptMode());
         editor.setValue("");
         exec("insertstring", 1, '<');
         exec("insertstring", 1, '>');
         assert.equal(editor.getValue(), '<></>');
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

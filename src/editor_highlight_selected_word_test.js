@@ -1,9 +1,9 @@
+"use strict";
+var test = require("./test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("./test/mockdom");
 }
-
-"use strict";
 
 var EditSession = require("./edit_session").EditSession;
 var Editor = require("./editor").Editor;
@@ -41,20 +41,20 @@ function callHighlighterUpdate(session, firstRow, lastRow) {
     return rangeCount;
 }
 
-module.exports = {
-    setUp: function(next) {
+
+    test.beforeEach(function(next) {
         this.session = new EditSession(lipsum);
         this.editor = new Editor(new MockRenderer(), this.session);
         this.selection = this.session.getSelection();
         this.search = this.editor.$search;
         next();
-    },
+    });
 
-    "test: highlight selected words by default": function() {
+    test("highlight selected words by default", function() {
         assert.equal(this.editor.getHighlightSelectedWord(), true);
-    },
+    });
 
-    "test: highlight a word": function() {
+    test("highlight a word", function() {
         this.editor.moveCursorTo(0, 9);
         this.selection.selectWord();
 
@@ -65,9 +65,9 @@ module.exports = {
         assert.equal(this.session.getTextRange(range), "ipsum");
         assert.equal(highlighter.cache.length, 0);
         assert.equal(callHighlighterUpdate(this.session, 0, 0), 2);
-    },
+    });
 
-    "test: highlight a word and clear highlight": function() {
+    test("highlight a word and clear highlight", function() {
         this.editor.moveCursorTo(0, 8);
         this.selection.selectWord();
 
@@ -78,23 +78,23 @@ module.exports = {
         this.session.highlight("");
         assert.equal(this.session.$searchHighlight.cache.length, 0);
         assert.equal(callHighlighterUpdate(this.session, 0, 0), 0);
-    },
+    });
 
-    "test: highlight another word": function() {
+    test("highlight another word", function() {
         this.selection.moveCursorTo(0, 14);
         this.selection.selectWord();
 
         var range = this.selection.getRange();
         assert.equal(this.session.getTextRange(range), "dolor");
         assert.equal(callHighlighterUpdate(this.session, 0, 0), 4);
-    },
+    });
 
-    "test: no selection, no highlight": function() {
+    test("no selection, no highlight", function() {
         this.selection.clearSelection();
         assert.equal(callHighlighterUpdate(this.session, 0, 0), 0);
-    },
+    });
 
-    "test: select a word, no highlight": function() {
+    test("select a word, no highlight", function() {
         this.selection.moveCursorTo(0, 14);
         this.selection.selectWord();
 
@@ -103,9 +103,9 @@ module.exports = {
         var range = this.selection.getRange();
         assert.equal(this.session.getTextRange(range), "dolor");
         assert.equal(callHighlighterUpdate(this.session, 0, 0), 0);
-    },
+    });
 
-    "test: select a word with no matches": function() {
+    test("select a word with no matches", function() {
         this.editor.setHighlightSelectedWord(true);
 
         var currentOptions = this.search.getOptions();
@@ -126,9 +126,9 @@ module.exports = {
 
         assert.equal(this.session.getTextRange(match), "Mauris");
         assert.equal(callHighlighterUpdate(this.session, 0, 0), 1);
-    },
+    });
 
-    "test: partial word selection 1": function() {
+    test("partial word selection 1", function() {
         this.selection.moveCursorTo(0, 14);
         this.selection.selectWord();
         this.selection.selectLeft();
@@ -136,9 +136,9 @@ module.exports = {
         var range = this.selection.getRange();
         assert.equal(this.session.getTextRange(range), "dolo");
         assert.equal(callHighlighterUpdate(this.session, 0, 0), 0);
-    },
+    });
 
-    "test: partial word selection 2": function() {
+    test("partial word selection 2", function() {
         this.selection.moveCursorTo(0, 13);
         this.selection.selectWord();
         this.selection.selectRight();
@@ -146,9 +146,9 @@ module.exports = {
         var range = this.selection.getRange();
         assert.equal(this.session.getTextRange(range), "dolor ");
         assert.equal(callHighlighterUpdate(this.session, 0, 0), 3);
-    },
+    });
 
-    "test: partial word selection 3": function() {
+    test("partial word selection 3", function() {
         var range = this.selection.getWordRange(0, 14);
         range.start.column++;
         this.selection.setRange(range);
@@ -156,9 +156,9 @@ module.exports = {
         var range = this.selection.getRange();
         assert.equal(this.session.getTextRange(range), "olor");
         assert.equal(callHighlighterUpdate(this.session, 0, 0), 0);
-    },
+    });
 
-    "test: select last word": function() {
+    test("select last word", function() {
         this.selection.moveCursorTo(0, 1);
 
         var currentOptions = this.search.getOptions();
@@ -181,10 +181,8 @@ module.exports = {
 
         assert.equal(this.session.getTextRange(match), "consectetur");
         assert.equal(callHighlighterUpdate(this.session, 0, 1), 3);
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

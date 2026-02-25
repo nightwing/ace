@@ -1,4 +1,5 @@
 "use strict";
+var test = require("./test/run.js")(module.exports);
 
 var EditSession = require("./edit_session").EditSession;
 var MockRenderer = require("./test/mockrenderer").MockRenderer;
@@ -7,15 +8,15 @@ var Search = require("./search").Search;
 var assert = require("./test/assertions");
 var Range = require("./range").Range;
 
-module.exports = {
-    "test: configure the search object" : function() {
+
+    test("configure the search object", function() {
         var search = new Search();
         search.set({
             needle: "juhu"
         });
-    },
+    });
 
-    "test: find simple text in document" : function() {
+    test("find simple text in document", function() {
         var session = new EditSession(["juhu kinners 123", "456"]);
         var search = new Search().set({
             needle: "kinners"
@@ -24,9 +25,9 @@ module.exports = {
         var range = search.find(session);
         assert.position(range.start, 0, 5);
         assert.position(range.end, 0, 12);
-    },
+    });
 
-    "test: find simple text in next line" : function() {
+    test("find simple text in next line", function() {
         var session = new EditSession(["abc", "juhu kinners 123", "456"]);
         var search = new Search().set({
             needle: "kinners"
@@ -35,9 +36,9 @@ module.exports = {
         var range = search.find(session);
         assert.position(range.start, 1, 5);
         assert.position(range.end, 1, 12);
-    },
+    });
 
-    "test: find text starting at cursor position" : function() {
+    test("find text starting at cursor position", function() {
         var session = new EditSession(["juhu kinners", "juhu kinners 123"]);
         session.getSelection().moveCursorTo(0, 6);
         var search = new Search().set({
@@ -47,9 +48,9 @@ module.exports = {
         var range = search.find(session);
         assert.position(range.start, 1, 5);
         assert.position(range.end, 1, 12);
-    },
+    });
 
-    "test: wrap search is on by default" : function() {
+    test("wrap search is on by default", function() {
         var session = new EditSession(["abc", "juhu kinners 123", "456"]);
         session.getSelection().moveCursorTo(2, 1);
 
@@ -58,9 +59,9 @@ module.exports = {
         });
 
         assert.notEqual(search.find(session), null);
-    },
+    });
 
-    "test: wrap search should wrap at file end" : function() {
+    test("wrap search should wrap at file end", function() {
         var session = new EditSession(["abc", "juhu kinners 123", "456"]);
         session.getSelection().moveCursorTo(2, 1);
 
@@ -72,9 +73,9 @@ module.exports = {
         var range = search.find(session);
         assert.position(range.start, 1, 5);
         assert.position(range.end, 1, 12);
-    },
+    });
 
-    "test: wrap search should find needle even if it starts inside it" : function() {
+    test("wrap search should find needle even if it starts inside it", function() {
         var session = new EditSession(["abc", "juhu kinners 123", "456"]);
         session.getSelection().moveCursorTo(6, 1);
 
@@ -86,9 +87,9 @@ module.exports = {
         var range = search.find(session);
         assert.position(range.start, 1, 5);
         assert.position(range.end, 1, 12);
-    },
+    });
 
-    "test: wrap search with no match should return 'null'": function() {
+    test("wrap search with no match should return 'null'", function() {
         var session = new EditSession(["abc", "juhu kinners 123", "456"]);
         session.getSelection().moveCursorTo(2, 1);
 
@@ -98,9 +99,9 @@ module.exports = {
         });
 
         assert.equal(search.find(session), null);
-    },
+    });
 
-    "test: case sensitive is by default off": function() {
+    test("case sensitive is by default off", function() {
         var session = new EditSession(["abc", "juhu kinners 123", "456"]);
 
         var search = new Search().set({
@@ -108,9 +109,9 @@ module.exports = {
         });
 
         assert.range(search.find(session), 1, 0, 1, 4);
-    },
+    });
 
-    "test: case sensitive search": function() {
+    test("case sensitive search", function() {
         var session = new EditSession(["abc", "juhu kinners 123", "456"]);
 
         var search = new Search().set({
@@ -120,9 +121,9 @@ module.exports = {
 
         var range = search.find(session);
         assert.equal(range, null);
-    },
+    });
 
-    "test: whole word search should not match inside of words": function() {
+    test("whole word search should not match inside of words", function() {
         var session = new EditSession(["juhukinners", "juhu kinners 123", "456"]);
 
         var search = new Search().set({
@@ -133,9 +134,9 @@ module.exports = {
         var range = search.find(session);
         assert.position(range.start, 1, 5);
         assert.position(range.end, 1, 12);
-    },
+    });
 
-    "test: fallback to nonUnicode mode on edge cases": function() {
+    test("fallback to nonUnicode mode on edge cases", function() {
         var session = new EditSession([
             /* eslint-disable no-octal-escape*/
             "string with \xa9 symbol",  // test octal escape sequence
@@ -154,9 +155,9 @@ module.exports = {
         range = search.find(session);
         assert.position(range.start, 1, 8);
         assert.position(range.end, 1, 13);
-    },
+    });
 
-    "test: whole word search should not match inside of words with unicode": function() {
+    test("whole word search should not match inside of words with unicode", function() {
         var session = new EditSession(["𝓗ello𝓦orld", "𝓗ello 𝓦orld 123", "456"]);
 
         var search = new Search().set({
@@ -167,9 +168,9 @@ module.exports = {
         var range = search.find(session);
         assert.position(range.start, 1, 0);
         assert.position(range.end, 1, 6);
-    },
+    });
 
-    "test: return to unicode mode when possible": function() {
+    test("return to unicode mode when possible", function() {
         var session = new EditSession(["𝓕oo"]);
 
         var search = new Search().set({
@@ -185,9 +186,9 @@ module.exports = {
         var range = search.find(session);
         assert.position(range.start, 0, 0);
         assert.position(range.end, 0, 2);
-    },
+    });
 
-    "test: empty match before surrogate pair": function() {
+    test("empty match before surrogate pair", function() {
         var session = new EditSession(["𝓕oo"]);
 
         var search = new Search().set({
@@ -199,9 +200,9 @@ module.exports = {
         var range = search.find(session);
         assert.position(range.start, 0, 2);
         assert.position(range.end, 0, 2);
-    },
+    });
 
-    "test: find backwards": function() {
+    test("find backwards", function() {
         var session = new EditSession(["juhu juhu juhu juhu"]);
         session.getSelection().moveCursorTo(0, 10);
         var search = new Search().set({
@@ -212,9 +213,9 @@ module.exports = {
         var range = search.find(session);
         assert.position(range.start, 0, 5);
         assert.position(range.end, 0, 9);
-    },
+    });
 
-    "test: find in selection": function() {
+    test("find in selection", function() {
         var session = new EditSession(["juhu", "juhu", "juhu", "juhu"]);
         session.getSelection().setSelectionAnchor(1, 0);
         session.getSelection().selectTo(3, 5);
@@ -241,9 +242,9 @@ module.exports = {
         var range = search.find(session);
         assert.position(range.start, 1, 0);
         assert.position(range.end, 1, 4);
-    },
+    });
 
-    "test: find backwards in selection": function() {
+    test("find backwards in selection", function() {
         var session = new EditSession(["juhu", "juhu", "juhu", "juhu"]);
 
         session.getSelection().setSelectionAnchor(0, 2);
@@ -272,9 +273,9 @@ module.exports = {
         var range = search.find(session);
         assert.position(range.start, 1, 0);
         assert.position(range.end, 1, 4);
-    },
+    });
 
-    "test: edge case - match directly before the cursor" : function() {
+    test("edge case - match directly before the cursor", function() {
         var session = new EditSession(["123", "123", "juhu"]);
 
         var search = new Search().set({
@@ -287,9 +288,9 @@ module.exports = {
         var range = search.find(session);
         assert.position(range.start, 2, 0);
         assert.position(range.end, 2, 4);
-    },
+    });
 
-    "test: edge case - match backwards directly after the cursor" : function() {
+    test("edge case - match backwards directly after the cursor", function() {
         var session = new EditSession(["123", "123", "juhu"]);
 
         var search = new Search().set({
@@ -303,9 +304,9 @@ module.exports = {
         var range = search.find(session);
         assert.position(range.start, 2, 0);
         assert.position(range.end, 2, 4);
-    },
+    });
 
-    "test: find using a regular expression" : function() {
+    test("find using a regular expression", function() {
         var session = new EditSession(["abc123 123 cd", "abc"]);
 
         var search = new Search().set({
@@ -316,9 +317,9 @@ module.exports = {
         var range = search.find(session);
         assert.position(range.start, 0, 3);
         assert.position(range.end, 0, 6);
-    },
+    });
 
-    "test: find using a regular expression and whole word" : function() {
+    test("find using a regular expression and whole word", function() {
         var session = new EditSession(["abc123 123 cd", "abc"]);
 
         var search = new Search().set({
@@ -330,9 +331,9 @@ module.exports = {
         var range = search.find(session);
         assert.position(range.start, 0, 7);
         assert.position(range.end, 0, 10);
-    },
+    });
 
-    "test: use regular expressions with capture groups": function() {
+    test("use regular expressions with capture groups", function() {
         var session = new EditSession(["  ab: 12px", "  <h1 abc"]);
 
         var search = new Search().set({
@@ -343,9 +344,9 @@ module.exports = {
         var range = search.find(session);
         assert.position(range.start, 0, 6);
         assert.position(range.end, 0, 8);
-    },
+    });
 
-    "test: find all matches in selection" : function() {
+    test("find all matches in selection", function() {
         var session = new EditSession(["juhu", "juhu", "juhu", "juhu"]);
 
         session.getSelection().setSelectionAnchor(0, 2);
@@ -364,10 +365,10 @@ module.exports = {
         assert.position(ranges[0].end, 1, 3);
         assert.position(ranges[1].start, 2, 1);
         assert.position(ranges[1].end, 2, 3);
-    },
+    });
 
 
-    "test: find all multiline matches" : function() {
+    test("find all multiline matches", function() {
         var session = new EditSession(["juhu", "juhu", "juhu", "juhu"]);
 
         var search = new Search().set({
@@ -382,9 +383,9 @@ module.exports = {
         assert.position(ranges[0].end, 1, 2);
         assert.position(ranges[1].start, 1, 2);
         assert.position(ranges[1].end, 2, 2);
-    },
+    });
 
-    "test: replace() should return the replacement if the input matches the needle" : function() {
+    test("replace() should return the replacement if the input matches the needle", function() {
         var search = new Search().set({
             needle: "juhu"
         });
@@ -399,9 +400,9 @@ module.exports = {
         assert.equal(search.replace("Juhu", "kinners"), null);
 
         // regexp replacement
-    },
+    });
 
-    "test: replace with a RegExp search" : function() {
+    test("replace with a RegExp search", function() {
         var search = new Search().set({
             needle: "\\d+",
             regExp: true
@@ -412,9 +413,9 @@ module.exports = {
         assert.equal(search.replace("", "kinners"), null);
         assert.equal(search.replace("a12", "kinners"), null);
         assert.equal(search.replace("12a", "kinners"), null);
-    },
+    });
 
-    "test: replace with RegExp match and capture groups" : function() {
+    test("replace with RegExp match and capture groups", function() {
         var search = new Search().set({
             needle: "ab((\\d)\\d)",
             regExp: true
@@ -427,9 +428,9 @@ module.exports = {
 
         search.set({ needle: "(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)(l)" });
         assert.equal(search.replace("abcdefghijkl", "$2$9$7_$11$9$4_$8$9$4$5_$10$1$3$11_$6$12$1$7_$13"), "big_kid_hide_jack_flag_a3");
-    },
+    });
 
-    "test: replace() should correctly handle $$ in the replacement string": function () {
+    test("replace() should correctly handle $$ in the replacement string", function () {
         var search = new Search().set({
             needle: "example"
         });
@@ -459,9 +460,9 @@ module.exports = {
         search.set({ regExp: false });
         // Tests that without regular expression, "$1test" is treated as a literal string with $ escape.
         assert.equal(search.replace("(example)", "$1test"), "$1test");
-    },
+    });
 
-    "test: replace() should correctly handle \\\\ in the replacement string": function () {
+    test("replace() should correctly handle \\\\ in the replacement string", function () {
         var search = new Search().set({
             needle: "example"
         });
@@ -480,9 +481,9 @@ module.exports = {
         assert.equal(search.replace("example", "\\\\\\\\\\"), "\\\\\\");
         assert.equal(search.replace("example", "\\\\\\\\\\\\"), "\\\\\\");
         assert.equal(search.replace("example", "\\\\\\\\\\\\\\"), "\\\\\\\\");
-    },
+    });
 
-    "test: find all using regular expresion containing $" : function() {
+    test("find all using regular expresion containing $", function() {
         var session = new EditSession(["a", "     b", "c ", "d"]);
 
         var search = new Search().set({
@@ -497,9 +498,9 @@ module.exports = {
         assert.equal(ranges.length, 1);
         assert.position(ranges[0].start, 2, 1);
         assert.position(ranges[0].end, 2, 2);
-    },
+    });
 
-    "test: find all matches in a line" : function() {
+    test("find all matches in a line", function() {
         var session = new EditSession("foo bar foo baz foobar foo");
 
         var search = new Search().set({
@@ -519,9 +520,9 @@ module.exports = {
         assert.position(ranges[1].end, 0, 11);
         assert.position(ranges[2].start, 0, 23);
         assert.position(ranges[2].end, 0, 26);
-    },
+    });
 
-    "test: find all matches in a line backwards" : function() {
+    test("find all matches in a line backwards", function() {
         var session = new EditSession("foo bar foo baz foobar foo");
 
         var search = new Search().set({
@@ -542,9 +543,9 @@ module.exports = {
         assert.position(ranges[1].end, 0, 11);
         assert.position(ranges[0].start, 0, 0);
         assert.position(ranges[0].end, 0, 3);
-    },
+    });
 
-    "test: find next empty range" : function() {
+    test("find next empty range", function() {
         var session = new EditSession("foo foobar foo");
         var editor = new Editor(new MockRenderer(), session);
 
@@ -573,9 +574,9 @@ module.exports = {
             var len = range.end.column - start;
             assert.equal(start + 0.1 * len, positions[i]);
         }
-    },
+    });
 
-    "test: repeating text": function() {
+    test("repeating text", function() {
         var session = new EditSession("tttttt\ntttttt\ntttttt\ntttttt\ntttttt\ntttttt");
         var editor = new Editor(new MockRenderer(), session);
 
@@ -604,9 +605,9 @@ module.exports = {
         check(2, 2, 3, 4);
         check(0, 2, 1, 4);
         check(4, 2, 5, 4);
-    },
+    });
 
-    "test: find all matches in a range" : function() {
+    test("find all matches in a range", function() {
         var session = new EditSession([
             "",
             "    var myVar1 = 1; var myVar2 = 2; var myVar3 = 3;",
@@ -631,9 +632,9 @@ module.exports = {
         assert.position(ranges[1].end, 1, 39);
         assert.position(ranges[2].start, 2, 4);
         assert.position(ranges[2].end, 2, 7);
-    },
+    });
 
-    "test: find all line breaks (\\r\\n, \\n) using regular expression" : function() {
+    test("find all line breaks (\\r\\n, \\n) using regular expression", function() {
         var session = new EditSession('\nfunction foo(items, nada) {\n    for (var i=0; i<items.length; i++) {\n        alert(items[i] + "juhu\\n");\n    }\t/* Real Tab */\n\n\n\n\n}\n\n\n// test search/replace line break with regexp\r\n\r\n\t\t\t\t\n');
 
         var search = new Search().set({
@@ -677,9 +678,9 @@ module.exports = {
         assert.position(ranges[6].end, 14, 0);
         assert.position(ranges[7].start, 14, 4);
         assert.position(ranges[7].end, 15, 0);
-    },
+    });
 
-    "test: find line breaks backwards using regex" : function() {
+    test("find line breaks backwards using regex", function() {
         var session = new EditSession('\nfunction foo(items, nada) {\n    for (var i=0; i<items.length; i++) {\n        alert(items[i] + "juhu\\n");\n    }\t/* Real Tab */\n\n\n\n\n}\n\n\n// test search/replace line break with regexp\r\n\r\n\t\t\t\t\n');
         session.getSelection().moveCursorTo(2, 5);
 
@@ -695,9 +696,9 @@ module.exports = {
         // Should find the first newline to the left of the cursor
         assert.position(range.start, 1, 27);
         assert.position(range.end, 2, 0);
-    },
+    });
 
-    "test: replace with line breaks (\\n) and TAB (\\t) using regular expression" : function() {
+    test("replace with line breaks (\\n) and TAB (\\t) using regular expression", function() {
         var search = new Search().set({
             needle: "with",
             regExp: true,
@@ -713,10 +714,8 @@ module.exports = {
         assert.equal(search.replace("\n\n\n", "\n"), "\n");
         assert.equal(search.replace("\n\t\n\n", "\t$1"), "\t\n\t\t\n\n");
         assert.equal(search.replace("\r\n /* CRLF */", "\n"), "\n /* CRLF */");
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

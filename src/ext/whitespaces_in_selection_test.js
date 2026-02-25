@@ -48,7 +48,3 @@ module.exports = {
         assert.equal(markers[this.session.$invisibleMarkerId].className, "ace_whitespaces_in_selection");
     }
 };
-
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}

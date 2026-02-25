@@ -1,9 +1,9 @@
+"use strict";
+var test = require("./test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("./test/mockdom");
 }
-
-"use strict";
 
 require("./multi_select");
 var assert = require("./test/assertions");
@@ -15,19 +15,18 @@ var UndoManager = require("./undomanager").UndoManager;
 
 var editor, session, undoManager;
 
-module.exports = {
 
-    name: "ACE undoManager.js",
-    setUp: function() {
+
+    test.beforeEach(function() {
         editor = editor || new Editor(new MockRenderer());
         session = new EditSession("");
         undoManager = new UndoManager();
         undoManager.$keepRedoStack = true;
         session.setUndoManager(undoManager);
         editor.setSession(session);
-    },
+    });
 
-    "test: merging": function(done) {
+    test("merging", function(done) {
         editor.session.setValue("-");
         editor.execCommand("insertstring", "a");
         editor.execCommand("insertstring", "b");
@@ -56,8 +55,8 @@ module.exports = {
                 done();
             });
         });
-    },
-    "test: reabsing": function() {
+    });
+    test("reabsing", function() {
         session.setValue("012345-012345-012345");
         session.insert({row: 0, column: 0}, "xx");
         session.markUndoGroup();
@@ -83,8 +82,8 @@ module.exports = {
         editor.redo();
         var val2 = editor.getValue();
         assert.equal(val1, val2);
-    },
-    "test: conflicting deletes": function() {
+    });
+    test("conflicting deletes", function() {
         session.setValue("012345\nabcdefg\nxyz");
         session.remove(new Range(0, 2, 0, 4));
         assert.equal(session.getLine(0), "0145");
@@ -97,8 +96,8 @@ module.exports = {
         assert.equal(session.getLine(0), "05");
         editor.undo();
         assert.equal(session.getLine(0), "012345");
-    },
-    "test: several deltas ignored": function() {
+    });
+    test("several deltas ignored", function() {
         session.setValue("012345\nabcdefg\nxyz");
         session.insert({row: 0, column: 5}, "zzzz");
         var rev = undoManager.startNewGroup();
@@ -107,8 +106,8 @@ module.exports = {
         undoManager.markIgnored(rev, undoManager.getRevision() + 1);
         editor.undo();
         assert.equal(editor.getValue(), "01234aaaayyyy5\nabcdefg\nxyz");
-    },
-    "test: canUndo/canRedo and bookmarks": function() {
+    });
+    test("canUndo/canRedo and bookmarks", function() {
         session.setValue("012345\nabcdefg\nxyz");
         assert.ok(undoManager.isAtBookmark());
         editor.execCommand("removewordright");
@@ -127,8 +126,8 @@ module.exports = {
         session.insert({row: 0, column: 5}, "yyyy");
         assert.ok(undoManager.canUndo());
         assert.ok(!undoManager.canRedo());
-    },
-    "test: getRevision": function () {
+    });
+    test("getRevision", function () {
         session.setValue("012345\nabcdefg\nxyz");
         session.insert({row: 0, column: 5}, "yyyy");
         var rev = undoManager.getRevision();
@@ -136,8 +135,8 @@ module.exports = {
         editor.undo();
         rev = undoManager.getRevision();
         assert.equal(rev, 0);
-    },
-    "test: swap deltas delete/insert": function () {
+    });
+    test("swap deltas delete/insert", function () {
         session.setValue("012345\nabcdefg\nxyz");
         session.insert({row: 0, column: 5}, "zzzz");
         undoManager.startNewGroup();
@@ -148,8 +147,8 @@ module.exports = {
         undoManager.markIgnored(rev);
         editor.undo();
         assert.equal(editor.getValue(), "01234aaaazzzz5\nabcdefg\nxyz");
-    },
-    "test: swap deltas insert/delete": function () {
+    });
+    test("swap deltas insert/delete", function () {
         session.setValue("012345");
         undoManager.startNewGroup();
         session.insert({row: 0, column: 5}, "yyyy");
@@ -176,8 +175,8 @@ module.exports = {
         undoManager.markIgnored(rev2);
         editor.undo();
         assert.equal(editor.getValue(), "04yy5");
-    },
-    "test: swap deltas insert/insert": function () {
+    });
+    test("swap deltas insert/insert", function () {
         session.setValue("012345");
         undoManager.startNewGroup();
         session.insert({row: 0, column: 1}, "yyyy");
@@ -186,8 +185,8 @@ module.exports = {
         undoManager.markIgnored(rev);
         editor.undo();
         assert.equal(editor.getValue(), "0yyyy12345");
-    },
-    "test: swap deltas delete/delete": function () {
+    });
+    test("swap deltas delete/delete", function () {
         session.setValue("012345");
         session.insert({row: 0, column: 5}, "zzzz");
         undoManager.startNewGroup();
@@ -228,8 +227,8 @@ module.exports = {
         editor.undo();
         assert.equal(editor.getValue(), "yyyzzzz5");
 
-    },
-    "test: xform deltas insert/insert": function () {
+    });
+    test("xform deltas insert/insert", function () {
         session.setValue("012345");
         session.insert({row: 0, column: 5}, "zzzz");
         undoManager.startNewGroup();
@@ -238,8 +237,8 @@ module.exports = {
         session.insert({row: 0, column: 5}, "aaaa");
         editor.redo();
         assert.equal(editor.getValue(), "yyyy01234aaaazzzz5");
-    },
-    "test: xform deltas insert/delete": function () {
+    });
+    test("xform deltas insert/delete", function () {
         session.setValue("012345");
         session.insert({row: 0, column: 5}, "zzzz");
         undoManager.startNewGroup();
@@ -259,8 +258,8 @@ module.exports = {
         session.remove(new Range(0, 0, 0, 1));
         editor.redo();
         assert.equal(editor.getValue(), "yyy01234zzzz5");
-    },
-    "test: xform deltas delete/insert": function () {
+    });
+    test("xform deltas delete/insert", function () {
         session.setValue("012345");
         session.insert({row: 0, column: 0}, "yyyy");
         undoManager.startNewGroup();
@@ -269,8 +268,8 @@ module.exports = {
         session.insert({row: 0, column: 5}, "zzzz");
         editor.redo();
         assert.equal(editor.getValue(), "yyy0zzzz12345");
-    },
-    "test: xform deltas delete/delete": function () {
+    });
+    test("xform deltas delete/delete", function () {
         session.setValue("012345");
         session.insert({row: 0, column: 0}, "yyyy");
         undoManager.startNewGroup();
@@ -298,16 +297,16 @@ module.exports = {
         editor.redo();
         assert.equal(editor.getValue(), "ijd ---");
         assert.equal(undoManager.$prettyPrint(), '-[abc]0:4=>0:7\t(12)\n+[ijkl]0:0=>0:4\t(13)\n-[kl1234]0:2=>0:8\n---\n');
-    },
-    "test: clear redo stack after insert": function () {
+    });
+    test("clear redo stack after insert", function () {
         undoManager.$keepRedoStack = false;
         session.insert({row: 0, column: 0}, "y");
         editor.undo();
         assert.equal(session.$undoManager.$redoStack.length, 1);
         session.insert({row: 0, column: 0}, "y");
         assert.equal(session.$undoManager.$redoStack.length, 0);
-    },
-    "test: ignore deltas with incorrect boundaries": function () {
+    });
+    test("ignore deltas with incorrect boundaries", function () {
         session.setValue("012\n345\n678");
         undoManager.add({
             action: "remove",
@@ -358,8 +357,8 @@ module.exports = {
         }]);
         editor.redo();
         assert.equal(editor.getValue(), "012\n345\n678");
-    },
-    "test: do not ignore valid deltas": function () {
+    });
+    test("do not ignore valid deltas", function () {
         editor.setValue("");
         editor.insert("\n");
         editor.insert("\n");
@@ -369,8 +368,8 @@ module.exports = {
         assert.equal(editor.getValue(), "");
         editor.redo();
         assert.equal(editor.getValue(), "\n\n\n\n");
-    },
-    "test: limit possible undos amount": function() {
+    });
+    test("limit possible undos amount", function() {
         editor.setValue("");
         undoManager.startNewGroup();
         editor.insert("a");
@@ -390,8 +389,8 @@ module.exports = {
         editor.insert("c");
         assert.equal(undoManager.$undoStack[0][0].lines[0], "c");
         assert.equal(undoManager.$undoStack.length, undoManager.$undoDepth);
-    },
-    "test: export instance using toJSON": function() {
+    });
+    test("export instance using toJSON", function() {
         let state = undoManager.toJSON();
         assert.equal(typeof state, "object");
         assert.equal(state.$redoStack.length, 0);
@@ -408,8 +407,8 @@ module.exports = {
         assert.equal(state.$redoStack.length, 1);
         assert.equal(state.$undoStack.length, 1);
 
-    },
-    "test: import instance using fromJSON": function() {
+    });
+    test("import instance using fromJSON", function() {
         const JSONwithundo = `{"$redoStack":[],"$undoStack":[[{"start":{"row":0,"column":0},"end":{"row":0,"column":1},"action":"insert","lines":["j"],"id":1}]]}`;
         const JSONwithredo = `{"$redoStack":[[{"start":{"row":0,"column":0},"end":{"row":0,"column":1},"action":"insert","lines":["s"],"id":2}]],"$undoStack":[]}`;
         const JSONwithboth = `{"$redoStack":[[{"start":{"row":0,"column":0},"end":{"row":0,"column":1},"action":"insert","lines":["s"],"id":2}]],"$undoStack":[[{"start":{"row":0,"column":0},"end":{"row":0,"column":1},"action":"insert","lines":["j"],"id":1}]]}`;
@@ -431,10 +430,8 @@ module.exports = {
         undoManager.fromJSON(state);
         assert.equal(undoManager.canUndo(), false);
         assert.equal(undoManager.canRedo(), false);
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

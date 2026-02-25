@@ -1,9 +1,9 @@
+"use strict";
+var test = require("./test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("./test/mockdom");
 }
-
-"use strict";
 
 require("./multi_select");
 var assert = require("./test/assertions");
@@ -62,11 +62,9 @@ function setSelection(editor, data) {
     }));
 }
 
-module.exports = {
 
-    name: "ACE multi_select.js",
 
-    "test: multiselect editing": function() {
+    test("multiselect editing", function() {
         var doc = new EditSession([
             "w1.w2",
             "    wtt.w",
@@ -90,9 +88,9 @@ module.exports = {
         exec("selectall");
         assert.ok(!editor.inMultiSelectMode);
         //assert.equal(editor.selection.getAllRanges().length, 1);
-    },
+    });
 
-    "test: multiselect navigation": function() {
+    test("multiselect navigation", function() {
         var doc = new EditSession([
             "w1.w2",
             "    wtt.w",
@@ -112,9 +110,9 @@ module.exports = {
         testRanges("Range: [1/8] -> [1/9],Range: [2/8] -> [2/10]");
         exec("golinedown", 2);
         assert.ok(!editor.inMultiSelectMode);
-    },
+    });
 
-    "test: multiselect session change": function() {
+    test("multiselect session change", function() {
         var doc = new EditSession([
             "w1.w2",
             "    wtt.w",
@@ -132,9 +130,9 @@ module.exports = {
 
         editor.setSession(doc);
         assert.ok(editor.inMultiSelectMode);
-    },
+    });
 
-    "test: multiselect addRange": function() {
+    test("multiselect addRange", function() {
         var doc = new EditSession([
             "w1.w2",
             "    wtt.w",
@@ -159,9 +157,9 @@ module.exports = {
         var range4 = new Range(0, 0, 4, 0);
         selection.addRange(range4);
         assert.ok(!editor.inMultiSelectMode);
-    },
+    });
 
-    "test: multiselect paste": function() {
+    test("multiselect paste", function() {
         editor = new Editor(new MockRenderer());
 
         editor.setValue("l1\nl2\nl3", -1);
@@ -193,9 +191,9 @@ module.exports = {
         editor.selectMoreLines(1);
         editor.$handlePaste("a\nb\nc\nd");
         assert.equal("a\nb\nc\ndl1\na\nb\nc\ndl2\na\nb\nc\ndl3", editor.getValue());
-    },
+    });
     
-    "test: onPaste in command with multiselect": function() {
+    test("onPaste in command with multiselect", function() {
         var doc = new EditSession(["l1", "l2"]);
         editor = new Editor(new MockRenderer(), doc);
         editor.commands.addCommand({
@@ -210,9 +208,9 @@ module.exports = {
         selection.addRange(range2);
         editor.execCommand('insertfoo');
         assert.equal('l1foo\nl2foo', editor.getValue());
-    },
+    });
     
-    "test multiselect move lines": function() {
+    test("multiselect move lines", function() {
         editor = new Editor(new MockRenderer());
         
         editor.setValue("l1\nl2\nl3\nl4", -1);
@@ -241,9 +239,9 @@ module.exports = {
         exec("movelinesup", 12);
         assert.equal(editor.getValue(),"l1\nl2\nl3\nl4\nl1\nl1\nl1\nl2\nl2\nl2\nl3\nl3\nl3\nl4\nl4\nl4");
         testSelection(editor, [[0,2],[0,1,0,0],[1,0,1,1],[2,0,2,1],[3,0,3,1]]);
-    },
+    });
 
-    "test multiselect fromJSON/toJSON": function() {
+    test("multiselect fromJSON/toJSON", function() {
         var doc = new EditSession(["l1", "l2"]);
         editor = new Editor(new MockRenderer(), doc);
         var selection = editor.selection;
@@ -264,9 +262,9 @@ module.exports = {
         selection.fromJSON(after);
         assert.ok(!selection.isEqual(before));
         assert.ok(selection.isEqual(after));
-    },
+    });
     
-    "test multiselect align": function() {
+    test("multiselect align", function() {
         var doc = new EditSession(["l1", "l2", "l3"]);
         doc.setUndoManager(new UndoManager());
         editor = new Editor(new MockRenderer(), doc);
@@ -278,9 +276,9 @@ module.exports = {
         doc.markUndoGroup();
         editor.execCommand("undo");
         assert.equal('l1\nl2\nl3', editor.getValue());
-    },
+    });
     
-    "test multiselect transpose": function() {
+    test("multiselect transpose", function() {
         editor = new Editor(new MockRenderer());
         editor.setValue("ay caramba");
         var selection = editor.selection;
@@ -290,18 +288,18 @@ module.exports = {
         editor.execCommand("transposeletters");
         assert.ok(!editor.getSelectionRange().isEmpty());
         assert.equal('ay caramba', editor.getValue());
-    },
+    });
     
-    "test select next": function() {
+    test("select next", function() {
         editor = new Editor(new MockRenderer());
         editor.setValue("a\na\na", 1);
         editor.execCommand("selectMoreBefore");
         editor.execCommand("selectMoreBefore");
         testSelection(editor, [[0,1,0,0],[1,1,1,0],[2,1,2,0]]);
         assert.equal(editor.session.$highlightLineMarker.start.row, 0);
-    },
+    });
     
-    "test multiSelect delete": function() {
+    test("multiSelect delete", function() {
         editor.setValue("\n" + "a\nb\nc/\n".repeat(4), -1);
         exec("selectdown", 4);
         exec("selectleft", 2);
@@ -323,9 +321,9 @@ module.exports = {
 
         editor.session.remove(new Range(4,0,5,0));
         testSelection(editor, [[2,4,8,7],[0,3,0,4],[0,0,0,1]]);
-    },
+    });
     
-    "test splitIntoLines": function() {
+    test("splitIntoLines", function() {
         var session = new EditSession(["l1", "l2", "l3"]);
         var selection = session.selection;
         editor = new Editor(new MockRenderer(), session);
@@ -353,10 +351,8 @@ module.exports = {
         editor.setValue("");
         assert.equal(editor.selection.inMultiSelectMode, false);
         assert.equal(editor.selection.rangeCount, 0);
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

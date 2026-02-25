@@ -1,12 +1,13 @@
 "use strict";
+var test = require("../test/run.js")(module.exports);
 
 var CommandManager = require("./command_manager").CommandManager;
 var keys = require("../lib/keys");
 var assert = require("../test/assertions");
 
-module.exports = {
 
-    setUp: function() {
+
+    test.beforeEach(function() {
         this.command = {
             name: "gotoline",
             bindKey: {
@@ -20,22 +21,22 @@ module.exports = {
         };
 
         this.cm = new CommandManager("mac", [this.command]);
-    },
+    });
 
-    "test: register command": function() {
+    test("register command", function() {
         this.cm.exec("gotoline");
         assert.ok(this.command.called);
-    },
+    });
 
-    "test: mac hotkeys": function() {
+    test("mac hotkeys", function() {
         var command = this.cm.findKeyCommand(keys.KEY_MODS.command, "l");
         assert.equal(command, this.command);
 
         var command = this.cm.findKeyCommand(keys.KEY_MODS.ctrl, "l");
         assert.equal(command, undefined);
-    },
+    });
 
-    "test: win hotkeys": function() {
+    test("win hotkeys", function() {
         var cm = new CommandManager("win", [this.command]);
 
         var command = cm.findKeyCommand(keys.KEY_MODS.command, "l");
@@ -43,9 +44,9 @@ module.exports = {
 
         var command = cm.findKeyCommand(keys.KEY_MODS.ctrl, "l");
         assert.equal(command, this.command);
-    },
+    });
 
-    "test: command isAvailable": function() {
+    test("command isAvailable", function() {
         this.command.available = false;
 
         this.cm.exec("gotoline");
@@ -53,9 +54,9 @@ module.exports = {
         this.cm.$checkCommandState = false;
         this.cm.exec("gotoline");
         assert.ok(this.command.called);
-    },
+    });
 
-    "test: remove command by object": function() {
+    test("remove command by object", function() {
         this.cm.removeCommand(this.command);
 
         this.cm.exec("gotoline");
@@ -63,9 +64,9 @@ module.exports = {
 
         var command = this.cm.findKeyCommand(keys.KEY_MODS.command, "l");
         assert.equal(command, null);
-    },
+    });
 
-    "test: remove command by name": function() {
+    test("remove command by name", function() {
         this.cm.removeCommand("gotoline");
 
         this.cm.exec("gotoline");
@@ -73,9 +74,9 @@ module.exports = {
 
         var command = this.cm.findKeyCommand(keys.KEY_MODS.command, "l");
         assert.equal(command, null);
-    },
+    });
 
-    "test: adding a new command with the same name as an existing one should remove the old one first": function() {
+    test("adding a new command with the same name as an existing one should remove the old one first", function() {
         var command = {
             name: "gotoline",
             bindKey: {
@@ -92,9 +93,9 @@ module.exports = {
         assert.ok(!this.command.called);
 
         assert.equal(this.cm.findKeyCommand(keys.KEY_MODS.command, "l"), command);
-    },
+    });
 
-    "test: adding commands and recording a macro": function() {
+    test("adding commands and recording a macro", function() {
         var called = "";
         this.cm.addCommands({
             togglerecording: function(editor) {
@@ -128,9 +129,9 @@ module.exports = {
         called = "";
         this.cm.exec("replay", this);
         assert.equal(called, "1-2");
-    },
+    });
 
-    "test: bindkeys": function() {
+    test("bindkeys", function() {
         this.cm.bindKeys({
             "Ctrl-L|Command-C": "cm1",
             "Ctrl-R": "cm2"
@@ -148,9 +149,9 @@ module.exports = {
 
         var command = this.cm.findKeyCommand(keys.KEY_MODS.ctrl, "r");
         assert.equal(command, null);
-    },
+    });
 
-    "test: binding keys without modifiers": function() {
+    test("binding keys without modifiers", function() {
         this.cm.bindKeys({
             "R": "cm1",
             "Shift-r": "cm2",
@@ -166,10 +167,8 @@ module.exports = {
 
         var command = this.cm.findKeyCommand(0, "return");
         assert.equal(command + "", ["cm4", "cm3"] + "");
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

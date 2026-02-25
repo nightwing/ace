@@ -1,4 +1,5 @@
 "use strict";
+var test = require("./test/run.js")(module.exports);
 
 var EditSession = require("./edit_session").EditSession;
 var Editor = require("./editor").Editor;
@@ -9,42 +10,39 @@ var Occur = require("./occur").Occur;
 var occurStartCommand = require("./commands/occur_commands").occurStartCommand;
 var editor, occur;
 
-module.exports = {
 
-    name: "ACE occur.js",
-
-    setUp: function() {
+    test.beforeEach(function() {
         var session = new EditSession('');
         editor = new Editor(new MockRenderer(), session);
         occur = new Occur();
-    },
+    });
 
-    "test: find lines matching" : function() {
+    test("find lines matching", function() {
         editor.session.insert({row: 0, column: 0}, 'abc\ndef\nxyz\nbcxbc');
         var result = occur.matchingLines(editor.session, {needle: 'bc'}),
             expected = [{row: 0, content: 'abc'}, {row: 3, content: 'bcxbc'}];
         assert.deepEqual(result, expected);
-    },
+    });
 
-    "test: display occurrences" : function() {
+    test("display occurrences", function() {
         var text = 'abc\ndef\nxyz\nbcx\n';
         editor.session.insert({row: 0, column: 0}, text);
         occur.displayOccurContent(editor, {needle: 'bc'});
         assert.equal(editor.getValue(), 'abc\nbcx');
         occur.displayOriginalContent(editor);
         assert.equal(editor.getValue(), text);
-    },
+    });
 
-    "test: original position from occur doc" : function() {
+    test("original position from occur doc", function() {
         var text = 'abc\ndef\nxyz\nbcx\n';
         editor.session.insert({row: 0, column: 0}, text);
         occur.displayOccurContent(editor, {needle: 'bc'});
         assert.equal(editor.getValue(), 'abc\nbcx');
         var pos = occur.occurToOriginalPosition(editor.session, {row: 1, column: 2});
         assert.position(pos, 3, 2);
-    },
+    });
 
-    "test: occur command" : function() {
+    test("occur command", function() {
         // setup
         var text = 'hel\nlo\n\nwo\nrld\n';
         editor.session.insert({row: 0, column: 0}, text);
@@ -66,9 +64,9 @@ module.exports = {
         // assert.ok(!editor.getReadOnly(), 'original doc is marked as read only');
         assert.ok(!editor.getKeyboardHandler().isOccurHandler, 'occur handler installed after detach');
         assert.ok(!editor.commands.byName.occurexit, 'exitoccur installed after exiting occur');
-    },
+    });
 
-    "test: occur navigation" : function() {
+    test("occur navigation", function() {
         // setup
         var text = 'hel\nlo\n\nwo\nrld\n';
         editor.session.insert({row: 0, column: 0}, text);
@@ -85,9 +83,9 @@ module.exports = {
         editor.execCommand('occuraccept');
 
         assert.position(editor.getCursorPosition(), 3, 1, 'occur -> original pos');
-    },
+    });
 
-    "test: recursive occur" : function() {
+    test("recursive occur", function() {
         // setup
         var text = 'x\nabc1\nx\nabc2\n';
         editor.session.insert({row: 0, column: 0}, text);
@@ -108,11 +106,9 @@ module.exports = {
         // occur1 -> orig
         editor.execCommand('occurexit');
         assert.equal(editor.getValue(), text, "occur1 -> orig");
-    }
-
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+
+

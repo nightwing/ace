@@ -1,12 +1,13 @@
 "use strict";
+var test = require("../../test/run.js")(module.exports);
 
 const DroolsMode = require("../drools").Mode;
 const EditSession = require("../../edit_session").EditSession;
 const assert = require("../../test/assertions");
 
-module.exports = {
 
-  "test: drools folds": function () {
+
+  test("drools folds", function () {
     const session = new EditSession([
       'package com.example.ace',
       'import java.math.BigDecimal',
@@ -59,9 +60,7 @@ module.exports = {
     assert.range(session.getFoldWidgetRange(10), 10, 41, 12, 0); // query
     assert.range(session.getFoldWidgetRange(13), 13, 10, 18, 0); // rule
     assert.range(session.getFoldWidgetRange(16), 16, 4, 18, 0); // then
-  }
-};
+  });
 
 
-if (typeof module !== "undefined" && module === require.main)
-  require("asyncjs").test.testcase(module.exports).exec();
+ 

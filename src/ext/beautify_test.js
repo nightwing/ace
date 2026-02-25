@@ -1,4 +1,5 @@
 "use strict";
+var test = require("../test/run.js")(module.exports);
 
 var assert = require("assert");
 var EditSession = require("../edit_session").EditSession;
@@ -7,10 +8,8 @@ var PHPMode = require("../mode/php").Mode;
 var CSSMode = require("../mode/css").Mode;
 
 // Execution ORDER: test.setUpSuite, setUp, testFn, tearDown, test.tearDownSuite
-module.exports = {
-    timeout: 10000,
 
-    "test beautify first line empty": function() {
+    test("beautify first line empty", function() {
         var s = new EditSession([
             "",
             "hello world"
@@ -19,9 +18,9 @@ module.exports = {
 
         beautify.beautify(s);
         assert.equal(s.getValue(), "hello world");
-    },
+    });
 
-    "test beautify block tag indentation": function() {
+    test("beautify block tag indentation", function() {
         var s = new EditSession([
             "<div>",
             "<h1>hello</h1>",
@@ -34,9 +33,9 @@ module.exports = {
             + "\t<h1>hello</h1>\n"
             + "\tworld\n"
             + "</div>");
-    },
+    });
 
-    "test beautify block tag line breaks and indentation": function() {
+    test("beautify block tag line breaks and indentation", function() {
         var s = new EditSession([
             "<html><body><div></div></body></html>"
         ], new PHPMode());
@@ -48,9 +47,9 @@ module.exports = {
             + "\t<div></div>\n"
             + "</body>\n"
             + "</html>");
-    },
+    });
 
-    "test beautify empty block tag": function() {
+    test("beautify empty block tag", function() {
         var s = new EditSession([
             "\t<div></div>"
         ], new PHPMode());
@@ -58,9 +57,9 @@ module.exports = {
 
         beautify.beautify(s);
         assert.equal(s.getValue(), "<div></div>");
-    },
+    });
 
-    "test beautify inline tag indentation": function() {
+    test("beautify inline tag indentation", function() {
         var s = new EditSession([
             "<div>",
             "<span>hello world</span>",
@@ -72,9 +71,9 @@ module.exports = {
         assert.equal(s.getValue(), "<div>\n"
             + "\t<span>hello world</span>\n"
             + "</div>");
-    },
+    });
 
-    "test beautify multiline inline tag indentation": function() {
+    test("beautify multiline inline tag indentation", function() {
         var s = new EditSession([
             "<div>",
             "<span>",
@@ -90,9 +89,9 @@ module.exports = {
             + "\t\thello world\n"
             + "\t</span>\n"
             + "</div>");
-    },
+    });
 
-    "test beautify singleton tag indentation": function() {
+    test("beautify singleton tag indentation", function() {
         var s = new EditSession([
             "<div>",
             "hello<br>",
@@ -106,9 +105,9 @@ module.exports = {
             + "\thello<br>\n"
             + "\tworld\n"
             + "</div>");
-    },
+    });
 
-    "test beautify unknown singleton indentation": function() {
+    test("beautify unknown singleton indentation", function() {
         var s = new EditSession([
             "<div>",
             "hello<single />",
@@ -122,9 +121,9 @@ module.exports = {
             + "\thello<single />\n"
             + "\tworld\n"
             + "</div>");
-    },
+    });
 
-    "test beautify curly indentation": function() {
+    test("beautify curly indentation", function() {
         var s = new EditSession([
             "<?php",
             "if ($foo===array()) {",
@@ -146,9 +145,9 @@ module.exports = {
             + "\t$bar)) {\n"
             + "\ttrue;\n"
             + "}");
-    },
+    });
 
-    "test beautify adding bracket whitespace": function() {
+    test("beautify adding bracket whitespace", function() {
         var s = new EditSession([
             "<?php",
             "if(true){",
@@ -162,9 +161,9 @@ module.exports = {
             + "if (true) {\n"
             + "\t$i++;\n"
             + "}");
-    },
+    });
 
-    "test beautify removing bracket whitespace": function() {
+    test("beautify removing bracket whitespace", function() {
         var s = new EditSession([
             "<?php",
             "if ( true ) {",
@@ -178,9 +177,9 @@ module.exports = {
             + "if (true) {\n"
             + "\t$i++;\n"
             + "}");
-    },
+    });
 
-    "test beautify adding keyword whitespace": function() {
+    test("beautify adding keyword whitespace", function() {
         var s = new EditSession([
             "<?php",
             "if ($foo===true) {",
@@ -194,9 +193,9 @@ module.exports = {
             + "if ($foo === true) {\n"
             + "\t$i++;\n"
             + "}");
-    },
+    });
 
-    "test beautify if without paren": function() {
+    test("beautify if without paren", function() {
         var s = new EditSession([
             "<?php",
             "if ($foo)",
@@ -212,9 +211,9 @@ module.exports = {
             + "\t$i++;\n"
             + "if ($foo) $j++\n"
             + "print $i");
-    },
+    });
 
-    "test beautify switch indentation": function() {
+    test("beautify switch indentation", function() {
         var s = new EditSession([
             "<?php",
             "switch ($i) {",
@@ -238,9 +237,9 @@ module.exports = {
             + "\tcase 2;\n"
             + "\t\tprint $bar;\n"
             + "}");
-    },
+    });
 
-    "test beautify multiline string": function() {
+    test("beautify multiline string", function() {
         var s = new EditSession([
             "<?php",
             "\tprint 'hello",
@@ -252,9 +251,9 @@ module.exports = {
         assert.equal(s.getValue(), "<?php\n"
             + "print 'hello\n"
             + "\t\tworld'");
-    },
+    });
 
-    "test beautify remove spaces before semicolons": function() {
+    test("beautify remove spaces before semicolons", function() {
         var s = new EditSession([
             "<?php echo \"hello world\";?>",
             "<?php",
@@ -268,9 +267,9 @@ module.exports = {
             + "<?php\n"
             + "$foo = \"hello \"; $bar = \"world\";\n"
             + "print $foo.$bar;");
-    },
+    });
 
-    "test beautify tag whitepace": function() {
+    test("beautify tag whitepace", function() {
         var s = new EditSession([
             "<form   id=\"\"   action = \"\"   method=\"get\"  >",
             "\t<br   />",
@@ -282,9 +281,9 @@ module.exports = {
         assert.equal(s.getValue(), "<form id=\"\" action=\"\" method=\"get\">\n"
             + "\t<br />\n"
             + "</form>");
-    },
+    });
 
-    "test beautify css in php": function() {
+    test("beautify css in php", function() {
         var s = new EditSession([
             "<style>h1{font-size: 20px;}p{font-size:14px; padding:10px;}</style>"
         ], new PHPMode());
@@ -301,9 +300,9 @@ module.exports = {
             + "\t\tpadding: 10px;\n"
             + "\t}\n"
             + "</style>");
-    },
+    });
     
-    "test beautify css": function() {
+    test("beautify css", function() {
         var s = new EditSession("", new CSSMode());
         s.setUseSoftTabs(true);
         s.setValue(".x    y:h{    animation: appear 1.5s ease-in-out     ease-in-out;     border:  solid    red;}");
@@ -313,9 +312,9 @@ module.exports = {
             + "    animation: appear 1.5s ease-in-out ease-in-out;\n"
             + "    border: solid red;\n"
             + "}");
-    },
+    });
 
-    "test beautify comments": function() {
+    test("beautify comments", function() {
         var s = new EditSession([
             "<?php\n",
             "if(true) //break me\n",
@@ -337,9 +336,9 @@ module.exports = {
             + "\thello\n"
             + "\t\tworld\n"
             + "-->");
-    },
+    });
 
-    "test beautify js array of objects": function() {
+    test("beautify js array of objects", function() {
         var s = new EditSession([
             "<script>\n",
             "var foo = [",
@@ -363,9 +362,9 @@ module.exports = {
             + "\t\t\"bar\": true\n"
             + "\t}];\n"
             + "</script>");
-    },
+    });
 
-    "test beautify js object": function() {
+    test("beautify js object", function() {
         var s = new EditSession([
             '<script>{"a": "1", "b": "2"}</script>'
         ], new PHPMode());
@@ -378,9 +377,9 @@ module.exports = {
             + "\t\t\"b\": \"2\"\n"
             + "\t}\n"
             + "</script>");
-    },
+    });
 
-    "test beautify php default behaviour with line breaks after comma": function() {
+    test("beautify php default behaviour with line breaks after comma", function() {
         var s = new EditSession([
             "<?php\n",
             "class Test {",
@@ -395,9 +394,9 @@ module.exports = {
             + "\tpublic int $id,\n" 
             + "\t$num;\n"
             + "}");
-    },
+    });
 
-    "test beautify php with no line breaks after comma": function() {
+    test("beautify php with no line breaks after comma", function() {
         var s = new EditSession([
             "<?php\n",
             "class Test {",
@@ -412,10 +411,8 @@ module.exports = {
             + "class Test {\n"
             + "\tpublic int $id, $num;\n"
             + "}");
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

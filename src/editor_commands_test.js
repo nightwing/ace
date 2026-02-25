@@ -1,9 +1,9 @@
+"use strict";
+var test = require("./test/run.js")(module.exports);
+
 if (typeof process !== "undefined") {
-    require("amd-loader");
     require("./test/mockdom");
 }
-
-"use strict";
 
 var Editor = require("./editor").Editor;
 var UndoManager = require("./undomanager").UndoManager;
@@ -23,8 +23,8 @@ var exec = function(name, times, args) {
 };
 
 
-module.exports = {
-    "test highlightmatching": function(done) {
+
+    test("highlightmatching", function(done) {
         editor = new Editor(new MockRenderer());
         editor.session.setMode(new HTMLMode);
         editor.setValue("<html><head></head> abcd</html>", 1);
@@ -62,8 +62,8 @@ module.exports = {
                 }, 51);
             }, 51);
         }, 51);
-    },
-    "test modifyNumber": function() {
+    });
+    test("modifyNumber", function() {
         editor = new Editor(new MockRenderer());
         editor.setValue("999");
         editor.execCommand(editor.commands.byName.modifyNumberUp);
@@ -85,8 +85,8 @@ module.exports = {
         exec("gotoleft", 2);
         editor.execCommand(editor.commands.byName.modifyNumberDown);
         assert.equal(editor.getValue(), "122.3");
-    },
-    "test duplicateSelection": function() {
+    });
+    test("duplicateSelection", function() {
         editor = new Editor(new MockRenderer());
 
         editor.setValue("123.3", 1);
@@ -102,8 +102,8 @@ module.exports = {
         editor.clearSelection();
         editor.execCommand(editor.commands.byName.duplicateSelection);
         assert.equal(editor.getValue(), "124.4.3\n124.4.3");
-    },
-    "test editor find": function() {
+    });
+    test("editor find", function() {
         editor = new Editor(new MockRenderer());
 
         editor.setValue("for for foo", 1);
@@ -139,8 +139,8 @@ module.exports = {
         exec("selectright", 3);
         editor.execCommand(editor.commands.byName.selectOrFindPrevious);
         assert.range(editor.selection.getRange(), 0, 0, 0, 3);
-    },
-    "test overwrite": function() {
+    });
+    test("overwrite", function() {
         editor = new Editor(new MockRenderer());
 
         editor.setValue("foo for foo foo", 1);
@@ -148,8 +148,8 @@ module.exports = {
         editor.execCommand(editor.commands.byName.overwrite);
         exec("insertstring", 1, "b");
         assert.equal(editor.getValue(),"foo for boo foo");
-    },
-    "test selections": function() {
+    });
+    test("selections", function() {
         editor = new Editor(new MockRenderer(5));
 
         editor.setValue("foo for foo foo\nfoo for foo foo", 1);
@@ -301,8 +301,8 @@ module.exports = {
         editor.execCommand(editor.commands.byName.expandtoline);
         editor.execCommand(editor.commands.byName.expandtoline);
         assert.range(editor.selection.getRange(), 0, 0, 1, 13);
-    },
-    "test goto": function() {
+    });
+    test("goto", function() {
         editor = new Editor(new MockRenderer());
 
         editor.setValue("foo for foo foo\nfsdfsd232", 1);
@@ -334,8 +334,8 @@ module.exports = {
         exec("gotostart", 1);
         editor.execCommand(editor.commands.byName.gotowordright);
         assert.position(editor.getCursorPosition(), 0, 3);
-    },
-    "test cut/cut_or_delete": function() {
+    });
+    test("cut/cut_or_delete", function() {
         editor = new Editor(new MockRenderer());
 
         editor.setValue("foo for foo foo", 1);
@@ -363,8 +363,8 @@ module.exports = {
         editor.setValue("foo for foo foo", 1);
         exec("selectleft", 2);
         assert.ok(editor.execCommand("cut_or_delete") == false);
-    },
-    "test sortlines": function() {
+    });
+    test("sortlines", function() {
         editor = new Editor(new MockRenderer());
 
         editor.setValue("def\nabd\nacde", 1);
@@ -376,8 +376,8 @@ module.exports = {
         exec("selectall", 1);
         editor.execCommand(editor.commands.byName.sortlines);
         assert.equal(editor.getValue(), "abd\nabd\ndef");
-    },
-    "test togglecomments/blockcomments": function() {
+    });
+    test("togglecomments/blockcomments", function() {
         editor = new Editor(new MockRenderer());
         editor.session.setMode(new JavaScriptMode);
 
@@ -388,8 +388,8 @@ module.exports = {
         editor.setValue("def\nabd\nabd");
         editor.execCommand(editor.commands.byName.toggleBlockComment);
         assert.equal(editor.getValue(), "/*def\nabd\nabd*/");
-    },
-    "test redo without undoManager": function() {
+    });
+    test("redo without undoManager", function() {
         editor = new Editor(new MockRenderer());
 
         editor.session.setValue("def\nabd\nabd");
@@ -399,8 +399,8 @@ module.exports = {
         assert.equal(editor.getValue(), "");
         editor.execCommand(editor.commands.byName.redo);
         assert.equal(editor.getValue(), "");
-    },
-    "test redo": function() {
+    });
+    test("redo", function() {
         editor = new Editor(new MockRenderer());
         editor.session.setUndoManager(new UndoManager());
 
@@ -411,8 +411,8 @@ module.exports = {
         assert.equal(editor.getValue(), "def\nabd\nabd");
         editor.execCommand(editor.commands.byName.redo);
         assert.equal(editor.getValue(), "");
-    },
-    "test removetoline": function() {
+    });
+    test("removetoline", function() {
         editor = new Editor(new MockRenderer());
 
         editor.setValue("foo for foo foo", 1);
@@ -471,8 +471,8 @@ module.exports = {
         exec("selectright", 1);
         editor.execCommand(editor.commands.byName.removewordright);
         assert.equal(editor.getValue(), "oo for foo foo");
-    },
-    "test indent/outdent": function() {
+    });
+    test("indent/outdent", function() {
         editor = new Editor(new MockRenderer());
 
         editor.setValue("foo for foo foo", 1);
@@ -513,8 +513,8 @@ module.exports = {
         exec("gotostart", 1);
         editor.execCommand(editor.commands.byName.blockindent);
         assert.equal(editor.getValue(),"    foo for foo foo");
-    },
-    "test splitline": function() {
+    });
+    test("splitline", function() {
         editor = new Editor(new MockRenderer());
 
         editor.setValue("foo for foo foo", 1);
@@ -526,8 +526,8 @@ module.exports = {
         exec("selectleft", 3);
         editor.execCommand(editor.commands.byName.splitline);
         assert.equal(editor.getValue(), "foo for foo \n");
-    },
-    "test touppercase/tolowercase": function() {
+    });
+    test("touppercase/tolowercase", function() {
         editor = new Editor(new MockRenderer());
 
         editor.setValue("foo for foo foo");
@@ -537,8 +537,8 @@ module.exports = {
         editor.setValue("FOO for FOO FOO");
         editor.execCommand(editor.commands.byName.tolowercase);
         assert.equal(editor.getValue(), "foo for foo foo");
-    },
-    "test joinlines": function() {
+    });
+    test("joinlines", function() {
         editor = new Editor(new MockRenderer());
 
         editor.setValue("foo for foo foo\nfoo for foo foo");
@@ -554,8 +554,8 @@ module.exports = {
         exec("selectlineend", 1);
         editor.execCommand(editor.commands.byName.joinlines);
         assert.equal(editor.getValue(), "foo for foo foo foo for foo foo\nfoo for foo foo");
-    },
-    "test findlink": function() {
+    });
+    test("findlink", function() {
         editor = new Editor(new MockRenderer());
 
         editor.setValue("foo for foo foo\nhttps://www.google.com/", 1);
@@ -564,8 +564,8 @@ module.exports = {
 
         url = editor.findLinkAt(1, 5);
         assert.equal(url, "https://www.google.com/");
-    },
-    "test handle events without deprecated keyCode property": function() {
+    });
+    test("handle events without deprecated keyCode property", function() {
         var e = new CustomEvent("keydown"); 
         e.code = "KeyA"; 
         e.ctrlKey = true;
@@ -574,8 +574,8 @@ module.exports = {
         assert.equal(editor.getSelectedText(), "");
         editor.textInput.getElement().dispatchEvent(e);
         assert.equal(editor.getSelectedText(), "123");
-    },
-    "test fold": function() {
+    });
+    test("fold", function() {
         editor = new Editor(new MockRenderer());
         editor.session.setMode(new JavaScriptMode);
         editor.session.setValue('"string"');
@@ -586,10 +586,8 @@ module.exports = {
         assert.equal(editor.session.getFoldLine(0).end.row, 1);
         editor.execCommand("unfold");
         assert.equal(editor.session.getFoldLine(0), undefined);
-    }
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

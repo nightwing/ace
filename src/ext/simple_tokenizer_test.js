@@ -1,9 +1,5 @@
 "use strict";
-
-const isNodeEnvironment = require("../test/util").isNodeEnvironment;
-if (!isNodeEnvironment()) {
-    require("amd-loader");
-}
+var test = require("../test/run.js")(module.exports);
 
 const assert = require("../test/assertions");
 const tokenize = require("./simple_tokenizer").tokenize;
@@ -11,8 +7,8 @@ const tokenize = require("./simple_tokenizer").tokenize;
 const JsonHighlightRules = require("../mode/json_highlight_rules").JsonHighlightRules;
 const JavaScriptHighlightRules = require("../mode/javascript_highlight_rules").JavaScriptHighlightRules;
 
-module.exports = {
-    "test: can tokenize JSON": function() {
+
+    test("can tokenize JSON", function() {
         const content = `{
             "name": "John",
             "age": 30,
@@ -48,9 +44,9 @@ module.exports = {
         ];
 
         assert.deepEqual(result, expectedResult);
-    },
+    });
 
-    "test: can tokenize Javascript": function() {
+    test("can tokenize Javascript", function() {
         const content = `console.log("content")`;
         const result = tokenize(content, new JavaScriptHighlightRules());
 
@@ -66,6 +62,6 @@ module.exports = {
         ];
 
         assert.deepEqual(result, expectedResult);
-    }
+    });
 
-};
+

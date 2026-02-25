@@ -1,7 +1,8 @@
+"use strict";
+var test = require("../test/run.js")(module.exports);
+
 /*global CustomEvent*/
  
-"use strict";
-
 require("../test/mockdom");
 var assert = require("../test/assertions");
 var clipboard = require("../clipboard");
@@ -61,8 +62,8 @@ function sendEvent(type, data) {
     editor.resize(true);
 }
 
-module.exports = {
-    setUp: function() {
+
+    test.beforeEach(function() {
         if (editor) this.tearDown();
         
         setUserAgentForTests(false, false);
@@ -80,16 +81,16 @@ module.exports = {
         textarea = editor.textInput.getElement();
         changes = [];
         editor.focus();
-    },
-    tearDown: function() {
+    });
+    test.afterEach(function() {
         if (editor) {
             editor.destroy();
             editor.container.remove();
             editor = textarea = null;
         }
-    },
+    });
     
-    "test: simple text input": function() {
+    test("simple text input", function() {
         [
             { _: "input", range: [1,1], value: "a\n\n"},
             { _: "input", range: [2,2], value: "aa\n\n"},
@@ -105,9 +106,9 @@ module.exports = {
         editor.resize(true);
         assert.equal(changes.filter(function(d) { return d.action == "insert"; }).length, 6);
         assert.equal(changes.filter(function(d) { return d.action == "remove"; }).length, 1);
-    },
+    });
     
-    "test: mobile text deletion": function() {
+    test("mobile text deletion", function() {
         editor.setValue("x      x", -1);
         editor.execCommand("gotoright", {times: 4});
         editor.resize(true);
@@ -123,9 +124,9 @@ module.exports = {
         });
         editor.resize(true);
         assert.equal(editor.getValue(), "x    x");
-    },
+    });
     
-    "test: mobile text deletion at the line start": function() {
+    test("mobile text deletion at the line start", function() {
         setUserAgentForTests(true, false);
         editor.destroy();
         editor = ace.edit(editor.container);
@@ -147,9 +148,9 @@ module.exports = {
         });
         editor.resize(true);
         assert.equal(editor.getValue(), "y");
-    },
+    });
     
-    "test: composition with visible textarea": function() {
+    test("composition with visible textarea", function() {
         var data = [
             // select ll
             { _: "keydown", range: [4,4], value: "hello\n\n", key: { code: "ArrowLeft", key: "ArrowLeft", keyCode: 37}},
@@ -236,9 +237,9 @@ module.exports = {
         });
         assert.ok(!editor.renderer.$composition);
         assert.notOk(/ace_composition/.test(textarea.className));
-    },
+    });
     
-    "test: composition with hidden textarea": function() {
+    test("composition with hidden textarea", function() {
         var data = [
             { _: "keydown", range: [4,4], value: "hello\n\n", key: { code: "ArrowLeft", key: "ArrowLeft", keyCode: 37}},
             { _: "select", range: [4,4], value: "hello\n\n"},
@@ -357,9 +358,9 @@ module.exports = {
         });
         assert.ok(!editor.renderer.$composition);
         assert.notOk(/ace_composition/.test(textarea.className));
-    },
+    });
     
-    "test: korean composition": function() {
+    test("korean composition", function() {
         var data = [
             { _: "input", range: [1,1], value: "ㅁ\n\n", key: { key: "a", keyCode: 229}},
             { _: "compositionstart", range: [1,1], value: "ㅁ\n\n"},
@@ -421,9 +422,9 @@ module.exports = {
         assert.ok(!editor.renderer.$composition);
         assert.notOk(/ace_composition/.test(textarea.className));
         assert.equal(editor.getValue(), "멧ㅁ셈ㅁ");
-    },
+    });
     
-    "test: selection synchronization": function() {
+    test("selection synchronization", function() {
         editor.session.setValue("juhu\nkinners\n");
         [
             { _: "keydown", range: [1,1], value: "juhu\n\n", key: { code: "ArrowRight", key: "ArrowRight", keyCode: 39}},
@@ -452,9 +453,9 @@ module.exports = {
         assert.equal([textarea.value.length, textarea.selectionStart, textarea.selectionEnd].join(","), "3,0,0");
         editor.execCommand("selectleft");
         assert.equal([textarea.value.length, textarea.selectionStart, textarea.selectionEnd].join(","), "3,0,1");
-    },
+    });
     
-    "test: selection synchronization with extra lines enabled": function() {
+    test("selection synchronization with extra lines enabled", function() {
         editor.textInput.setNumberOfExtraLines(1);
         editor.session.setValue("line1\nline2\nline3\nline4\nline5\nline6\n");
         [
@@ -486,9 +487,9 @@ module.exports = {
         assert.equal([textarea.value.length, textarea.selectionStart, textarea.selectionEnd].join(","), "3,0,0");
         editor.execCommand("selectleft");
         assert.equal([textarea.value.length, textarea.selectionStart, textarea.selectionEnd].join(","), "3,0,1");
-    },
+    });
     
-    "test: chinese ime on ie": function() {
+    test("chinese ime on ie", function() {
         editor.setOption("useTextareaForIME", false);
         [
             { _: "keydown", range: [0,0], value: "\n\n", key: { key: "Backspace", keyCode: 8}},
@@ -615,9 +616,9 @@ module.exports = {
             sendEvent(data._, data);
         });
         assert.equal(editor.getValue(), "开iird");
-    },
+    });
     
-    "test: backspace during composition": function() {
+    test("backspace during composition", function() {
         editor.setValue("lxx\n", 1);
         editor.execCommand("golineup");
         editor.selection.moveTo(0, 1);
@@ -673,9 +674,9 @@ module.exports = {
             sendEvent(data._, data);
         });
         assert.equal(editor.getValue(), "aaˆx\n");
-    },
+    });
 
-    "test: mac pressAndHold on firefox": function() {
+    test("mac pressAndHold on firefox", function() {
         editor.setOption("useTextareaForIME", true);
         [
             { _: "keydown", range: [0,0], value: "\n\n", key: { code: "KeyA", key: "a", keyCode: 65}},
@@ -693,9 +694,9 @@ module.exports = {
             sendEvent(data._, data);
         });
         assert.equal(editor.getValue(), "à");
-    },
+    });
     
-    "test: contextmenu": function() {
+    test("contextmenu", function() {
         var value = "juhu\nkinners\n";
         editor.setValue(value);
         editor.execCommand("gotoright");
@@ -714,9 +715,9 @@ module.exports = {
         textarea.setSelectionRange(0, 0);
         textarea.dispatchEvent(new CustomEvent("input"));        
         assert.equal(editor.getValue(), "");
-    },
+    });
     
-    "test clipboard": function() {
+    test("clipboard", function() {
         copiedValue = "x";
         sendEvent("paste");
         assert.equal(editor.getValue(), "x");
@@ -740,27 +741,27 @@ module.exports = {
         clipboard.cancel();
         sendEvent("paste");
         assert.equal(editor.getValue(), "");
-    },
+    });
     
-    "test inputType undo": function() {
+    test("inputType undo", function() {
         editor.execCommand("insertstring", "x");
         assert.equal(editor.getValue(), "x");
         sendEvent("input", {key: {inputType: "historyUndo"}});
         assert.equal(editor.getValue(), "");
         sendEvent("input", {key: {inputType: "historyRedo"}});
         assert.equal(editor.getValue(), "x");
-    },
+    });
 
-    "test: text input aria label without extra label set": function() {
+    test("text input aria label without extra label set", function() {
         editor.setValue("x      x", -1);
         editor.setOption('enableKeyboardAccessibility', true);
         editor.renderer.$loop._flush();
 
         let text = editor.container.querySelector(".ace_text-input"); 
         assert.equal(text.getAttribute("aria-label"), "Cursor at row 1");
-    },
+    });
 
-    "test: text input aria label updated on focus": function() {
+    test("text input aria label updated on focus", function() {
         editor.setValue("x      x\ny      y", -1);
         editor.setOption('enableKeyboardAccessibility', true);
         editor.renderer.$loop._flush();
@@ -775,9 +776,9 @@ module.exports = {
         editor.blur();
         editor.focus();
         assert.equal(text.getAttribute("aria-label"), "Cursor at row 2");
-    },
+    });
 
-    "test: text input aria label with extra label set": function() {
+    test("text input aria label with extra label set", function() {
         editor.setValue("x      x", -1);
         editor.setOption('textInputAriaLabel', "super cool editor");
         editor.setOption('enableKeyboardAccessibility', true);
@@ -785,9 +786,9 @@ module.exports = {
 
         let text = editor.container.querySelector(".ace_text-input"); 
         assert.equal(text.getAttribute("aria-label"), "super cool editor, Cursor at row 1");
-    },
+    });
 
-    "test: text input aria label updated on cursor move": function() {
+    test("text input aria label updated on cursor move", function() {
         editor.setValue("line1\nline2\nline3", -1);
         editor.setOption('enableKeyboardAccessibility', true);
         editor.renderer.$loop._flush();
@@ -802,10 +803,8 @@ module.exports = {
         editor.renderer.$loop._flush();
 
         assert.equal(text.getAttribute("aria-label"), "Cursor at row 3");
-    },
-};
+    });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}
+
+

@@ -1,36 +1,38 @@
+var test = require("../test/run.js")(module.exports);
+
     "use strict";
 
     var EditSession = require("../edit_session").EditSession;
     var VBScriptMode = require("./vbscript").Mode;
     var assert = require("../test/assertions");
 
-    module.exports = {
-        setUp : function() {
-            this.mode = new VBScriptMode();
-        },
 
-        "test: getNextLineIndent": function() {
+        test.beforeEach(function() {
+            this.mode = new VBScriptMode();
+        });
+
+        test("getNextLineIndent", function() {
             assert.equal(this.mode.getNextLineIndent("start", "Class ClassName", "  "), "  ");
             assert.equal(this.mode.getNextLineIndent("start", "  Public Default Function FunctionName(param)", "  "), "    ");
             assert.equal(this.mode.getNextLineIndent("start", "  If Answer <> vbOK Then Exit Sub", "  "), "  ");
             assert.equal(this.mode.getNextLineIndent("start", "  If Condition Then", "  "), "    ");
-        },
+        });
 
-        "test: checkOutdent": function() {
+        test("checkOutdent", function() {
             assert.ok(this.mode.checkOutdent("start", "        End If", "\n"));
             assert.ok(this.mode.checkOutdent("start", "        Loop", "\n"));
             assert.equal(this.mode.checkOutdent("start", "  Class blabla", "\n"), false);
             assert.equal(this.mode.checkOutdent("start", "", "\r"), false);
-        },
+        });
 
-        "test: auto outdent" : function() {
+        test("auto outdent", function() {
             var session = new EditSession(["Class ClassName", "  some code", "  End Class"]);
             session.setMode(this.mode);
             this.mode.autoOutdent("start", session, 2);
             assert.equal("End Class", session.getLine(2));
-        },
+        });
 
-        "test: opening/ending tags matching": function() {
+        test("opening/ending tags matching", function() {
             var session = new EditSession([
                 'Sub Name(attr)',
                 '   If Condition Then ',
@@ -70,9 +72,9 @@
             ranges = this.mode.getMatching(session, 5, 4);
             assert.range(ranges[0], 5, 3, 5, 9);
             assert.range(ranges[1], 7, 3, 7, 7);
-        },
+        });
 
-        "test: single line condition couldn't have closing tag": function() {
+        test("single line condition couldn't have closing tag", function() {
             var session = new EditSession([
                 'Sub Name(attr)',
                 '   If Condition Then ',
@@ -97,9 +99,9 @@
             ranges = this.mode.getMatching(session, 4, 1);
             assert.range(ranges[1], 0, 0, 0, 3);
             assert.range(ranges[0], 4, 0, 4, 7);
-        },
+        });
 
-        "test: private and public properties/subs/functions should return matching tag": function() {
+        test("private and public properties/subs/functions should return matching tag", function() {
             var session = new EditSession([
                 'Class ClassName',
                 '   Public Property Get PropertyName',
@@ -129,9 +131,9 @@
             ranges = this.mode.getMatching(session, 7, 4);
             assert.range(ranges[1], 5, 11, 5, 19);
             assert.range(ranges[0], 7, 3, 7, 15);
-        },
+        });
 
-        "test: wrong closing/opening tag": function() {
+        test("wrong closing/opening tag", function() {
             var session = new EditSession([
                 'Class ClassName',
                 '   Public Property Get PropertyName',
@@ -157,9 +159,9 @@
             ranges = this.mode.getMatching(session, 0, 3);
             assert.range(ranges[0], 0, 0, 0, 5);
             assert.range(ranges[1], 8, 0, 8, 9);
-        },
+        });
 
-        "test: Do While / Loop double keyword matching": function() {
+        test("Do While / Loop double keyword matching", function() {
             var session = new EditSession([
                 'Do While condition',
                 '   some code',
@@ -182,9 +184,9 @@
             assert.equal(ranges.length, 2);
             assert.range(ranges[0], 0, 0, 0, 8);
             assert.range(ranges[1], 2, 0, 2, 4);
-        },
+        });
 
-        "test: Do Until / Loop double keyword matching": function() {
+        test("Do Until / Loop double keyword matching", function() {
             var session = new EditSession([
                 'Do Until condition',
                 '   some code',
@@ -201,9 +203,9 @@
             assert.equal(ranges.length, 2);
             assert.range(ranges[0], 0, 0, 0, 8);
             assert.range(ranges[1], 2, 0, 2, 4);
-        },
+        });
 
-        "test: Do / Loop Until double keyword matching": function() {
+        test("Do / Loop Until double keyword matching", function() {
             var session = new EditSession([
                 'Do',
                 '   some code',
@@ -225,9 +227,9 @@
             assert.equal(ranges.length, 2);
             assert.range(ranges[0], 2, 0, 2, 10);
             assert.range(ranges[1], 0, 0, 0, 2);
-        },
+        });
 
-        "test: Exit statements should not match": function() {
+        test("Exit statements should not match", function() {
             var session = new EditSession([
                 'Do While condition',
                 '   Exit Do',
@@ -259,9 +261,9 @@
             assert.equal(ranges.length, 2);
             assert.range(ranges[0], 0, 0, 0, 8);
             assert.range(ranges[1], 3, 0, 3, 4);
-        },
+        });
 
-        "test: getNextLineIndent with double keywords": function() {
+        test("getNextLineIndent with double keywords", function() {
             // Do While/Until - one indent, not two
             assert.equal(this.mode.getNextLineIndent("start", "Do While condition", "  "), "  ");
             assert.equal(this.mode.getNextLineIndent("start", "Do Until condition", "  "), "  ");
@@ -272,9 +274,9 @@
             assert.equal(this.mode.getNextLineIndent("start", "  Exit Sub", "  "), "  ");
             assert.equal(this.mode.getNextLineIndent("start", "  Exit Function", "  "), "  ");
             assert.equal(this.mode.getNextLineIndent("start", "  Exit Property", "  "), "  ");
-        },
+        });
 
-        "test: nested Do loops with double keywords": function() {
+        test("nested Do loops with double keywords", function() {
             var session = new EditSession([
                 'Do While outer',
                 '   Do Until inner',
@@ -295,9 +297,9 @@
             assert.equal(ranges.length, 2);
             assert.range(ranges[0], 1, 3, 1, 11);
             assert.range(ranges[1], 3, 3, 3, 7);
-        },
+        });
 
-        "test: plain Do / Loop without While/Until": function() {
+        test("plain Do / Loop without While/Until", function() {
             var session = new EditSession([
                 'Do',
                 '   some code',
@@ -314,10 +316,6 @@
             assert.equal(ranges.length, 2);
             assert.range(ranges[0], 2, 0, 2, 4);
             assert.range(ranges[1], 0, 0, 0, 2);
-        }
-    };
+        });
 
 
-if (typeof module !== "undefined" && module === require.main) {
-    require("asyncjs").test.testcase(module.exports).exec();
-}

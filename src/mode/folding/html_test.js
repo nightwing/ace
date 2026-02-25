@@ -1,12 +1,13 @@
 "use strict";
+var test = require("../../test/run.js")(module.exports);
 
 var HtmlMode = require("../html").Mode;
 var EditSession = require("../../edit_session").EditSession;
 var assert = require("../../test/assertions");
 
-module.exports = {
 
-    "test: fold mixed html and javascript": function() {
+
+    test("fold mixed html and javascript", function() {
         var session = new EditSession([
             '<script type="text/javascript"> ',
             'function() foo {',
@@ -30,9 +31,9 @@ module.exports = {
         
         assert.range(session.getFoldWidgetRange(1), 1, 16, 3, 0);
         assert.range(session.getFoldWidgetRange(3), 1, 16, 3, 0);
-    },
+    });
     
-    "test: fold mixed html and css": function() {
+    test("fold mixed html and css", function() {
         var session = new EditSession([
             '<style type="text/css">',
             '    .text-layer {',
@@ -56,9 +57,9 @@ module.exports = {
         
         assert.range(session.getFoldWidgetRange(1), 1, 17, 3, 4);
         assert.range(session.getFoldWidgetRange(3), 1, 17, 3, 4);
-    },
+    });
     
-    "test: fold should skip self closing elements": function() {
+    test("fold should skip self closing elements", function() {
         var session = new EditSession([
             '<body>',
             '<br />',
@@ -75,9 +76,9 @@ module.exports = {
         
         assert.range(session.getFoldWidgetRange(0), 0, 6, 2, 0);
         assert.range(session.getFoldWidgetRange(2), 0, 6, 2, 0);
-    },
+    });
     
-    "test: fold should skip void elements": function() {
+    test("fold should skip void elements", function() {
         var session = new EditSession([
             '<body>',
             '<br>',
@@ -94,9 +95,9 @@ module.exports = {
         
         assert.range(session.getFoldWidgetRange(0), 0, 6, 2, 0);
         assert.range(session.getFoldWidgetRange(2), 0, 6, 2, 0);
-    },
+    });
     
-    "test: fold multiple unclosed elements": function() {
+    test("fold multiple unclosed elements", function() {
         var session = new EditSession([
             '<div>',
             '<p>',
@@ -119,9 +120,9 @@ module.exports = {
         
         assert.range(session.getFoldWidgetRange(0), 0, 5, 5, 0);
         assert.range(session.getFoldWidgetRange(5), 0, 5, 5, 0);
-    },
+    });
     
-    "test: fold multiple nested optional elements": function() {
+    test("fold multiple nested optional elements", function() {
         var session = new EditSession([
             '<p>',
             '<li>',
@@ -143,9 +144,5 @@ module.exports = {
         assert.equal(session.getFoldWidget(5), "end");
         
         assert.range(session.getFoldWidgetRange(1), 1, 4, 5, 0);
-    }
-};
+    });
 
-
-if (typeof module !== "undefined" && module === require.main)
-    require("asyncjs").test.testcase(module.exports).exec();

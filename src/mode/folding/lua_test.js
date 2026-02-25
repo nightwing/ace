@@ -1,11 +1,12 @@
 "use strict";
+var test = require("../../test/run.js")(module.exports);
 
 var LuaMode = require("../lua").Mode;
 var EditSession = require("../../edit_session").EditSession;
 var assert = require("../../test/assertions");
 
-module.exports = {
-    "test: lua multi-line comment and string folding": function () {
+
+    test("lua multi-line comment and string folding", function () {
         var session = new EditSession([
             '--[[This is a multi-line comment in Lua', 'It can span multiple lines until it encounters', ']]--', '',
             'local title = [[This is a multi-line string in Lua',
@@ -28,8 +29,5 @@ module.exports = {
         assert.range(session.getFoldWidgetRange(2), 0, 4, 2, 0);
         assert.range(session.getFoldWidgetRange(4), 4, 16, 5, 52);
         assert.range(session.getFoldWidgetRange(5), 4, 16, 5, 52);
-    }
+    });
 
-};
-
-if (typeof module !== "undefined" && module === require.main) require("asyncjs").test.testcase(module.exports).exec();
