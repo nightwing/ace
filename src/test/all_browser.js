@@ -9,7 +9,7 @@ var escapeRegExp = require("ace/lib/lang").escapeRegExp;
 var useMockdom = location.search.indexOf("mock=1") != -1;
 var forceShow = location.search.indexOf("show=1") != -1;
 
-var log = document.getElementById("log");
+var log = buildDom(["div", {id: "log"}], document.body);
 var documentElement = document.documentElement;
 
 // change buildDom to use real document in mockdom 
@@ -18,10 +18,10 @@ var createTextNode = document.createTextNode.bind(document);
 var buildDom = eval("(" + buildDom.toString().replace(/document\./g, "") + ")");
 
 window.onerror = function name(...params) {
-    console.log(">>>>>>>>>>>>>>", ...params)
+    console.error(">>>>>>>>>>>>>>", ...params)
 }
 window.addEventListener('unhandledrejection', (event) => {
-    console.log("Unhandled promise rejection:", event.promise, event.reason);
+    console.error("Unhandled promise rejection:", event.promise, event.reason);
 });
 
 
@@ -116,6 +116,7 @@ var testNames = [
 ];
 
 var html = [
+    ["div", {ref: "summary"}],
     useMockdom
         ? ["a", {href: normalizeHref(location.search.replace('mock=1', '')) + location.hash}, "do not use mockdom"]
         : ["a", {href: normalizeHref(location.search + '&mock=1') + location.hash}, "use mockdom"],
@@ -130,15 +131,20 @@ var html = [
 for (var i in testNames) {    
     html.push(testLink(testNames[i]), ["br"]);
 }
-
+function testHref(suiteName, name) {
+    var href = '?' + suiteName + (useMockdom ? "&mock=1" : "");
+    if (name) href += "#" + escapeRegExp(name.replace(/^test\s*/, ""));
+    return href;
+}
 function testLink(name) {
-    return ["a", {href:'?' + name + (useMockdom ? "&mock=1" : "")}, name.replace(/^ace\//, "") + ".js"];
+    return ["a", {href: testHref(name)}, name.replace(/^ace\//, "") + ".js"];
 }
 function normalizeHref(str) {
     return str.replace(/([?&])&+/g, "$1");
 }
 
-var nav = buildDom(["div", {style: "position:absolute;right:0;top:0"}, html], document.body);
+var refs = {};
+var nav = buildDom(["div", {style: "position:absolute;right:0;top:0"}, html], document.body, refs);
 
 
 if (forceShow) {
@@ -190,7 +196,7 @@ require(selectedTests, async function() {
             if (!test.name) return;
             var messageHeader = "[" + test.index + "/" + test.count + "]";
             var node = buildDom(["div", {class: test.skip ? "skipped" : "waiting"}, 
-                ["a", {href: "#" + escapeRegExp(test.name.replace(/^test\s*/, ""))}, messageHeader],
+                ["a", {href: testHref(test.testSuite.href, test.name)}, messageHeader],
                 " ",                
                 test.name,
                 ["span", (test.skip ? " SKIP" : " ...")],
@@ -219,6 +225,8 @@ require(selectedTests, async function() {
             if (test.error && test.error != true)
                 buildDom(["pre", {class: "error"}, test.error + ""], log);
             if (test.error) console.log(test.fn);
+
+            refs.summary.innerText = "Passed: " + passed + ", Failed: " + failed + ", Skipped: " + skipped;
         },
         before: function(testSuite) {
             var counter = " [" + testSuite.index + "/" + testSuite.count + "]";
@@ -264,14 +272,6 @@ require(selectedTests, async function() {
             }
         } finally {
             if (!step) return;
-            // if (step.error) {
-            //     console.log("---------------------------->>")
-            //     setTimeout(function() {
-            //         console.log("---------------------------->><<")
-            //         runStep()
-            //     }, 1000)
-            //     return
-            // }
             setTimeout(runStep,0);
         }
     }
@@ -346,7 +346,7 @@ require(selectedTests, async function() {
         for (var j = 0; j < testArray.length; j++) {
             var test = testArray[j];
             test.index = j + 1;
-            test.count = testArray.length;  
+            test.count = testArray.length;
             steps.push({type: "beforeEach", testSuite, fn: testSuite.setUp});
             steps.push(test);
             steps.push({type: "afterEach", testSuite, fn: testSuite.tearDown});

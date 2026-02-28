@@ -766,6 +766,7 @@ function Event(type, options) {
         this.altKey = alt;
         this.shiftKey = shift;
         this.metaKey = meta;
+        this.which = button + 1;
     };
     this.preventDefault = function() {
         this.defaultPrevented = true;
