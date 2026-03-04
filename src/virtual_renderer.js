@@ -128,6 +128,7 @@ class VirtualRenderer {
             height : 1,
             gutterOffset: 1
         };
+        this.$fontMetrics.config = this.layerConfig;
 
         this.scrollMargin = {
             left: 0,

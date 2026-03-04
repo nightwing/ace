@@ -412,6 +412,10 @@ function Node(name) {
         if (position === "afterbegin") this.insertBefore(element, this.firstChild);
         if (position === "beforebegin") this.parentElement.insertBefore(element, this);
     };
+    this.getClientRects = function() {
+        var rect = this.getBoundingClientRect();
+        return [rect];
+    };
     this.getBoundingClientRect = function(fromChild) {
         var width = 0;
         var height = 0;
@@ -844,6 +848,42 @@ window.HTMLDocument = window.XMLDocument = window.Document = function() {
     document.createDocumentFragment = function() {
         return new Node("#fragment");
     };
+    document.createTreeWalker = function(root, whatToShow, filter) {
+        var nodes = [];
+        walk(root, function(node) {
+            if ((whatToShow & (1 << (node.nodeType - 1))) && (!filter || filter.acceptNode(node) == 1))
+                nodes.push(node);
+        });
+        var index = -1;
+        return {
+            nextNode: function() {
+                if (index < nodes.length - 1)
+                    return this.currentNode = nodes[++index];
+            },
+            previousNode: function() {
+                if (index > 0)
+                    return this.currentNode = nodes[--index];
+            }
+        };
+    };
+    document.createRange = function() {
+        return {
+            setStart: function(node, offset) {
+                this.startContainer = node;
+                this.startOffset = offset;
+            },
+            setEnd: function(node, offset) {
+                this.endContainer = node;
+                this.endOffset = offset;
+            },
+            getBoundingClientRect: function() {
+                return {top: 0, left: 0, width: 0, height: 0, right: 0, bottom: 0};
+            },
+            getClientRects: function() {
+                return [];
+            },
+        };
+    };
     document.hasFocus = function() {
         return true;
     };
@@ -879,6 +919,12 @@ window.DOMParser = function() {
         }
         return document;
     };
+};
+
+window.NodeFilter = {
+    SHOW_ALL: 0xFFFFFFFF,
+    SHOW_ELEMENT: 1,
+    SHOW_TEXT: 4
 };
 
 var document = new window.Document();
