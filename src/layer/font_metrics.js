@@ -15,6 +15,7 @@ class FontMetrics {
      * @param {HTMLElement} parentEl
      */
     constructor(parentEl, textLayer) {
+        this.config = {characterWidth: 1};
         this.$characterSize = {width: 0, height: 0};
         this.textLayer = textLayer;
 
@@ -218,11 +219,12 @@ class FontMetrics {
      */
     $findElementForScreenRow(screenRow) {
         var textLayer = this.textLayer;
-        var data = textLayer.$lines.$getCellByScreenRow(screenRow, textLayer.config);
+        if (!this.config) return null; // not initialized yet
+        var data = textLayer.$lines.$getCellByScreenRow(screenRow, this.config);
         var lineElement = data && data.cell.element;
 
         if (lineElement && textLayer.$useLineGroups()) {
-            var index = Math.floor(data.offset / textLayer.config.lineHeight);
+            var index = Math.floor(data.offset / this.config.lineHeight);
             lineElement =  lineElement.children[Math.max(index, 0)];
         }
         return lineElement;
@@ -241,7 +243,7 @@ class FontMetrics {
         var lineElement = this.$findElementForScreenRow(screenRow);
         if (!lineElement || !document.createRange) {
             // Fallback for lines not currently rendered
-            return screenColumn * textLayer.config.characterWidth;
+            return screenColumn * this.config.characterWidth;
         }
 
         return this.$measureLineToColumn(lineElement, screenColumn);
@@ -267,7 +269,7 @@ class FontMetrics {
         try {
             var position = this.$findColumnPosition(lineElement, screenColumn);
             if (!position) {
-                return screenColumn * textLayer.config.characterWidth;
+                return screenColumn * this.config.characterWidth;
             }
 
             this.$scratchRange.setStart(position.node, position.offset);
@@ -278,7 +280,7 @@ class FontMetrics {
             return rangeRect.left - rect.left;
         } catch (e) {
             console.error("Error measuring text width:", e);
-            return screenColumn * textLayer.config.characterWidth;
+            return screenColumn * this.config.characterWidth;
         }
     }
 
@@ -426,8 +428,8 @@ class FontMetrics {
             }
         }
         return [{
-            left: startScreenPos.column * textLayer.config.characterWidth,
-            width: (endScreenPos.column - startScreenPos.column) * textLayer.config.characterWidth,
+            left: startScreenPos.column * this.config.characterWidth,
+            width: (endScreenPos.column - startScreenPos.column) * this.config.characterWidth,
         }];
     }
 }
