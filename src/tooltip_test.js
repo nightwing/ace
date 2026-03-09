@@ -13,6 +13,7 @@ var dom = require("./lib/dom");
 var lang = require("./lib/lang");
 
 var editor, docTooltip;
+
 module.exports = {
     setUp: function() {
         docTooltip = new HoverTooltip();

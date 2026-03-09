@@ -25,7 +25,7 @@ module.exports = {
             "*/",
             "var juhu"
         ]);
-        doc.setMode("./mode/javascript");  
+        doc.setMode(new JavaScriptMode);  
         
         forceTokenize(doc);
         testStates(doc, ["comment1", "start", "no_regex"]);
@@ -49,7 +49,7 @@ module.exports = {
             "juhu",
             "*/"
         ]);
-        doc.setMode("./mode/javascript");
+        doc.setMode(new JavaScriptMode);
         
         var updateEvent = null;
         doc.bgTokenizer.on("update", function(e) {
@@ -92,7 +92,7 @@ module.exports = {
             "kinners]]--",
             ""
         ]);
-        doc.setMode("./mode/lua");
+        doc.setMode(new LuaMode);
         forceTokenize(doc);
         var string = "bracketedString,2,start";
         var comment = "bracketedComment,2,start";
