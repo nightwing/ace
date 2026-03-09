@@ -12,6 +12,7 @@ var Range = require("./range").Range;
 var dom = require("./lib/dom");
 
 var editor, docTooltip;
+
 module.exports = {
     setUp: function() {
         docTooltip = new HoverTooltip();
