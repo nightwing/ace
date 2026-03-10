@@ -427,36 +427,41 @@ function Node(name) {
             width = WINDOW_WIDTH;
             height = WINDOW_HEIGHT;
         }
-        else if (!document.contains(this) || this.style.display == "none") {
+        else if (!document.contains(this) || this.style?.display == "none") {
             width = height = 0;
         }
-        else if (this.style.width == "auto" || this.localName == "span" || /^inline/.test(this.style.display)) {
+        else if (this.nodeType == 3 || this.style?.width == "auto" || this.localName == "span" || /^inline/.test(this.style.display)) {
             width = this.textContent.length * CHAR_WIDTH;
             var node = this;
             var blockParent;
             while (node) {
-                if (node.style.fontSize) {
+                if (node.style?.fontSize) {
                     height = parseInt(node.style.fontSize);
                     break;
                 }
-                if (!blockParent && (node.style.display == "block" || /div|body|html/.test(node.localName)))
+                if (
+                    !blockParent && node != this 
+                    && (node.style?.display == "block" || /div|body|html/.test(node.localName))
+                )
                     blockParent = node;
                 node = node.parentNode;
             }
             if (!height) height = CHAR_HEIGHT;
-            var parentRect = blockParent ? blockParent.getBoundingClientRect(true) : {top: 0, left: 0};
-            top = parentRect.top;
-            node = this;
-            left = parentRect.left;
-            while (node && node != blockParent) {
-                if (node.previousSibling) {
-                    var text = node.previousSibling.textContent
-                        .replace(/\t/g, "    ")
-                        .replace(/[ぁ-ん]/g, "  ");
-                    left += text.length * CHAR_WIDTH;
-                    node = node.previousSibling;
-                } else {
-                    node = node.parentNode;
+            if (blockParent && (this.localName == "span" || /^inline/.test(this.style?.display) || this.nodeType == 3)) {
+                var parentRect = blockParent.getBoundingClientRect(true);
+                top = parentRect.top;
+                node = this;
+                left = parentRect.left;
+                while (node && node != blockParent) {
+                    if (node.previousSibling) {
+                        var text = node.previousSibling.textContent
+                            .replace(/\t/g, "    ")
+                            .replace(/[ぁ-ん]/g, "  ");
+                        left += text.length * CHAR_WIDTH;
+                        node = node.previousSibling;
+                    } else {
+                        node = node.parentNode;
+                    }
                 }
             }
         }
@@ -898,6 +903,18 @@ window.HTMLDocument = window.XMLDocument = window.Document = function() {
                 this.endOffset = offset;
             },
             getBoundingClientRect: function() {
+                if (this.startContainer.nodeType == 3) {
+                    var rect1 = Element.prototype.getBoundingClientRect.call(this.startContainer);
+                    rect1.left += this.startOffset * CHAR_WIDTH;
+                    rect1.width = rect1.right - rect1.left;
+                } else {
+                    var rect1 = this.startContainer.getBoundingClientRect();
+                }
+                    var rect2 = Element.prototype.getBoundingClientRect.call(this.endContainer);
+                if (this.startContainer.nodeType == 3)
+
+                if (this.endContainer.nodeType == 3)
+                rect2.left -= this.endOffset * CHAR_WIDTH;
                 return {top: 0, left: 0, width: 0, height: 0, right: 0, bottom: 0};
             },
             getClientRects: function() {
