@@ -177,7 +177,7 @@ function Node(name) {
 (function() {
     this.nodeType = 1;
     this.ELEMENT_NODE = 1;
-    this.TEXT_NODE = 1;
+    this.TEXT_NODE = 3;
     this.cloneNode = function(recursive) {
         var clone = new Node(this.localName);
         for (var i in this.$attributes) {
@@ -236,9 +236,11 @@ function Node(name) {
             if (node.previousSibling)
                 node.previousSibling.nextSibling = node;
             node.parentNode = this;
-            i = this.children.indexOf(before);
-            if (i == -1) i = this.children.length + 1;
-            this.children.splice(i, 0, node);
+            if (node.nodeType == 1) {
+                i = this.children.indexOf(before);
+                if (i == -1) i = this.children.length + 1;
+                this.children.splice(i, 0, node);
+            }
         }
         
         return node;
@@ -431,14 +433,32 @@ function Node(name) {
         else if (this.style.width == "auto" || this.localName == "span" || /^inline/.test(this.style.display)) {
             width = this.textContent.length * CHAR_WIDTH;
             var node = this;
+            var blockParent;
             while (node) {
                 if (node.style.fontSize) {
                     height = parseInt(node.style.fontSize);
                     break;
                 }
+                if (!blockParent && (node.style.display == "block" || /div|body|html/.test(node.localName)))
+                    blockParent = node;
                 node = node.parentNode;
             }
             if (!height) height = CHAR_HEIGHT;
+            var parentRect = blockParent ? blockParent.getBoundingClientRect(true) : {top: 0, left: 0};
+            top = parentRect.top;
+            node = this;
+            left = parentRect.left;
+            while (node && node != blockParent) {
+                if (node.previousSibling) {
+                    var text = node.previousSibling.textContent
+                        .replace(/\t/g, "    ")
+                        .replace(/[ぁ-ん]/g, "  ");
+                    left += text.length * CHAR_WIDTH;
+                    node = node.previousSibling;
+                } else {
+                    node = node.parentNode;
+                }
+            }
         }
         else if (this.parentNode) {
             var isFixed = this.style.position == "fixed" 
@@ -613,6 +633,7 @@ function Node(name) {
             node.parentNode = null;
         });
         node.childNodes.length = 0;
+        node.children.length = 0;
         if (!document.contains(document.activeElement))
             document.activeElement = document.body;
     }
@@ -807,7 +828,7 @@ function TextNode(value) {
 (function() {
     this.nodeType = 3;
     this.ELEMENT_NODE = 1;
-    this.TEXT_NODE = 1;
+    this.TEXT_NODE = 3;
     this.cloneNode = function() {
         return new TextNode(this.data);
     };

@@ -12,7 +12,8 @@ var forceShow = location.search.indexOf("show=1") != -1;
 
 var passed = 0;
 var failed = 0;
-var log = document.getElementById("log");
+var documentElement = document.documentElement;
+var log = buildDom(["div", {id: "log"}], documentElement);
 
 // change buildDom to use real document in mockdom 
 var createElement = document.createElement.bind(document);
@@ -132,7 +133,7 @@ function normalizeHref(str) {
     return str.replace(/([?&])&+/g, "$1");
 }
 
-var nav = buildDom(["div", {style: "position:absolute;right:0;top:0"}, html], document.body);
+var nav = buildDom(["div", {style: "position:absolute;right:0;top:0"}, html], documentElement);
 
 
 if (forceShow) {
