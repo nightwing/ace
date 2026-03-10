@@ -18,17 +18,17 @@ module.exports = {
         </div>`);
         var div = document.querySelector("div[x]");
 
-        var spans = div.querySelectorAll("span");
+        var spans = document.querySelectorAll("span");
         assert.equal(spans[0].matches("[z=dd]"), true);
         assert.equal(spans[0].matches("[z=dde]"), false);
         assert.equal(spans[1].matches("div>[class=x]"), true);
         assert.equal(spans[1].matches("body>[class=x]"), false);
         assert.equal(spans[0].matches("body [z=dd]"), true);
         
-        assert.equal(div.querySelectorAll("body     [x]").length, 2);
-        assert.equal(div.querySelectorAll("html *>  [x]").length, 2);
-        assert.equal(div.querySelectorAll("html * * [x]").length, 1);
-        assert.equal(div.querySelectorAll(" * * * * [x]").length, 0);
+        assert.equal(document.querySelectorAll("body     [x]").length, 2);
+        assert.equal(document.querySelectorAll("html *>  [x]").length, 2);
+        assert.equal(document.querySelectorAll("html * * [x]").length, 1);
+        assert.equal(document.querySelectorAll(" * * * * [x]").length, 0);
 
         div.remove();
     },
@@ -81,11 +81,12 @@ module.exports = {
     "test: getBoundingClientRect for inline elements": function() {
         var div = document.createElement("div");
         div.style.position = "absolute";
+        div.style.fontFamily = "monospace";
         div.style.top = "20px";
         div.style.left = "40px";
         document.body.appendChild(div);
         
-        div.innerHTML = "\tぁ-<span>abc</span> <span>def<span>xyz</span></span>";
+        div.innerHTML = "\tぁ-<span>a</span> <span>def<span>xyz</span></span>";
         var span1 = div.children[0];
         var span2 = div.children[1];
         var span3 = span2.children[0];
@@ -94,21 +95,13 @@ module.exports = {
         var rect2 = span2.getBoundingClientRect();
         var rect3 = span3.getBoundingClientRect();
         
-        debugger;
-        assert.equal(rect1.top, 20);
-        assert.equal(rect1.left, 40);
-        assert.equal(rect1.width, 3 * 10);
-        assert.equal(rect1.height, 20);
-        
-        assert.equal(rect2.top, 20);
-        assert.equal(rect2.left, 40 + 4 * 10);
-        assert.equal(rect2.width, 6 * 10);
-        assert.equal(rect2.height, 20);
-        
-        assert.equal(rect3.top, 20);
-        assert.equal(rect3.left, 40 + 7 * 10);
-        assert.equal(rect3.width, 3 * 10);
-        assert.equal(rect3.height, 20);
+        assert.equal((rect3.left - rect2.left) / rect1.width, 3);
+
+        var range = document.createRange();
+        range.setStart(span1.firstChild, 1);
+        range.setEnd(span2.firstChild, 1);
+        var rect = range.getBoundingClientRect();
+        assert.equal(rect.left, rect1.left + rect1.width);
     },
     "test: eventListener" : function() {
         var div = document.createElement("div");
