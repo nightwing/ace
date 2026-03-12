@@ -245,8 +245,12 @@ class FontMetrics {
             // Fallback for lines not currently rendered
             return screenColumn * this.config.characterWidth;
         }
-
-        return this.$measureLineToColumn(lineElement, screenColumn);
+        var result = this.$measureLineToColumn(lineElement, screenColumn);
+        if (result != screenColumn * this.config.characterWidth) {
+            debugger
+            this.$measureLineToColumn(lineElement, screenColumn);
+        }
+        return result
     }
 
     /**
