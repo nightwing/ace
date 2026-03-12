@@ -912,9 +912,6 @@ class VirtualRenderer {
 
         this._signal("beforeRender", changes);
 
-        if (this.session && this.session.$bidiHandler)
-            this.session.$bidiHandler.updateCharacterWidths(this.$fontMetrics);
-
         var config = this.layerConfig;
         // text, scrolling and resize changes can cause the view port size to change
         if (changes & this.CHANGE_FULL ||
