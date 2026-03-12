@@ -903,22 +903,37 @@ window.HTMLDocument = window.XMLDocument = window.Document = function() {
                 this.endOffset = offset;
             },
             getBoundingClientRect: function() {
+                var rect1 = Element.prototype.getBoundingClientRect.call(this.startContainer);
                 if (this.startContainer.nodeType == 3) {
-                    var rect1 = Element.prototype.getBoundingClientRect.call(this.startContainer);
                     rect1.left += this.startOffset * CHAR_WIDTH;
-                    rect1.width = rect1.right - rect1.left;
                 } else {
-                    var rect1 = this.startContainer.getBoundingClientRect();
+                    var child = this.startContainer.childNodes[this.startOffset];
+                    if (!child) {
+                        rect1.left = rect1.right;
+                    } else {
+                        rect1.left = Element.prototype.getBoundingClientRect.call(child).left;
+                    }
                 }
-                    var rect2 = Element.prototype.getBoundingClientRect.call(this.endContainer);
-                if (this.startContainer.nodeType == 3)
-
-                if (this.endContainer.nodeType == 3)
-                rect2.left -= this.endOffset * CHAR_WIDTH;
-                return {top: 0, left: 0, width: 0, height: 0, right: 0, bottom: 0};
+                var rect2 = Element.prototype.getBoundingClientRect.call(this.endContainer);
+                if (this.endContainer.nodeType == 3) {
+                    rect2.right = rect2.left + this.endOffset * CHAR_WIDTH;
+                } else {
+                    var child = this.endContainer.childNodes[this.endOffset];
+                    if (child) {
+                        rect2.right = Element.prototype.getBoundingClientRect.call(child).right;
+                    }
+                }
+                return {
+                    top: rect1.top,
+                    left: rect1.left,
+                    width: rect2.right - rect1.left,
+                    height: rect2.bottom - rect1.top,
+                    right: rect2.right,
+                    bottom: rect2.bottom
+                };
             },
             getClientRects: function() {
-                return [];
+                return [this.getBoundingClientRect()];
             },
         };
     };
