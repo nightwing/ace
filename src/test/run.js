@@ -4,7 +4,7 @@ module.exports = function(testModule) {
     if (testModule === require.main) {
         require("asyncjs").test.testcase(testModule.exports).exec();
     }
-    else if (global.describe && global.it) {
+    else if (typeof global == "object" && global.describe && global.it) {
         global.describe("#: " + testModule.id, function() {            
             for (let i in testModule.exports) {
                 if (/^test/.test(i)) {
