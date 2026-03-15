@@ -16,8 +16,8 @@ if (testFiles.length === 0) {
     process.exit(1);
 }
 
- var testListFilePath = __dirname + "/test_list.js";
-var data =  `module.exports = [\n    "${testFiles.join('",\n    "')}"\n];`
+var testListFilePath = __dirname + "/test_list.js";
+var data = `module.exports = [\n    "${testFiles.join('",\n    "')}"\n];`;
 
 // Write the updated content back to the file
 fs.writeFileSync(testListFilePath, data, "utf8");

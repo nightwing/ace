@@ -140,7 +140,7 @@ class InlineDiffView extends BaseDiffView {
 
     selectEditor(editor) {
         if (editor == this.activeEditor) {
-            this.otherEditor.selection.clearSelection();
+            this.otherEditor.selection?.clearSelection();
             this.activeEditor.textInput.setHost(this.activeEditor);
             this.activeEditor.setStyle("ace_diff_other", false);
             this.cursorLayer.element.remove();
@@ -174,7 +174,7 @@ class InlineDiffView extends BaseDiffView {
 
     removeBracketHighlight(editor) {
         var session = editor.session;
-        if (session.$bracketHighlight) {
+        if (session && session.$bracketHighlight) {
             session.$bracketHighlight.markerIds.forEach(function(id) {
                 session.removeMarker(id);
             });
@@ -312,10 +312,10 @@ class InlineDiffView extends BaseDiffView {
     }
 
     $detachSessionHandlers(editor, marker) {
-        editor.session.removeMarker(marker.id);
-        editor.selection.off("changeCursor", this.onSelect);
-        editor.selection.off("changeSelection", this.onSelect);
-        editor.session.off("changeFold", this.onChangeFold);
+        editor.session?.removeMarker(marker.id);
+        editor.selection?.off("changeCursor", this.onSelect);
+        editor.selection?.off("changeSelection", this.onSelect);
+        editor.session?.off("changeFold", this.onChangeFold);
     }
 
     $attachEventHandlers() {

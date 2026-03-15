@@ -927,20 +927,25 @@ exports.load = function() {
     Object.keys(window).forEach(function(i) {
         var desc = Object.getOwnPropertyDescriptor(global, i);
         originalProperties[i] = desc;
-        global.__defineGetter__(i, function() {
-            return overriddenValues[i] || window[i];
-        });
-        global.__defineSetter__(i, function(value) {
-            if (!overridableProperties.includes(i)) {
-                console.log("attempt to set " + i);
-            } else if (value === window[i]) {
-                delete overriddenValues[i];
-                if (!loaded) {
-                    unloadProperty(i);
+        Object.defineProperty(global, i, {
+            get: function() {
+                return overriddenValues[i] || window[i];
+            }, 
+            set: function(value) {
+                if (!overridableProperties.includes(i)) {
+                    console.trace("attempt to set " + i);
+                } else if (value === window[i]) {
+                    delete overriddenValues[i];
+                    if (!loaded) {
+                        unloadProperty(i);
+                    }
+                } else {
+                    overriddenValues[i] = value;
                 }
-            } else {
-                overriddenValues[i] = value;
-            }
+            },
+            // writable: true, 
+            enumerable: true,
+            configurable: true,
         });
     });
     loaded = true;
@@ -954,6 +959,8 @@ exports.loadInBrowser = function(global, $setSize) {
     delete global.ResizeObserver;
     global.__origRoot__ = global.document.documentElement;
     global.__origBody__ = global.document.body;
+    global.document.createElementOrig = global.document.createElement;
+    global.document.createTextNodeOrig = global.document.createTextNode;
     Object.keys(window).forEach(function(i) {
         if (i != "document" && i != "window") {
             delete global[i];
@@ -964,7 +971,6 @@ exports.loadInBrowser = function(global, $setSize) {
         var val = window.document[i];
         if (typeof val == "function") {
             if (i == "createElement") {
-                global.document.createElementOrig = global.document.createElement;
                 val = function(n) {
                     if (n == "script")
                         return global.document.createElementOrig(n);
