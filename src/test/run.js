@@ -4,8 +4,9 @@ module.exports = function(testModule) {
     if (testModule === require.main) {
         require("asyncjs").test.testcase(testModule.exports).exec();
     }
-    else if (global.describe && global.it) {
-        global.describe("#: " + testModule.id, function() {            
+    else if (typeof global == "object" && global.describe && (global.it || global.test)) {
+        if (!global.it) global.it = global.test;
+        global.describe("# file: " + testModule.id, function() {            
             for (let i in testModule.exports) {
                 if (/^test/.test(i)) {
                     let fn = testModule.exports[i];

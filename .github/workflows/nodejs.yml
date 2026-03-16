@@ -25,14 +25,13 @@ jobs:
     - uses: actions/checkout@v2
     - name: Fetch the master branch
       run: git fetch origin HEAD:refs/remotes/origin/HEAD --depth 1
-    - name: Fetch the master branch
-      run: git diff --name-only origin/HEAD --no-renames --diff-filter=ACMR
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm i
+    - run: npm i && npm i mocha c8
     - run: npm run cover
+    - run: npx c8 --reporter=lcov  --reporter=text-summary  mocha './src/**/*_test.js'  --exit -p --color
     # run linter
     - run: |
         set -x;

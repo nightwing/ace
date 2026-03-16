@@ -50,6 +50,7 @@ module.exports = {
         editor.setOptions({
             customScrollbar: true
         });
+        renderer.$loop._flush();
     },
     tearDown: function () {
         editor && editor.destroy();
