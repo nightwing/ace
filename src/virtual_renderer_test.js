@@ -19,10 +19,12 @@ function setScreenPosition(node, rect) {
     node.style.height = rect[3] + "px";
 }
 
-function calcEditorWidth(editor, characterCount) {
+function setEditorWidth(editor, characterCount) {
+    editor.resize(true);
     var renderer = editor.renderer;
-    var chWidth = renderer.characterWidth;
-    editor.container.style.width = 2 * renderer.$padding + renderer.gutterWidth + chWidth * characterCount + "px";
+    editor.container.style.width = 2 * renderer.$padding + renderer.gutterWidth
+         + renderer.characterWidth * characterCount + 2 + "px";
+    editor.resize(true);
 }
 
 var editor = null;
@@ -443,7 +445,7 @@ module.exports = {
         assert.equal(editor.session.lineWidgets, null);
     },
     "test long multiline ghost text": function() {
-        calcEditorWidth(editor, 30);
+        setEditorWidth(editor, 30);
 
         editor.session.setValue("abcdef");
         editor.resize(true);
@@ -469,9 +471,8 @@ module.exports = {
         var lineText = "existing";
         var ghostText = "01234567890123456789012345678901234567890123456789";
         editor.renderer.setPadding(10);
-        editor.resize(true);
 
-        calcEditorWidth(editor, 30);
+        setEditorWidth(editor, 30);
 
         editor.session.setValue(lineText);
         editor.renderer.$loop._flush();
@@ -487,7 +488,7 @@ module.exports = {
     "test ghost text respects padding and editor resize": function() {
         editor.session.setValue("abcdef");
 
-        calcEditorWidth(editor, 25);
+        setEditorWidth(editor, 25);
 
         editor.renderer.setPadding(10);
         editor.resize(true);
