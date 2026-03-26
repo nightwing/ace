@@ -204,13 +204,25 @@ async function runSteps() {
             resume();
         }
     }, 50);
+    var previousStep;
     while (currentStep = steps.shift()) {
         currentStep.timeout = (currentStep.testSuite?.timeout || 3000);
         var waitForStep = new Promise(resolve => { waitForStepCallback = resolve; });
-        setTimeout(runOne, 0);
+        // do not use timeout between beforeEach and test to match mocha's behavior
+        if (previousStep && previousStep.type == "beforeEach") {
+            setImmediate(runOne);
+        } else {
+            setTimeout(runOne, 0);
+        }
+        previousStep = currentStep;
         await waitForStep;
     }
     clearInterval(watchdog);
+}
+function setImmediate(fn) {
+    var resolve;
+    new Promise(r => resolve = r).then(runOne);
+    resolve();
 }
 async function runOne() {
     var step = currentStep;
