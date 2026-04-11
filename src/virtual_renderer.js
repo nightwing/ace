@@ -98,7 +98,7 @@ class VirtualRenderer {
             column : 0
         };
 
-        this.$fontMetrics = new FontMetrics(this.container, this.$textLayer);
+        this.$fontMetrics = new FontMetrics(this.container, this.$textLayer, this);
         this.$textLayer.on("changeCharacterSize", function(e) {
             _self.updateCharacterSize();
             _self.onResize(true, _self.gutterWidth, _self.$size.width, _self.$size.height);

@@ -14,10 +14,11 @@ class FontMetrics {
     /**
      * @param {HTMLElement} parentEl
      */
-    constructor(parentEl, textLayer) {
+    constructor(parentEl, textLayer, renderer) {
         this.config = {characterWidth: 1};
         this.$characterSize = {width: 0, height: 0};
         this.textLayer = textLayer;
+        this.renderer = renderer;
 
         this.el = dom.createElement("div");
         this.$setMeasureNodeStyles(this.el.style, true);
@@ -149,13 +150,6 @@ class FontMetrics {
             this.el.parentNode.removeChild(this.el);
     }
 
-    
-    $getZoom(element) {
-        if (!element || !element.parentElement) return 1;
-        return (Number(window.getComputedStyle(element)["zoom"]) || 1) * this.$getZoom(element.parentElement);
-    }
-    
-    
     $initTransformMeasureNodes() {
         var t = function(t, l) {
             return ["div", {
@@ -175,8 +169,7 @@ class FontMetrics {
 
         var p = (el) => {
             var r = el.getBoundingClientRect();
-            var zoom = this.$getZoom ? this.$getZoom(this.el) : 1;
-            return [r.left / zoom, r.top / zoom];
+            return [r.left, r.top];
         };
 
         var sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
@@ -201,17 +194,13 @@ class FontMetrics {
         var m2 = mul((1 + h[1]) / L, sub(c, a));
 
         return [
-            m1[0], m2[0], a[0],
-            m1[1], m2[1], a[1],
+            m2[0], m1[0], a[0],
+            m2[1], m1[1], a[1],
             h[0] / L, h[1] / L, 1
         ];
     }
 
     transformCoordinates(clientPos, elPos) {
-        if (clientPos) {
-            var zoom = this.$getZoom(this.el);
-            clientPos = mul(1 / zoom, clientPos);
-        }
         function solve(l1, l2, r) {
             var det = l1[1] * l2[0] - l1[0] * l2[1];
             return [
@@ -252,7 +241,7 @@ class FontMetrics {
         return mul(L, f);
     }
 
-    recoverRect(M, bbox) {
+    transformRect(M, bbox) {
         var { left, top, width: Wt, height: Ht } = bbox;
         
         // 1. Detect Affine Case (Perspective components are zero)
@@ -287,7 +276,7 @@ class FontMetrics {
             var cx = (m11 * ctx - m01 * cty) / detM;
             var cy = (-m10 * ctx + m00 * cty) / detM;
 
-            return { x: cx - w / 2, y: cy - h / 2, width: w, height: h };
+            return { left: cx - w / 2, top: cy - h / 2, width: w, height: h };
         }
 
         // 2. Projective Case (Full Jacobian + 4x4 Solver)
@@ -322,11 +311,7 @@ class FontMetrics {
         });
 
         var res = this.$solve4x4(rows);
-        return res ? { x: res[0], y: res[1], width: res[2], height: res[3] } : null;
-    }
-
-    recoverRects(matrix, rects) {
-        return Array.from(rects).map(r => this.recoverRect(matrix, r));
+        return res ? { left: res[0], top: res[1], width: res[2], height: res[3] } : null;
     }
 
     $solve4x4(m) {
@@ -408,7 +393,14 @@ class FontMetrics {
             this.$scratchRange.setEnd(position.node, position.offset);
 
             var rangeRect = this.$scratchRange.getBoundingClientRect();
-            var rect = textLayer.element.getBoundingClientRect(); 
+            var hasCssTransform = true;
+            if (hasCssTransform) {
+                var M = this.getTransformMatrix();
+                var transformed = this.transformRect(M, rangeRect);
+                var leftOffset = this.renderer.gutterWidth + this.renderer.$padding + this.renderer.scrollLeft;
+                return transformed.left - leftOffset + position.overflow * this.config.characterWidth;
+            } 
+            var rect = textLayer.element.getBoundingClientRect();
             return rangeRect.left - rect.left + position.overflow * this.config.characterWidth;
         } catch (e) {
             console.error("Error measuring text width:", e);
