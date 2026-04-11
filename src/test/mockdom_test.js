@@ -159,6 +159,10 @@ module.exports = {
         rect = div.getBoundingClientRect();
         assertRect(rect, expected);
 
+        parent.style.zoom = 1.5;
+        rect = div.getBoundingClientRect();
+        debugger
+
         function assertRect(rect, expected) {
             for (var key in expected) {
                 assert.equal(Math.round(rect[key]), Math.round(expected[key]));
