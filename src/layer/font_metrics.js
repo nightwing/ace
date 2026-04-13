@@ -151,9 +151,9 @@ class FontMetrics {
     }
 
     $initTransformMeasureNodes() {
-        var t = function(t, l) {
+        var t = function(l, t) {
             return ["div", {
-                style: "position: absolute;top:" + t + "px;left:" + l + "px;"
+                style: "position: absolute;left:" + l + "px;top:" + t + "px;"
             }];
         };
         this.els = dom.buildDom([t(0, 0), t(L, 0), t(0, L), t(L, L)], this.el);
@@ -165,23 +165,12 @@ class FontMetrics {
     // this function finds the coeeficients of the matrix using positions of four points
     //  
     getTransformMatrix() {
-        if (!this.els) this.$initTransformMeasureNodes();
-
-        var p = (el) => {
+        if (!this.els)
+            this.$initTransformMeasureNodes();
+        
+        function p(el) {
             var r = el.getBoundingClientRect();
             return [r.left, r.top];
-        };
-
-        var sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
-        var add = (a, b) => [a[0] + b[0], a[1] + b[1]];
-        var mul = (s, a) => [s * a[0], s * a[1]];
-
-        var solve2x2 = (l1, l2, r) => {
-            var det = l1[1] * l2[0] - l1[0] * l2[1];
-            return [
-                (-l2[1] * r[0] + l2[0] * r[1]) / det,
-                (l1[1] * r[0] - l1[0] * r[1]) / det
-            ];
         }
 
         var a = p(this.els[0]);
@@ -189,29 +178,19 @@ class FontMetrics {
         var c = p(this.els[2]);
         var d = p(this.els[3]);
 
-        var h = solve2x2(sub(d, b), sub(d, c), sub(add(b, c), add(d, a)));
-        var m1 = mul((1 + h[0]) / L, sub(b, a));
-        var m2 = mul((1 + h[1]) / L, sub(c, a));
+        var h = solve(sub(d, b), sub(d, c), sub(add(b, c), add(d, a)));
+
+        var m1 = mul((1 + h[0])/L, sub(b, a));
+        var m2 = mul((1 + h[1])/L, sub(c, a));
 
         return [
-            m2[0], m1[0], a[0],
-            m2[1], m1[1], a[1],
-            h[0] / L, h[1] / L, 1
+            m1[0], m2[0], a[0],
+            m1[1], m2[1], a[1],
+            h[0] , h[1] , 1
         ];
     }
 
     transformCoordinates(clientPos, elPos) {
-        function solve(l1, l2, r) {
-            var det = l1[1] * l2[0] - l1[0] * l2[1];
-            return [
-                (-l2[1] * r[0] + l2[0] * r[1]) / det,
-                (+l1[1] * r[0] - l1[0] * r[1]) / det
-            ];
-        }
-        function sub(a, b) { return [a[0] - b[0], a[1] - b[1]]; }
-        function add(a, b) { return [a[0] + b[0], a[1] + b[1]]; }
-        function mul(a, b) { return [a * b[0], a * b[1]]; }
-
         if (!this.els)
             this.$initTransformMeasureNodes();
         
@@ -590,6 +569,19 @@ function mergeTouchingRects(rects) {
     }
     return merged;
 } 
+
+
+
+function solve(l1, l2, r) {
+    var det = l1[1] * l2[0] - l1[0] * l2[1];
+    return [
+        (-l2[1] * r[0] + l2[0] * r[1]) / det,
+        (+l1[1] * r[0] - l1[0] * r[1]) / det
+    ];
+}
+function sub(a, b) { return [a[0] - b[0], a[1] - b[1]]; }
+function add(a, b) { return [a[0] + b[0], a[1] + b[1]]; }
+function mul(a, b) { return [a * b[0], a * b[1]]; }
  
 
 oop.implement(FontMetrics.prototype, EventEmitter);
