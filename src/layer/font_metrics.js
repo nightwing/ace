@@ -183,11 +183,21 @@ class FontMetrics {
         var m1 = mul((1 + h[0])/L, sub(b, a));
         var m2 = mul((1 + h[1])/L, sub(c, a));
 
-        return [
+        var M =  [
             m1[0], m2[0], a[0],
             m1[1], m2[1], a[1],
-            h[0] , h[1] , 1
+            h[0]/L, h[1]/L, 1
         ];
+
+        var q = project(M, [L, L]);
+        if (q[0] - d[0] || q[1] - d[1]) {
+            console.warn("Transform matrix M:", M);
+            console.warn("Projected point:", q);
+            console.warn("Expected point:", d);
+            debugger
+        }
+
+        return M
     }
 
     transformCoordinates(clientPos, elPos) {
@@ -226,7 +236,7 @@ class FontMetrics {
         // 1. Detect Affine Case (Perspective components are zero)
         var isAffine = Math.abs(M[6]) < 1e-10 && Math.abs(M[7]) < 1e-10;
         
-        if (isAffine) {
+        if (isAffine&&0) {
             var [m00, m01, m02, m10, m11, m12] = M;
             
             // analytical formula: {w, h} = inverse(|M|) * {Wt, Ht}
@@ -242,7 +252,6 @@ class FontMetrics {
                 // Solve: w = (Wt - |m01|*h) / |m00|
                 w = (Wt - absM[1] * h) / absM[0];
             } else {
-                // Normal case: use your analytical Cramer's formula
                 w = (absM[3] * Wt - absM[1] * Ht) / delta;
                 h = (-absM[2] * Wt + absM[0] * Ht) / delta;
             }
@@ -259,38 +268,7 @@ class FontMetrics {
         }
 
         // 2. Projective Case (Full Jacobian + 4x4 Solver)
-        var xMax = left + Wt;
-        var yMax = top + Ht;
-
-        var getCorner = (px, py, isYAxis, dir) => {
-            var g = M[6] * px + M[7] * py + M[8];
-            var f = isYAxis ? (M[3] * px + M[4] * py + M[5]) : (M[0] * px + M[1] * py + M[2]);
-            var d_dx = (isYAxis ? M[3] : M[0]) * g - f * M[6];
-            var d_dy = (isYAxis ? M[4] : M[1]) * g - f * M[7];
-            return [(dir * d_dx > 0) ? 1 : 0, (dir * d_dy > 0) ? 1 : 0];
-        };
-
-        var corners = [
-            getCorner(left, top + Ht/2, false, -1), // Left
-            getCorner(left + Wt/2, top, true, -1),  // Top
-            getCorner(xMax, top + Ht/2, false, 1),  // Right
-            getCorner(left + Wt/2, yMax, true, 1)   // Bottom
-        ];
-
-        var targets = [left, top, xMax, yMax];
-        var isY = [false, true, false, true];
-
-        var rows = corners.map((c, i) => {
-            var [dx, dy] = c;
-            var target = targets[i];
-            var m = isY[i] ? M.slice(3, 6) : M.slice(0, 3);
-            var mp = M.slice(6, 9);
-            var ax = m[0] - target * mp[0], ay = m[1] - target * mp[1];
-            return [ax, ay, dx * ax, dy * ay, target * mp[2] - m[2]];
-        });
-
-        var res = this.$solve4x4(rows);
-        return res ? { left: res[0], top: res[1], width: res[2], height: res[3] } : null;
+        return recoverRectAll(M, bbox)
     }
 
     $solve4x4(m) {
@@ -375,8 +353,8 @@ class FontMetrics {
             var hasCssTransform = true;
             if (hasCssTransform) {
                 var M = this.getTransformMatrix();
-                var transformed = this.transformRect(M, rangeRect);
-                var leftOffset = this.renderer.gutterWidth + this.renderer.$padding + this.renderer.scrollLeft;
+                var transformed = recoverRectAll(M, rangeRect);
+                var leftOffset = this.renderer.gutterWidth + this.renderer.$padding - this.renderer.scrollLeft;
                 return transformed.left - leftOffset + position.overflow * this.config.characterWidth;
             } 
             var rect = textLayer.element.getBoundingClientRect();
@@ -587,3 +565,241 @@ function mul(a, b) { return [a * b[0], a * b[1]]; }
 oop.implement(FontMetrics.prototype, EventEmitter);
 
 exports.FontMetrics = FontMetrics;
+
+
+
+
+
+
+/**
+ * Brute-force solver to find the correct corner-to-boundary mapping.
+ * Order: [minY, maxX, maxY, minX]
+ * Source Corners: C0:[0,0], C1:[1,0], C2:[1,1], C3:[0,1]
+ */
+function recoverRectAll(M, bbox) {
+    const { left, top, width, height } = bbox;
+    const targets = [top, left + width, top + height, left]; // minY, maxX, maxY, minX
+    const isYAxis = [true, false, true, false]; // minY=Y, maxX=X, maxY=Y, minX=X
+    
+    // var w1 = 1 / width;
+    // var h1 = 1 / height;
+    // var x1 = left * w1, y1 = top * h1 
+    // M = [
+    //     M[0] * w1 - M[6] * x1, M[1] * w1 - M[7] * x1, M[2] * w1 - x1,
+    //     M[3] * h1 - M[6] * y1, M[4] * h1 - M[7] * y1, M[5] * h1 - y1,
+    //     M[6], M[7], M[8] 
+    // ]
+    const corners = [
+        [0, 0], [1, 0], [1, 1], [0, 1]
+    ];
+    var result = null;
+
+    // console.log("Starting brute force search for 256 mappings...");
+
+    for (let i = 0; i < 256; i++) {
+        // Decode i into 4 corner indices (base 4)
+        const mappingIdx = [
+            (i >> 0) & 3,
+            (i >> 2) & 3,
+            (i >> 4) & 3,
+            (i >> 6) & 3
+        ];
+
+        const mapping = mappingIdx.map(idx => corners[idx]);
+        
+        // Build the 4x5 linear system for [x0, y0, w, h]
+        const rows = mapping.map((c, j) => {
+            const [dx, dy] = c;
+            const target = targets[j];
+            const m = isYAxis[j] ? M.slice(3, 6) : M.slice(0, 3);
+            const mp = M.slice(6, 9);
+            
+            // Equation: (m0 - T*m6)x0 + (m1 - T*m7)y0 + dx(m0 - T*m6)w + dy(m1 - T*m7)h = T*m8 - m2
+            const ax = m[0] - target * mp[0];
+            const ay = m[1] - target * mp[1];
+            
+            return [ax, ay, dx * ax, dy * ay, target * mp[2] - m[2]];
+        });
+
+        const res = solve4x4(rows);
+        
+        if (res) {
+            const [x0, y0, w, h] = res;
+            
+            // Basic sanity check: dimensions must be positive
+            // if (w > 0.1 && h > 0.1) {
+                if (validateSolution(M, x0, y0, w, h, bbox)) {
+                    // console.log(`%c Found Valid Mapping! (Index: ${i})`, "color: green; font-weight: bold");
+                    // console.log("Mapping indices [minY, maxX, maxY, minX]:", mappingIdx);
+                    // console.log("Resulting Rect:", { x: x0, y: y0, width: w, height: h });
+                    if (w>=0 && h>=0) {
+                        result = { left: x0, top: y0, width: w, height: h, mappingIdx };
+                    }
+                }
+            // }
+        }
+    }
+    if (!result)
+        console.warn("No valid mapping found in 256 combinations.");
+    return result;
+}
+
+
+function recover0WidthRect(M, bbox) {
+    var { left, top, width, height } = bbox; 
+    var MI = invert3x3(M);
+    var p1 = project(MI, left, top);
+    var p2 = project(MI, left + width, top);
+    var p3 = project(MI, left + width, top + height);
+    var p4 = project(MI, left, top + height);
+
+    var minX = Math.min(p1[0], p2[0], p3[0], p4[0]);
+    var maxX = Math.max(p1[0], p2[0], p3[0], p4[0]);
+    var minY = Math.min(p1[1], p2[1], p3[1], p4[1]);
+    var maxY = Math.max(p1[1], p2[1], p3[1], p4[1]);
+
+    return {
+        x: minX,
+        y: minY,
+        width: maxX - minX,
+        height: maxY - minY
+    };
+}
+const invert3x3 = (m) => {
+    const [a, b, c, d, e, f, g, h, i] = m;
+    const det = a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
+    if (Math.abs(det) < 1e-14) return null;
+    const invDet = 1 / det;
+    return [
+        (e * i - f * h) * invDet, (c * h - b * i) * invDet, (b * f - c * e) * invDet,
+        (f * g - d * i) * invDet, (a * i - c * g) * invDet, (c * d - a * f) * invDet,
+        (d * h - e * g) * invDet, (g * b - a * h) * invDet, (a * e - b * d) * invDet
+    ];
+};
+var project = (m, px, py) => {
+    const k = m[6] * px + m[7] * py + m[8];
+    return [(m[0] * px + m[1] * py + m[2]) / k, (m[3] * px + m[4] * py + m[5]) / k];
+};
+
+function recoverRectAn(M, bbox) {
+    const { left: x1, top: y1, width: W, height: H } = bbox;
+
+    // Helper: Project a point [px, py] through a 3x3 matrix
+
+
+    // Helper: Standard 3x3 Matrix Inversion
+
+
+    // 1. Calculate Normalized Matrix
+    // This transforms the coordinate system so the screen bbox is the unit square
+    let m00 = M[0], m01 = M[1], T0 = M[2];
+    let m10 = M[3], m11 = M[4], T1 = M[5];
+    let H1 = M[6], H2 = M[7];
+
+    let normM = [
+        m00 / W - (H1 * x1) / W, m01 / W - (H2 * x1) / W, T0 / W - x1 / W,
+        m10 / H - (H1 * y1) / H, m11 / H - (H2 * y1) / H, T1 / H - y1 / H,
+        H1, H2, 1
+    ];
+
+    const computePointImages = (nm) => {
+        const [a, b, c, d, e, f, g, h] = nm; 
+        // Correspondence with Mathematica: a=m00, b=m01, d=m10, e=m11, g=H1, h=H2
+        const den1 = -h * a + b * d + g * (h - b - e) + a * e;
+        const den2 = -h * a + b * d + a * e;
+        const den3 = -h * d + b * d + a * e;
+        const den4 = -h * d + b * d + g * (h - b - e) + a * e;
+
+        return [
+            [(b * (-a + d)) / den1, 0],
+            [1, (d * (-h + b + e)) / den2],
+            [(a * (-h + b + e)) / den3, 1],
+            [0, ((a - d) * e) / den4]
+        ];
+    };
+
+    let pImgs = computePointImages(normM);
+
+    // 2. Orientation Check
+    // If calculated points fall outside unit square, rotate normalized matrix by 90 deg
+    const flattened = pImgs.reduce((acc, val) => acc.concat(val), []);
+    if (Math.min(...flattened) < 0 || Math.max(...flattened) > 1) {
+        // Rot = {{0, -1, 1}, {1, 0, 0}, {0, 0, 1}}
+        const oldNorm = [...normM];
+        normM = [
+            oldNorm[6] -oldNorm[3], oldNorm[7]-oldNorm[4], 1 - oldNorm[5],
+             oldNorm[0],  oldNorm[1],     oldNorm[2],
+             oldNorm[6],  oldNorm[7],     1
+        ];
+        pImgs = computePointImages(normM);
+    }
+
+    // 3. Project back to source space
+    const invNorm = invert3x3(normM);
+    if (!invNorm) return null;
+
+    const points = pImgs.map(p => project(invNorm, p[0], p[1]));
+
+    const xs = points.map(p => p[0]);
+    const ys = points.map(p => p[1]);
+
+    return {
+        left: Math.min(...xs),
+        top: Math.min(...ys),
+        width: Math.max(...xs) - Math.min(...xs),
+        height: Math.max(...ys) - Math.min(...ys)
+    };
+}
+
+/**
+ * Forward projects the 4 corners of the solution and checks if the 
+ * resulting BBox matches the input bbox.
+ */
+function validateSolution(M, x, y, w, h, targetBbox) {
+    const pts = [
+        [x, y], [x + w, y], [x + w, y + h], [x, y + h]
+    ];
+
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+    for (const [px, py] of pts) {
+        const k = M[6] * px + M[7] * py + M[8];
+        if (k <= 0) return false; // Point is behind camera or at infinity
+        
+        const ux = (M[0] * px + M[1] * py + M[2]) / k;
+        const uy = (M[3] * px + M[4] * py + M[5]) / k;
+        
+        minX = Math.min(minX, ux);
+        minY = Math.min(minY, uy);
+        maxX = Math.max(maxX, ux);
+        maxY = Math.max(maxY, uy);
+    }
+
+    const eps = 0.5; // Pixel tolerance
+    return (
+        Math.abs(minX - targetBbox.left) < eps &&
+        Math.abs(minY - targetBbox.top) < eps &&
+        Math.abs(maxX - (targetBbox.left + targetBbox.width)) < eps &&
+        Math.abs(maxY - (targetBbox.top + targetBbox.height)) < eps
+    );
+}
+
+function solve4x4(m) {
+    let n = 4;
+    for (let i = 0; i < n; i++) {
+        let max = i;
+        for (let j = i + 1; j < n; j++) 
+            if (Math.abs(m[j][i]) > Math.abs(m[max][i])) max = j;
+        [m[i], m[max]] = [m[max], m[i]];
+        let p = m[i][i];
+        if (Math.abs(p) < 1e-10) return null;
+        for (let j = i; j <= n; j++) m[i][j] /= p;
+        for (let k = 0; k < n; k++) {
+            if (k !== i) {
+                let f = m[k][i];
+                for (let j = i; j <= n; j++) m[k][j] -= f * m[i][j];
+            }
+        }
+    }
+    return m.map(row => row[n]);
+}
