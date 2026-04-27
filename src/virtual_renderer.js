@@ -1634,10 +1634,10 @@ class VirtualRenderer {
     pixelToScreenCoordinates(x, y) {
         var canvasPos;
         if (this.$hasCssTransforms) {
-            canvasPos = {top:0, left: 0};
+            canvasPos = {top: this.margin.top, left: this.gutterWidth + this.margin.left};
             var p = this.$fontMetrics.transformCoordinates([x, y]);
-            x = p[1] - this.gutterWidth - this.margin.left;
-            y = p[0];
+            x = p[0];
+            y = p[1];
         } else {
             canvasPos = this.scroller.getBoundingClientRect();
         }
