@@ -417,6 +417,8 @@ class FontMetrics {
                 var textLength = node.nodeValue.length;
                 for (var j = 0; j < textLength; j++) {
                     scratchRange.setStart(node, j);
+                    if (/[\uDC00-\uDFFF]/.test(node.nodeValue.charAt(j)))
+                        j++ // skip low surrogate
                     scratchRange.setEnd(node, j + 1);
                     let rect = scratchRange.getBoundingClientRect();
                     if (hasCssTransform) {
@@ -587,13 +589,16 @@ function recoverRect(transform, bbox) {
     ];
     var result = null;
 
-    for (let i = 0; i < 256; i++) {
+    var mainMappings = [27, 57, 23, 53, 43, 9, 10, 11, 14, 37, 31, 56, 40, 41, 47];
+
+    for (let i = -mainMappings.length; i < 256; i++) {
+        var index = i < 0 ? mainMappings[mainMappings.length + i] : i;
         // Decode i into 4 corner indices (base 4)
         var mappingIdx = [
-            (i >> 0) & 3,
-            (i >> 2) & 3,
-            (i >> 4) & 3,
-            (i >> 6) & 3
+            (index >> 0) & 3,
+            (index >> 2) & 3,
+            (index >> 4) & 3,
+            (index >> 6) & 3
         ];
 
         var mapping = mappingIdx.map(idx => corners[idx]);
@@ -619,7 +624,7 @@ function recoverRect(transform, bbox) {
             if (w < 0) { x0 += w; w = -w; }
             if (h < 0) { y0 += h; h = -h; }
             if (validateSolution(M, x0, y0, w, h, bbox)) {
-                result = { left: x0, top: y0, width: w, height: h };
+                result = { left: x0, top: y0, width: w, height: h, mappingIdx: i };
                 break;
             }
         }
@@ -629,27 +634,6 @@ function recoverRect(transform, bbox) {
     return result;
 }
 
-
-function recover0WidthRect(M, bbox) {
-    var { left, top, width, height } = bbox; 
-    var MI = invert3x3(M);
-    var p1 = project(MI, left, top);
-    var p2 = project(MI, left + width, top);
-    var p3 = project(MI, left + width, top + height);
-    var p4 = project(MI, left, top + height);
-
-    var minX = Math.min(p1[0], p2[0], p3[0], p4[0]);
-    var maxX = Math.max(p1[0], p2[0], p3[0], p4[0]);
-    var minY = Math.min(p1[1], p2[1], p3[1], p4[1]);
-    var maxY = Math.max(p1[1], p2[1], p3[1], p4[1]);
-
-    return {
-        x: minX,
-        y: minY,
-        width: maxX - minX,
-        height: maxY - minY
-    };
-}
 const invert3x3 = (m) => {
     var [a, b, c, d, e, f, g, h, i] = m;
     var det = a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
