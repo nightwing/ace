@@ -257,7 +257,7 @@ class FontMetrics {
             return { left: cx - w / 2, top: cy - h / 2, width: w, height: h };
         }
 
-        return recoverRectAll(transform, bbox)
+        return recoverRect(transform, bbox)
     }
 
     /**
@@ -320,8 +320,7 @@ class FontMetrics {
             this.$scratchRange.setEnd(position.node, position.offset);
 
             var rangeRect = this.$scratchRange.getBoundingClientRect();
-            var hasCssTransform = true;
-            if (hasCssTransform) {
+            if (this.renderer.$hasCssTransforms) {
                 var tr = this.getTransform()
                 var transformed = this.recoverRect(tr, rangeRect);
                 var leftOffset = this.renderer.gutterWidth + this.renderer.margin.left + this.renderer.$padding - this.renderer.scrollLeft;
@@ -389,8 +388,8 @@ class FontMetrics {
         var lineElement = this.$findElementForScreenRow(screenRow);
         if (!lineElement) return screenColumn1;
 
-        var hasCssTransform = true;
-        var tr = this.getTransform();
+        var hasCssTransform = this.renderer.$hasCssTransforms;
+        var tr = hasCssTransform && this.getTransform();
 
         var screenColumn = 0;
         var getRects = (node) => {
@@ -420,7 +419,9 @@ class FontMetrics {
                     scratchRange.setStart(node, j);
                     scratchRange.setEnd(node, j + 1);
                     let rect = scratchRange.getBoundingClientRect();
-                    hasCssTransform && (rect = self.recoverRect(tr, rect));
+                    if (hasCssTransform) {
+                        rect = self.recoverRect(tr, rect);
+                    }
                     if (rect.left <= x && x <= rect.left + rect.width) {
                         screenColumn += j;
                         if (!blockCursor && x > rect.left + rect.width / 2) {
@@ -572,13 +573,7 @@ exports.FontMetrics = FontMetrics;
 
 
 
-
-/**
- * Brute-force solver to find the correct corner-to-boundary mapping.
- * Order: [minY, maxX, maxY, minX]
- * Source Corners: C0:[0,0], C1:[1,0], C2:[1,1], C3:[0,1]
- */
-function recoverRectAll(transform, bbox) {
+function recoverRect(transform, bbox) {
     var { left, top, width, height } = bbox;
     var M = transform.M;
     left -= transform.t[0];
@@ -587,20 +582,10 @@ function recoverRectAll(transform, bbox) {
     var targets = [top, left + width, top + height, left]; // minY, maxX, maxY, minX
     var isYAxis = [true, false, true, false]; // minY=Y, maxX=X, maxY=Y, minX=X
     
-    // var w1 = 1 / width;
-    // var h1 = 1 / height;
-    // var x1 = left * w1, y1 = top * h1 
-    // M = [
-    //     M[0] * w1 - M[6] * x1, M[1] * w1 - M[7] * x1, M[2] * w1 - x1,
-    //     M[3] * h1 - M[6] * y1, M[4] * h1 - M[7] * y1, M[5] * h1 - y1,
-    //     M[6], M[7], M[8] 
-    // ]
     var corners = [
         [0, 0], [1, 0], [1, 1], [0, 1]
     ];
     var result = null;
-
-    // console.log("Starting brute force search for 256 mappings...");
 
     for (let i = 0; i < 256; i++) {
         // Decode i into 4 corner indices (base 4)
@@ -628,22 +613,15 @@ function recoverRectAll(transform, bbox) {
         });
 
         var res = solve4x4(rows);
-        
+        var result;
         if (res) {
             var [x0, y0, w, h] = res;
-            
-            // Basic sanity check: dimensions must be positive
-            // if (w > 0.1 && h > 0.1) {
-                if (validateSolution(M, x0, y0, w, h, bbox)) {
-                    // console.log(`%c Found Valid Mapping! (Index: ${i})`, "color: green; font-weight: bold");
-                    // console.log("Mapping indices [minY, maxX, maxY, minX]:", mappingIdx);
-                    // console.log("Resulting Rect:", { x: x0, y: y0, width: w, height: h });
-                    if (w>=0 && h>=0) {
-                        result = { left: x0, top: y0, width: w, height: h, mappingIdx };
-                    }
-                    validateSolution(M, x0, y0, w, h, bbox)
-                }
-            // }
+            if (w < 0) { x0 += w; w = -w; }
+            if (h < 0) { y0 += h; h = -h; }
+            if (validateSolution(M, x0, y0, w, h, bbox)) {
+                result = { left: x0, top: y0, width: w, height: h };
+                break;
+            }
         }
     }
     if (!result)
@@ -688,76 +666,6 @@ var project = (m, px, py) => {
     return [(m[0] * px + m[1] * py + m[2]) / k, (m[3] * px + m[4] * py + m[5]) / k];
 };
 
-function recoverRectAn(M, bbox) {
-    var { left: x1, top: y1, width: W, height: H } = bbox;
-
-    // Helper: Project a point [px, py] through a 3x3 matrix
-
-
-    // Helper: Standard 3x3 Matrix Inversion
-
-
-    // 1. Calculate Normalized Matrix
-    // This transforms the coordinate system so the screen bbox is the unit square
-    let m00 = M[0], m01 = M[1], T0 = M[2];
-    let m10 = M[3], m11 = M[4], T1 = M[5];
-    let H1 = M[6], H2 = M[7];
-
-    let normM = [
-        m00 / W - (H1 * x1) / W, m01 / W - (H2 * x1) / W, T0 / W - x1 / W,
-        m10 / H - (H1 * y1) / H, m11 / H - (H2 * y1) / H, T1 / H - y1 / H,
-        H1, H2, 1
-    ];
-
-    var computePointImages = (nm) => {
-        var [a, b, c, d, e, f, g, h] = nm; 
-        // Correspondence with Mathematica: a=m00, b=m01, d=m10, e=m11, g=H1, h=H2
-        var den1 = -h * a + b * d + g * (h - b - e) + a * e;
-        var den2 = -h * a + b * d + a * e;
-        var den3 = -h * d + b * d + a * e;
-        var den4 = -h * d + b * d + g * (h - b - e) + a * e;
-
-        return [
-            [(b * (-a + d)) / den1, 0],
-            [1, (d * (-h + b + e)) / den2],
-            [(a * (-h + b + e)) / den3, 1],
-            [0, ((a - d) * e) / den4]
-        ];
-    };
-
-    let pImgs = computePointImages(normM);
-
-    // 2. Orientation Check
-    // If calculated points fall outside unit square, rotate normalized matrix by 90 deg
-    var flattened = pImgs.reduce((acc, val) => acc.concat(val), []);
-    if (Math.min(...flattened) < 0 || Math.max(...flattened) > 1) {
-        // Rot = {{0, -1, 1}, {1, 0, 0}, {0, 0, 1}}
-        var oldNorm = [...normM];
-        normM = [
-            oldNorm[6] -oldNorm[3], oldNorm[7]-oldNorm[4], 1 - oldNorm[5],
-             oldNorm[0],  oldNorm[1],     oldNorm[2],
-             oldNorm[6],  oldNorm[7],     1
-        ];
-        pImgs = computePointImages(normM);
-    }
-
-    // 3. Project back to source space
-    var invNorm = invert3x3(normM);
-    if (!invNorm) return null;
-
-    var points = pImgs.map(p => project(invNorm, p[0], p[1]));
-
-    var xs = points.map(p => p[0]);
-    var ys = points.map(p => p[1]);
-
-    return {
-        left: Math.min(...xs),
-        top: Math.min(...ys),
-        width: Math.max(...xs) - Math.min(...xs),
-        height: Math.max(...ys) - Math.min(...ys)
-    };
-}
-
 /**
  * Forward projects the 4 corners of the solution and checks if the 
  * resulting BBox matches the input bbox.
@@ -771,30 +679,7 @@ function validateSolution(M, x, y, w, h, targetBbox) {
         var mapped = project(M, p[0], p[1])
         return targetBbox.left - 0.5 <= mapped[0] && mapped[0] <= targetBbox.left + targetBbox.width + 0.5
              && targetBbox.top - 0.5 <= mapped[1] && mapped[1] <= targetBbox.top + targetBbox.height + 0.5
-    })
-
-    // let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-
-    // for (const [px, py] of pts) {
-    //     var k = M[6] * px + M[7] * py + M[8];
-    //     if (k <= 0) return false; // Point is behind camera or at infinity
-        
-    //     var ux = (M[0] * px + M[1] * py + M[2]) / k;
-    //     var uy = (M[3] * px + M[4] * py + M[5]) / k;
-        
-    //     minX = Math.min(minX, ux);
-    //     minY = Math.min(minY, uy);
-    //     maxX = Math.max(maxX, ux);
-    //     maxY = Math.max(maxY, uy);
-    // }
-
-    // var eps = 0.5; // Pixel tolerance
-    // return (
-    //     Math.abs(minX - targetBbox.left) < eps &&
-    //     Math.abs(minY - targetBbox.top) < eps &&
-    //     Math.abs(maxX - (targetBbox.left + targetBbox.width)) < eps &&
-    //     Math.abs(maxY - (targetBbox.top + targetBbox.height)) < eps
-    // );
+    });
 }
 
 function solve4x4(m) {
