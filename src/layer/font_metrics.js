@@ -8,6 +8,7 @@ var EventEmitter = require("../lib/event_emitter").EventEmitter;
 var CHAR_COUNT = 512;
 var USE_OBSERVER = typeof ResizeObserver == "function";
 var L = 200;
+var BINARY_SEARCH_TEXT_LENGTH = 256;
 
 class FontMetrics {
 
@@ -416,19 +417,82 @@ class FontMetrics {
             return rects;
         };
         var self = this;
+        function isLowSurrogate(node, offset) {
+            return /[\uDC00-\uDFFF]/.test(node.nodeValue.charAt(offset));
+        }
+        function getGraphemeWidth(node, offset) {
+            if (
+                /[\uD800-\uDBFF]/.test(node.nodeValue.charAt(offset)) &&
+                offset + 1 < node.nodeValue.length &&
+                /[\uDC00-\uDFFF]/.test(node.nodeValue.charAt(offset + 1))
+            ) {
+                return 2;
+            }
+            return 1;
+        }
+        function getCollapsedLeft(node, offset) {
+            scratchRange.setStart(node, offset);
+            scratchRange.setEnd(node, offset);
+            var rect = /**@type{{left: number, top: number, width: number, height: number}}*/(scratchRange.getBoundingClientRect());
+            if (hasCssTransform)
+                rect = self.recoverRect(tr, rect);
+            return rect.left;
+        }
+        function findTextNodeColumn(node) {
+            var textLength = node.nodeValue.length;
+            if (textLength < BINARY_SEARCH_TEXT_LENGTH)
+                return null;
+
+            var left = getCollapsedLeft(node, 0);
+            var right = getCollapsedLeft(node, textLength);
+            if (x < Math.min(left, right) || x > Math.max(left, right) || left >= right)
+                return null;
+
+            var low = 0;
+            var high = textLength;
+            while (low < high) {
+                var mid = (low + high) >> 1;
+                if (isLowSurrogate(node, mid))
+                    mid--;
+                if (mid < low)
+                    mid = low;
+
+                if (getCollapsedLeft(node, mid) <= x)
+                    low = mid + getGraphemeWidth(node, mid);
+                else
+                    high = mid;
+            }
+
+            var column = Math.max(0, Math.min(low - 1, textLength - 1));
+            if (isLowSurrogate(node, column))
+                column--;
+            var graphemeWidth = getGraphemeWidth(node, column);
+
+            scratchRange.setStart(node, column);
+            scratchRange.setEnd(node, column + graphemeWidth);
+            var rect = /** @type {ReturnType<FontMetrics['recoverRect']>}*/(scratchRange.getBoundingClientRect());
+            if (hasCssTransform)
+                rect = self.recoverRect(tr, rect);
+
+            if (rect.left <= x && x <= rect.left + rect.width) {
+                if (!blockCursor && x > rect.left + rect.width / 2)
+                    column += graphemeWidth;
+                return column;
+            }
+            return null;
+        }
         function search(node) {
             if (node.nodeType === Node.TEXT_NODE) {
                 var textLength = node.nodeValue.length;
+                var column = findTextNodeColumn(node);
+                if (column != null) {
+                    screenColumn += column;
+                    return screenColumn;
+                }
                 var graphemeWidth = 1;
                 for (var j = 0; j < textLength; j+= graphemeWidth) {
                     scratchRange.setStart(node, j);
-                    graphemeWidth = 1;
-                    if (
-                        /[\uD800-\uDBFF]/.test(node.nodeValue.charAt(j)) && j + 1 < textLength &&
-                        /[\uDC00-\uDFFF]/.test(node.nodeValue.charAt(j + 1))
-                    ) {
-                        graphemeWidth = 2;
-                    }
+                    graphemeWidth = getGraphemeWidth(node, j);
                     scratchRange.setEnd(node, j + graphemeWidth);
                     let rect = /** @type {ReturnType<FontMetrics['recoverRect']>}*/(scratchRange.getBoundingClientRect());
                     if (hasCssTransform) {
