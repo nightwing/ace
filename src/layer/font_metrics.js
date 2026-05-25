@@ -438,15 +438,26 @@ class FontMetrics {
                 rect = self.recoverRect(tr, rect);
             return rect.left;
         }
+        function canBinarySearchTextNode(node) {
+            scratchRange.setStart(node, 0);
+            scratchRange.setEnd(node, node.nodeValue.length);
+            return scratchRange.getClientRects().length <= 1;
+        }
         function findTextNodeColumn(node) {
             var textLength = node.nodeValue.length;
-            if (textLength < BINARY_SEARCH_TEXT_LENGTH)
+            if (textLength < BINARY_SEARCH_TEXT_LENGTH || !canBinarySearchTextNode(node))
                 return null;
 
             var left = getCollapsedLeft(node, 0);
             var right = getCollapsedLeft(node, textLength);
-            if (x < Math.min(left, right) || x > Math.max(left, right) || left >= right)
+            if (left === right)
                 return null;
+
+            var isRtl = left > right;
+            // This should normally be filtered at the element/text-node rect level.
+            // If it still happens, skip the linear fallback for this text node.
+            if (x < Math.min(left, right) || x > Math.max(left, right))
+                return -1;
 
             var low = 0;
             var high = textLength;
@@ -457,7 +468,8 @@ class FontMetrics {
                 if (mid < low)
                     mid = low;
 
-                if (getCollapsedLeft(node, mid) <= x)
+                var midLeft = getCollapsedLeft(node, mid);
+                if (isRtl ? midLeft >= x : midLeft <= x)
                     low = mid + getGraphemeWidth(node, mid);
                 else
                     high = mid;
@@ -485,10 +497,12 @@ class FontMetrics {
             if (node.nodeType === Node.TEXT_NODE) {
                 var textLength = node.nodeValue.length;
                 var column = findTextNodeColumn(node);
-                if (column != null) {
+                if (column != null && column >= 0) {
                     screenColumn += column;
                     return screenColumn;
                 }
+                if (column === -1)
+                    return;
                 var graphemeWidth = 1;
                 for (var j = 0; j < textLength; j+= graphemeWidth) {
                     scratchRange.setStart(node, j);
