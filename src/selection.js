@@ -36,8 +36,10 @@ class Selection {
                 self._emit("changeCursor");
             if (!self.$isEmpty && !self.$silent)
                 self._emit("changeSelection");
-            if (!self.$keepDesiredColumnOnChange && e.old.column != e.value.column)
+            if (!self.$keepDesiredColumnOnChange && e.old.column != e.value.column) {
                 self.$desiredColumn = null;
+                self.$desiredPixelPos = null;
+            }
         });
     
         this.anchor.on("change", function() {
@@ -711,10 +713,12 @@ class Selection {
         );
 
         var offsetX;
+        var useDesiredPixelPos = chars === 0 && rows !== 0 && this.$getCursorPixelPosition && this.$getCursorPositionAtPixel;
 
         if (chars === 0) {
-            if (rows !== 0) {
-                // TODO use fontmetrics
+            if (useDesiredPixelPos && this.$desiredPixelPos == null) {
+                var pixelPos = this.$getCursorPixelPosition(this.lead.row, this.lead.column);
+                this.$desiredPixelPos = pixelPos && pixelPos.pixel;
             }
 
             if (this.$desiredColumn)
@@ -731,7 +735,12 @@ class Selection {
                 rows += widget.rowCount - (widget.rowsAbove || 0);
         }
 
-        var docPos = this.session.screenToDocumentPosition(screenPos.row + rows, screenPos.column, offsetX);
+        var targetScreenRow = screenPos.row + rows;
+        var docPos;
+        if (useDesiredPixelPos && this.$desiredPixelPos != null)
+            docPos = this.$getCursorPositionAtPixel(targetScreenRow, this.$desiredPixelPos);
+        if (!docPos)
+            docPos = this.session.screenToDocumentPosition(targetScreenRow, screenPos.column, offsetX);
 
         if (rows !== 0 && chars === 0 && docPos.row === this.lead.row && docPos.column === this.lead.column) {
 
@@ -775,8 +784,10 @@ class Selection {
         this.lead.setPosition(row, column);
         this.$keepDesiredColumnOnChange = false;
 
-        if (!keepDesiredColumn)
+        if (!keepDesiredColumn) {
             this.$desiredColumn = null;
+            this.$desiredPixelPos = null;
+        }
     }
 
     /**

@@ -272,6 +272,8 @@ class Editor {
             this.session.off("endOperation", this.$onEndOperation);
 
             var selection = this.session.getSelection();
+            selection.$getCursorPixelPosition = null;
+            selection.$getCursorPositionAtPixel = null;
             selection.off("changeCursor", this.$onCursorChange);
             selection.off("changeSelection", this.$onSelectionChange);
         }
@@ -322,6 +324,7 @@ class Editor {
             this.session.on("changeScrollLeft", this.$onScrollLeftChange);
 
             this.selection = session.getSelection();
+            this.$updateSelectionPixelConversion();
             this.selection.on("changeCursor", this.$onCursorChange);
 
             this.$onSelectionChange = this.onSelectionChange.bind(this);
@@ -405,6 +408,27 @@ class Editor {
         return this.session.getValue();
     }
 
+    $updateSelectionPixelConversion() {
+        var selection = this.selection;
+        if (!selection)
+            return;
+        var editor = this;
+        selection.$getCursorPixelPosition = function(row, column) {
+            var renderer = editor.renderer;
+            if (!renderer)
+                return null;
+            var pos = renderer.textToScreenCoordinates(row, column);
+            return pos && {pixel: pos.pageX};
+        };
+        selection.$getCursorPositionAtPixel = function(screenRow, pixel) {
+            var renderer = editor.renderer;
+            if (!renderer)
+                return null;
+            var target = editor.session.screenToDocumentPosition(screenRow, 0);
+            var pos = renderer.textToScreenCoordinates(target.row, target.column);
+            return renderer.screenToTextCoordinates(pixel, pos.pageY + renderer.lineHeight / 2);
+        };
+    }
     /**
      *
      * Returns the currently highlighted selection.
