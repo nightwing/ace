@@ -36,10 +36,8 @@ class Selection {
                 self._emit("changeCursor");
             if (!self.$isEmpty && !self.$silent)
                 self._emit("changeSelection");
-            if (!self.$keepDesiredColumnOnChange && e.old.column != e.value.column) {
+            if (!self.$keepDesiredColumnOnChange && e.old.column != e.value.column)
                 self.$desiredColumn = null;
-                self.$desiredPixelPos = null;
-            }
         });
     
         this.anchor.on("change", function() {
@@ -713,12 +711,14 @@ class Selection {
         );
 
         var offsetX;
-        var useDesiredPixelPos = chars === 0 && rows !== 0 && this.$getCursorPixelPosition && this.$getCursorPositionAtPixel;
+        var fontMetrics = this.session.$fontMetrics;
+        var useFontMetrics = chars === 0 && rows !== 0 && fontMetrics;
 
         if (chars === 0) {
-            if (useDesiredPixelPos && this.$desiredPixelPos == null) {
-                var pixelPos = this.$getCursorPixelPosition(this.lead.row, this.lead.column);
-                this.$desiredPixelPos = pixelPos && pixelPos.pixel;
+            if (useFontMetrics && this.$desiredColumn == null) {
+                offsetX = fontMetrics.textWidth(screenPos.row, screenPos.column);
+                if (isFinite(offsetX))
+                    this.$desiredColumn = offsetX / fontMetrics.config.characterWidth;
             }
 
             if (this.$desiredColumn)
@@ -736,20 +736,23 @@ class Selection {
         }
 
         var targetScreenRow = screenPos.row + rows;
-        var docPos;
-        if (useDesiredPixelPos && this.$desiredPixelPos != null)
-            docPos = this.$getCursorPositionAtPixel(targetScreenRow, this.$desiredPixelPos);
-        if (!docPos)
-            docPos = this.session.screenToDocumentPosition(targetScreenRow, screenPos.column, offsetX);
-
-        if (rows !== 0 && chars === 0 && docPos.row === this.lead.row && docPos.column === this.lead.column) {
-
+        if (useFontMetrics && this.$desiredColumn != null) {
+            offsetX = this.$desiredColumn * fontMetrics.config.characterWidth;
+            var renderer = fontMetrics.renderer;
+            var blockCursor = renderer && renderer.$blockCursor;
+            var rect = fontMetrics.textLayer && fontMetrics.textLayer.element && fontMetrics.textLayer.element.getBoundingClientRect();
+            var x = renderer && renderer.$hasCssTransforms
+                ? renderer.gutterWidth + renderer.margin.left + renderer.$padding - renderer.scrollLeft + offsetX
+                : rect && rect.left + offsetX;
+            if (x != null && isFinite(x))
+                screenPos.column = fontMetrics.$pixelToColumn(targetScreenRow, screenPos.column, x, blockCursor);
         }
+        //TODO: currently offsetX is not used in screenToDocumentPosition
+        var docPos = this.session.screenToDocumentPosition(targetScreenRow, screenPos.column, offsetX);
 
         // move the cursor and update the desired column
         this.moveCursorTo(docPos.row, docPos.column + chars, chars === 0);
     }
-
     /**
      * Moves the selection to the position indicated by its `row` and `column`.
      * @param {Point} position The position to move to
@@ -784,10 +787,8 @@ class Selection {
         this.lead.setPosition(row, column);
         this.$keepDesiredColumnOnChange = false;
 
-        if (!keepDesiredColumn) {
+        if (!keepDesiredColumn)
             this.$desiredColumn = null;
-            this.$desiredPixelPos = null;
-        }
     }
 
     /**
