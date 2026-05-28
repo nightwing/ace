@@ -747,8 +747,7 @@ class Selection {
             if (x != null && isFinite(x))
                 screenPos.column = fontMetrics.$pixelToColumn(targetScreenRow, screenPos.column, x, blockCursor);
         }
-        //TODO: currently offsetX is not used in screenToDocumentPosition
-        var docPos = this.session.screenToDocumentPosition(targetScreenRow, screenPos.column, offsetX);
+        var docPos = this.session.screenToDocumentPosition(targetScreenRow, screenPos.column);
 
         // move the cursor and update the desired column
         this.moveCursorTo(docPos.row, docPos.column + chars, chars === 0);
