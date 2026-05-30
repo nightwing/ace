@@ -386,17 +386,37 @@ class FontMetrics {
      * @param {number} screenColumn1 - The initial screen column index.
      * @param {number} x - The x-coordinate (in pixels) to convert to a column index.
      * @param {boolean} blockCursor - Whether the cursor is in block mode.
+     * @param {boolean} [isTextWidthCoordinate] - Whether x is in the same coordinate space as textWidth().
      * @returns {number} The calculated screen column index corresponding to the x-coordinate.
      */
-    $pixelToColumn(screenRow, screenColumn1, x, blockCursor) {
+    $pixelToColumn(screenRow, screenColumn1, x, blockCursor, isTextWidthCoordinate) {
         var scratchRange = this.$scratchRange;
         var lineElement = this.$findElementForScreenRow(screenRow);
         if (!lineElement || screenColumn1 <= 0) return screenColumn1;
 
         var hasCssTransform = this.renderer.$hasCssTransforms;
         var tr = hasCssTransform && this.getTransform();
+        var textLayerRect = isTextWidthCoordinate && !hasCssTransform && this.textLayer.element.getBoundingClientRect();
+        var leftOffset = isTextWidthCoordinate && hasCssTransform
+            && this.renderer.gutterWidth + this.renderer.margin.left + this.renderer.$padding - this.renderer.scrollLeft;
 
         var screenColumn = 0;
+        var self = this;
+        function normalizeRect(rect) {
+            if (hasCssTransform)
+                rect = self.recoverRect(tr, rect);
+            if (!isTextWidthCoordinate)
+                return rect;
+            var left = rect.left - (hasCssTransform ? leftOffset : textLayerRect.left);
+            return {
+                left: left,
+                right: left + rect.width,
+                width: rect.width,
+                top: rect.top,
+                bottom: rect.bottom,
+                height: rect.height
+            };
+        }
         var getRects = (node) => {
             var rects = [];
             if (node.nodeType === Node.TEXT_NODE) {
@@ -406,17 +426,11 @@ class FontMetrics {
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 rects = Array.from(node.getClientRects());
             }
-            if (hasCssTransform) {
-                var fixedRects = [];
-                for (var i = 0; i < rects.length; i++) {
-                    var rect = rects[i];
-                    fixedRects.push(this.recoverRect(tr, rect));
-                }
-                rects = fixedRects;
+            for (var i = 0; i < rects.length; i++) {
+                rects[i] = normalizeRect(rects[i]);
             }
             return rects;
         };
-        var self = this;
         function isLowSurrogate(node, offset) {
             return /[\uDC00-\uDFFF]/.test(node.nodeValue.charAt(offset));
         }
@@ -434,9 +448,7 @@ class FontMetrics {
             scratchRange.setStart(node, offset);
             scratchRange.setEnd(node, offset);
             var rect = /**@type{{left: number, top: number, width: number, height: number}}*/(scratchRange.getBoundingClientRect());
-            if (hasCssTransform)
-                rect = self.recoverRect(tr, rect);
-            return rect.left;
+            return normalizeRect(rect).left;
         }
         function canBinarySearchTextNode(node) {
             scratchRange.setStart(node, 0);
@@ -482,9 +494,7 @@ class FontMetrics {
 
             scratchRange.setStart(node, column);
             scratchRange.setEnd(node, column + graphemeWidth);
-            var rect = /** @type {ReturnType<FontMetrics['recoverRect']>}*/(scratchRange.getBoundingClientRect());
-            if (hasCssTransform)
-                rect = self.recoverRect(tr, rect);
+            var rect = /** @type {ReturnType<FontMetrics['recoverRect']>}*/(normalizeRect(scratchRange.getBoundingClientRect()));
 
             if (rect.left <= x && x <= rect.left + rect.width) {
                 if (!blockCursor && x > rect.left + rect.width / 2)
@@ -508,10 +518,7 @@ class FontMetrics {
                     scratchRange.setStart(node, j);
                     graphemeWidth = getGraphemeWidth(node, j);
                     scratchRange.setEnd(node, j + graphemeWidth);
-                    let rect = /** @type {ReturnType<FontMetrics['recoverRect']>}*/(scratchRange.getBoundingClientRect());
-                    if (hasCssTransform) {
-                        rect = self.recoverRect(tr, rect);
-                    }
+                    let rect = /** @type {ReturnType<FontMetrics['recoverRect']>}*/(normalizeRect(scratchRange.getBoundingClientRect()));
                     if (rect.left <= x && x <= rect.left + rect.width) {
                         screenColumn += j;
                         if (!blockCursor && x > rect.left + rect.width / 2) {

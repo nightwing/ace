@@ -738,14 +738,8 @@ class Selection {
         var targetScreenRow = screenPos.row + rows;
         if (useFontMetrics && this.$desiredColumn != null) {
             offsetX = this.$desiredColumn * fontMetrics.config.characterWidth;
-            var renderer = fontMetrics.renderer;
-            var blockCursor = renderer && renderer.$blockCursor;
-            var rect = fontMetrics.textLayer && fontMetrics.textLayer.element && fontMetrics.textLayer.element.getBoundingClientRect();
-            var x = renderer && renderer.$hasCssTransforms
-                ? renderer.gutterWidth + renderer.margin.left + renderer.$padding - renderer.scrollLeft + offsetX
-                : rect && rect.left + offsetX;
-            if (x != null && isFinite(x))
-                screenPos.column = fontMetrics.$pixelToColumn(targetScreenRow, screenPos.column, x, blockCursor);
+            var blockCursor = fontMetrics.renderer && fontMetrics.renderer.$blockCursor;
+            screenPos.column = fontMetrics.$pixelToColumn(targetScreenRow, screenPos.column, offsetX, blockCursor, true);
         }
         var docPos = this.session.screenToDocumentPosition(targetScreenRow, screenPos.column);
 
