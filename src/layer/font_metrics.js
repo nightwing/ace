@@ -429,28 +429,40 @@ class FontMetrics {
             if (node.nodeType === Node.TEXT_NODE) {
                 var textLength = node.nodeValue.length;
                 var graphemeWidth = 1;
-                for (var j = 0; j < textLength; j+= graphemeWidth) {
+var maxD = Number.MAX_VALUE;
+var ind = -1;
+console.log("--------------------------")
+                for (var j = 0; j <= textLength; j+= graphemeWidth) {
                     scratchRange.setStart(node, j);
-                    graphemeWidth = 1;
-                    if (
+                    scratchRange.setEnd(node, j);
+                    graphemeWidth = 1; ע14לם
+/*                    if (
                         /[\uD800-\uDBFF]/.test(node.nodeValue.charAt(j)) && j + 1 < textLength &&
                         /[\uDC00-\uDFFF]/.test(node.nodeValue.charAt(j + 1))
                     ) {
                         graphemeWidth = 2;
                     }
                     scratchRange.setEnd(node, j + graphemeWidth);
+*/
                     let rect = /** @type {ReturnType<FontMetrics['recoverRect']>}*/(scratchRange.getBoundingClientRect());
                     if (hasCssTransform) {
                         rect = self.recoverRect(tr, rect);
                     }
-                    if (rect.left <= x && x <= rect.left + rect.width) {
+                    var d = Math.abs(x - rect.left);
+                    /*if (rect.left <= x && x <= rect.left + rect.width) {
                         screenColumn += j;
                         if (!blockCursor && x > rect.left + rect.width / 2) {
                             screenColumn += graphemeWidth;
                         }
                         return screenColumn;
+                    }*/ 
+                   console.log(d, maxD, screenColumn);
+                    if (d < maxD) {
+                        ind = j;
+                        maxD = d;
                     }
                 }
+                return screenColumn = screenColumn + ind
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 var childNodes = node.childNodes;
 
